@@ -1,0 +1,31 @@
+<!--miniprogram/pages/my/suggestion/index.wxml-->
+<navBar isBack="{{true}}" title="反馈建议" />
+<scroll-view class="pageBox" scroll-y style="height:calc(100vh - {{navBarHeight}}px)">
+	<view class="tab flex">
+		<view class="tabItem flex-center" style="color:{{current == 0?'#4FACFE':'#333333'}}" bindtap="changeTab" data-cur="0" data-type="tab">反馈</view>
+		<view class="tabItem flex-center" style="color:{{current == 1?'#4FACFE':'#333333'}}" bindtap="changeTab" data-cur="1" data-type="tab">建议</view>
+		<view class="underLine {{current == 1?'activeTab':''}}">
+			<span class="line"></span>
+		</view>
+	</view>
+	<swiper class="swiper" current="{{current}}" bindchange="changeTab" data-type="swiper">
+		<swiper-item class="swiperItem">
+			<view class="row">
+				<view class="rowTitle">反馈问题</view>
+				<textarea class="problem" placeholder="请输入您要反馈的问题" maxlength="-1"></textarea>
+			</view>
+			<view class="row">
+				<view class="rowTitle">邮箱联系方式<span>(处理结果将通过此邮箱通知您)</span></view>
+				<input class="email" placeholder="请输入您的邮箱"></input>
+			</view>
+			<view class="row">
+				<view class="rowTitle">上传图片</view>
+				<view class="imgList wrap">
+					<image class="pic" wx:for="{{imgData}}" wx:key="index" src="{{item.url}}"></image>
+					<view class="addPic flex-center" hidden="{{imgData.length >= 9}}"><icon class="iconfont icon-add"></icon></view>
+				</view>
+			</view>
+		</swiper-item>
+		<swiper-item class="swiperItem">2</swiper-item>
+	</swiper>
+</scroll-view>

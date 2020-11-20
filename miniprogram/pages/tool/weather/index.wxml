@@ -1,0 +1,6 @@
+<!--miniprogram/pages/tool/weather/index.wxml-->
+<navBar title="天气" wx:if="{{isNavBar}}" />
+
+<scroll-view class="pageBox" scroll-y style="height:calc(100vh - {{navBarHeight}}px)">
+
+</scroll-view>

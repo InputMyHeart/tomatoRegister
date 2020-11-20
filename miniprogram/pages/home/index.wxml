@@ -1,0 +1,16 @@
+<!--miniprogram/pages/home/index.wxml  小记一笔-->
+<navBar isBack="{{false}}" title="番茄工具" wx:if="{{isNavBar}}" />
+<scroll-view class="pageBox" scroll-y style="height:calc(100vh - {{navBarHeight}}px)">
+	<swiper class="swiper" indicator-dots indicator-color="#373A40" indicator-active-color="#4FACFE" 
+		autoplay circular previous-margin="40rpx" next-margin="40rpx">
+		<swiper-item class="swiperItem">
+			<image src="http://cx.ltfun.cn/image/img1.jpg" mode="aspectFill"></image>
+		</swiper-item>
+		<swiper-item class="swiperItem">
+			<image src="http://cx.ltfun.cn/image/img2.jpg" mode="aspectFill"></image>
+		</swiper-item>
+		<swiper-item class="swiperItem">
+			<image src="http://cx.ltfun.cn/image/img3.jpg" mode="aspectFill"></image>
+		</swiper-item>
+	</swiper>
+</scroll-view>

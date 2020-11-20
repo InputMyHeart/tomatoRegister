@@ -1,0 +1,17 @@
+/* miniprogram/pages/tool/eat/index.wxss */
+
+.turntable{
+	width: 702rpx;
+	height: 350rpx;
+	margin: 0 auto;
+	overflow: hidden;
+}
+.turntableItem{
+	width: 150rpx;
+	height: 300rpx;
+	margin: 0 24rpx;
+}
+
+.inputBox{
+	padding: 0 24rpx;
+}

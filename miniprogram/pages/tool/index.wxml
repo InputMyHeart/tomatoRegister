@@ -1,0 +1,16 @@
+<!--miniprogram/pages/tool/index.wxml-->
+<navBar isBack="{{false}}" title="工具" wx:if="{{isNavBar}}" />
+
+<scroll-view class="pageBox" scroll-y style="height:calc(100vh - {{navBarHeight}}px)">
+	<view style="height:40rpx;"></view>
+	<view class="list flex-between">
+		<navigator class="item" wx:for="{{mainData}}" wx:key="index" url="{{item.router}}" hover-class="none" open-type="{{item.type}}">
+			<view class="itemHead flex-between">
+				<text>{{item.title}}</text>
+				<icon class="iconfont {{item.icon}}"></icon>
+			</view>
+			<view class="itemFoot">{{item.en}}</view>
+		</navigator>
+	</view>
+</scroll-view>
+

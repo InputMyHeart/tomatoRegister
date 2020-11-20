@@ -1,0 +1,27 @@
+<!--miniprogram/pages/my/index.wxml   个人中心-->
+<navBar isBack="{{false}}" title="我的" wx:if="{{isNavBar}}" />
+<scroll-view class="pageBox" scroll-y style="height:calc(100vh - {{navBarHeight}}px)">
+	<view class="userBox flex-flex-center">
+		<image class="uAvatar" style="{{isRotate?style:''}}" src="{{userInfo.avatar == '' || userInfo == null?'../../assets/image/avatar.png':userInfo.avatar}}" mode="aspectFill" catchtap="rotateAvatar"></image>
+		<button class="btnLogin" open-type="getUserInfo" bindgetuserinfo="bindGetUserInfo" wx:if="{{userInfo == null}}" hover-class="none">点我登录</button>
+		<view class="uName flex-flex-center" wx:else>
+			<text class="ellipsis">{{userInfo.name}}</text>
+			<icon class="iconfont {{userInfo.gender == 1?'icon-male':'icon-female'}}"></icon>
+		</view>
+	</view>
+	<view class="optionsBox">
+		<navigator class="optionItem flex-flex-center" url="./suggestion/index" hover-class="none">
+			<icon class="iconfont icon-edit"></icon>
+			反馈建议
+		</navigator>
+		<view class="optionItem flex-flex-center" bindtap="showToast">
+			<icon class="iconfont icon-settings"></icon>
+			设置
+		</view>
+		<view class="optionItem flex-flex-center" bindtap="signOut">
+			<icon class="iconfont icon-exit"></icon>
+			退出登录
+		</view>
+	</view>
+
+</scroll-view>

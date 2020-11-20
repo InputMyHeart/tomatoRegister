@@ -1,0 +1,13 @@
+<!--components/navBar/index.wxml-->
+<view class="navBarBox" style="height:{{navBarHeight}}px" wx:if="{{isNavBar}}">
+	<view class="statusBar" style="height:{{statusBarHeight}}px"></view>
+	<view class="navBar flex" style="height:calc(100% - {{statusBarHeight}}px)">
+		<view class="handleBox flex-flex-center" style="width:{{capsuleWidth}}px">
+			<view class="back flex-center" catchtap="back" wx:if="{{isBack}}"><icon class="iconfont icon-back"></icon></view>
+		</view>
+		<view class="title flex-center">
+			<text class="ellipsis text">{{title}}</text>
+		</view>
+		<view class="capsule" style="width:{{capsuleWidth}}px"></view>
+	</view>
+</view>

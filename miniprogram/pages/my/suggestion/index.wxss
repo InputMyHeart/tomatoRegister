@@ -1,0 +1,79 @@
+/* miniprogram/pages/my/suggestion/index.wxss */
+.tab{
+	height: 100rpx;
+	border-bottom: 1rpx solid #eee;
+	position: relative;
+}
+.tabItem{
+	width: 0;
+	height: 100%;
+	flex: 1 0 auto;
+}
+.underLine{
+	width: 50%;
+	height: 4rpx;
+	padding: 0 40rpx;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	z-index: 2;
+	transition: all .5s;
+}
+.line{
+	width: 100%;
+	height: 100%;
+	border-radius: 10rpx;
+	background-color: #4FACFE;
+	display: block;
+}
+.activeTab{
+	left: 50%;
+	transition: all .5s;
+}
+
+.swiper{
+	min-height: calc(100% - 100rpx);
+}
+.swiperItem{
+	padding: 24rpx;
+}
+.row{
+	margin-bottom: 24rpx;
+}
+.rowTitle{
+	padding-bottom: 24rpx;
+	font-size: 32rpx;
+}
+.rowTitle span{
+	margin-left: 24rpx;
+	font-size: 24rpx;
+	color: #666;
+}
+.problem,.email{
+	width: 100%;
+	background-color: #EEEEEE;
+	border-radius: 10rpx;
+	padding: 0 24rpx;
+}
+.problem{
+	padding: 24rpx;
+}
+.email{
+	height: 80rpx;
+}
+
+.imgList image{
+	width: 200rpx;
+	height: 200rpx;
+	margin: 0 24rpx 24rpx 0;
+	background-color: #FFFFFF;
+}
+.addPic,.pic{
+	width: 200rpx;
+	height: 200rpx;
+	border: 1rpx dashed #999999;
+}
+.addPic .iconfont{
+	font-size: 80rpx;
+	color: #999999;
+}

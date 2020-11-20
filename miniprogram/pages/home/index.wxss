@@ -1,0 +1,13 @@
+/* miniprogram/pages/home/index.wxss */
+
+.swiper{
+	width: 100%;
+	height: 500rpx;
+}
+.swiperItem{
+	padding: 30rpx 24rpx 50rpx 24rpx !important;
+}
+.swiperItem image{
+	border-radius: 10rpx;
+	overflow: hidden;
+}

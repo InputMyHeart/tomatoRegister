@@ -1,0 +1,56 @@
+{
+	"pages": [
+		"pages/my/index",
+		"pages/index/index",
+		"pages/openapi/openapi",
+		"pages/openapi/serverapi/serverapi",
+		"pages/openapi/callback/callback",
+		"pages/record/index",
+		"pages/home/index",
+		"pages/tool/index",
+		"pages/my/suggestion/index",
+		"pages/tool/eat/index",
+		"pages/tool/weather/index",
+		"pages/chart/index"
+	],
+	"window": {
+		"backgroundColor": "#F6F6F6",
+		"backgroundTextStyle": "light",
+		"navigationStyle": "custom"
+	},
+	"tabBar": {
+		"color:": "#333333",
+		"selectedColor": "#4FACFE",
+		"list": [
+			{
+				"iconPath": "../miniprogram/assets/icon/home.png",
+				"selectedIconPath": "../miniprogram/assets/icon/homefill.png",
+				"pagePath": "pages/home/index",
+				"text": "小记一笔"
+			},
+			{
+				"iconPath": "../miniprogram/assets/icon/moneybag.png",
+				"selectedIconPath": "../miniprogram/assets/icon/moneybagfill.png",
+				"pagePath": "pages/record/index",
+				"text": "账本记录"
+			},
+			{
+				"iconPath": "../miniprogram/assets/icon/circle.png",
+				"selectedIconPath": "../miniprogram/assets/icon/circlefill.png",
+				"pagePath": "pages/tool/index",
+				"text": "报表展示"
+			},
+			{
+				"iconPath": "../miniprogram/assets/icon/my.png",
+				"selectedIconPath": "../miniprogram/assets/icon/myfill.png",
+				"pagePath": "pages/my/index",
+				"text": "个人中心"
+			}
+		]
+	},
+	"usingComponents": {
+		"navBar": "./components/navBar/index"
+	},
+	"sitemapLocation": "sitemap.json",
+	"style": "v2"
+}

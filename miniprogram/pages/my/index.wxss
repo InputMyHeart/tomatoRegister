@@ -1,0 +1,49 @@
+/* miniprogram/pages/my/index.wxss */
+.userBox{
+	height: 200rpx;
+	padding: 24rpx;
+}
+.uAvatar{
+	width: 120rpx;
+	height: 120rpx;
+	margin-right: 24rpx;
+	flex: 0 0 auto;
+	border: 2rpx solid #EEE;
+	border-radius: 50%;
+	background-color: #FFF;
+	overflow: hidden;
+}
+.uName{
+	width: 0;
+	flex: 1 0 auto;
+	font-size: 32rpx;
+}
+.uName .iconfont{
+	margin-left: 20rpx;
+	color: #68b0ab;
+}
+.btnLogin{
+	width: 180rpx;
+	height: 100rpx;
+	margin: 0 !important;
+	padding: 0 !important;
+	background-color: transparent !important;
+	text-align: left;
+	line-height: 100rpx;
+}
+
+
+.optionsBox{
+	padding: 0 24rpx;
+}
+.optionItem{
+	height: 70rpx;
+	font-size: 28rpx;
+	color: #333;
+	border-bottom: 1rpx solid #EEE;
+}
+.optionItem .iconfont{
+	margin-right: 24rpx;
+	font-size: 40rpx;
+	color: #4FACFE;
+}

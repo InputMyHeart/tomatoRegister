@@ -1,0 +1,26 @@
+/* components/navBar/index.wxss */
+.navBarBox{
+	width: 100%;
+	background-image: linear-gradient(to right, #0acffe 0%, #495aff 100%);
+}
+
+.handleBox,.capsule{
+	height: 100%;
+	flex: 0 0 auto;
+}
+.title{
+	width: 0;
+	height: 100%;
+	flex: 1 0 auto;
+}
+.text{
+	color: #EEEEEE;
+}
+.back{
+	width: 80rpx;
+	height: 80rpx;
+}
+.back .iconfont{
+	color: #FFFFFF;
+	font-size: 40rpx;
+}

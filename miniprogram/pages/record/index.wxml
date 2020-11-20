@@ -1,0 +1,7 @@
+<!--miniprogram/pages/record/index.wxml   账本记录-->
+<navBar isBack="{{false}}" title="记账" wx:if="{{isNavBar}}" />
+
+
+<view class="container">
+  <ec-canvas id="mychart-dom-bar" canvas-id="mychart-bar" ec="{{ ec }}"></ec-canvas>
+</view>
