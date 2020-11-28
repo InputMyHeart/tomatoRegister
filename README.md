@@ -1,6 +1,5 @@
 # tomatoRegister
-小程序_番茄记账
-
+原生小程序_番茄记账
 
 
 tips:
