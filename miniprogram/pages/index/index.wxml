@@ -1,0 +1,89 @@
+<view class="page home-page">
+  <custom-navbar title="首页"></custom-navbar>
+  <view class="hero fade-up">
+    <view>
+      <view class="ledger-switch">
+        <text>{{ledgerName}}</text>
+        <ri-icon name="arrow-down-s-line" size="38" color="#f0442f"></ri-icon>
+      </view>
+      <view class="month-line">{{monthLabel}}</view>
+    </view>
+    <view class="readonly-pill" wx:if="{{readonly}}">只读</view>
+    <image class="hero-logo soft-pop" wx:else src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+  </view>
+
+  <view class="summary-card card fade-up">
+    <view class="summary-glow"></view>
+    <view class="summary-head">
+      <view>
+        <view class="section-kicker">本月概览</view>
+        <view class="summary-title">{{familyMood}}</view>
+      </view>
+      <view class="tomato-badge">番茄账本</view>
+    </view>
+    <view class="overview-grid">
+      <view class="overview-item">
+        <view class="overview-label">收入</view>
+        <view class="overview-value income">¥{{monthIncome}}</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-label">支出</view>
+        <view class="overview-value expense">¥{{monthExpense}}</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-label">结余</view>
+        <view class="overview-value">¥{{balance}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mini-stats fade-up">
+    <view class="mini-stat">
+      <view class="mini-icon"><ri-icon name="file-list-3-line" size="24" color="#f0442f"></ri-icon></view>
+      <view class="mini-value">{{recordCount}}</view>
+      <view class="mini-label">本月记录</view>
+    </view>
+    <view class="mini-stat">
+      <view class="mini-icon"><ri-icon name="restaurant-2-line" size="24" color="#f0442f"></ri-icon></view>
+      <view class="mini-value">{{topCategory}}</view>
+      <view class="mini-label">支出最大</view>
+    </view>
+    <view class="mini-stat">
+      <view class="mini-icon"><ri-icon name="funds-line" size="24" color="#f0442f"></ri-icon></view>
+      <view class="mini-value">{{budgetRate}}%</view>
+      <view class="mini-label">预算进度</view>
+    </view>
+  </view>
+
+  <view class="budget-card card fade-up">
+    <view class="section-head">
+      <view>
+        <view class="section-title">月预算</view>
+        <view class="section-tip">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
+      </view>
+      <view class="budget-left">剩 ¥{{budgetLeft}}</view>
+    </view>
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
+    </view>
+  </view>
+
+  <view class="records-card card fade-up">
+    <view class="section-head">
+      <view class="section-title">最近记录</view>
+      <view class="section-link" bindtap="goRecords">全部</view>
+    </view>
+    <view class="record-item" wx:for="{{recentRecords}}" wx:key="id">
+      <view class="category-dot {{item.type}}">{{item.categoryName}}</view>
+      <view class="record-main">
+        <view class="record-title">{{item.note}}</view>
+        <view class="record-meta">{{item.date}} · {{item.memberName}} · {{item.categoryName}}</view>
+      </view>
+      <view class="record-amount {{item.type}}">
+        {{item.type === 'income' ? '+' : '-'}}¥{{item.amount}}
+      </view>
+    </view>
+  </view>
+
+  <floating-record-button readonly="{{readonly}}"></floating-record-button>
+</view>

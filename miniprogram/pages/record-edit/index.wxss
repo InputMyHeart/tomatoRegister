@@ -1,0 +1,26 @@
+.edit-page { padding-bottom: 80rpx; }
+.page-head { margin-bottom: 24rpx; }
+.eyebrow { color: #e94b35; font-size: 26rpx; font-weight: 700; }
+.title { margin-top: 8rpx; color: #2f2926; font-size: 44rpx; font-weight: 900; }
+.form-card { padding: 30rpx; }
+.type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; padding: 8rpx; border-radius: 999rpx; background: #f7eee8; }
+.type-item { height: 72rpx; border-radius: 999rpx; color: #9a877e; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 800; }
+.type-item.active.expense { color: #fff; background: #e94b35; box-shadow: 0 10rpx 22rpx rgba(233, 75, 53, 0.24); }
+.type-item.active.income { color: #fff; background: #2f9d68; box-shadow: 0 10rpx 22rpx rgba(47, 157, 104, 0.22); }
+.amount-box { display: flex; align-items: center; margin-top: 42rpx; padding-bottom: 20rpx; border-bottom: 1rpx solid #f2e9e3; }
+.currency { color: #e94b35; font-size: 52rpx; font-weight: 900; }
+.amount-input { flex: 1; height: 94rpx; padding-left: 18rpx; color: #2f2926; font-size: 72rpx; font-weight: 900; }
+.quick-amounts { display: flex; gap: 14rpx; margin-top: 20rpx; }
+.quick-chip,
+.note-chip { padding: 14rpx 22rpx; border-radius: 999rpx; color: #8b766d; background: #fff8f4; font-size: 24rpx; font-weight: 700; }
+.chip-section { padding: 30rpx 0 18rpx; border-bottom: 1rpx solid #f2e9e3; }
+.field-label { color: #8d7f78; font-size: 26rpx; }
+.category-scroll { width: 100%; white-space: nowrap; margin-top: 18rpx; }
+.category-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 96rpx; height: 64rpx; margin-right: 14rpx; padding: 0 24rpx; border-radius: 999rpx; color: #8b766d; background: #fff8f4; font-size: 25rpx; font-weight: 800; }
+.category-chip.active { color: #fff; background: #e94b35; box-shadow: 0 10rpx 22rpx rgba(233, 75, 53, 0.22); }
+.field-row { display: flex; align-items: center; justify-content: space-between; min-height: 96rpx; border-bottom: 1rpx solid #f2e9e3; }
+.field-value { color: #2f2926; font-size: 29rpx; font-weight: 800; }
+.note-box { padding-top: 26rpx; }
+.note-input { margin-top: 14rpx; height: 82rpx; padding: 0 24rpx; border-radius: 24rpx; color: #2f2926; background: #fff8f4; font-size: 28rpx; }
+.note-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.save-button { margin-top: 30rpx; }

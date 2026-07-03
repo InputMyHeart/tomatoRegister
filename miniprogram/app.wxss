@@ -1,0 +1,82 @@
+page {
+  min-height: 100%;
+  background: #fff7f2;
+  color: #312522;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+view,
+text,
+button,
+input {
+  box-sizing: border-box;
+}
+
+button {
+  background: initial;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+}
+
+button::after {
+  border: none;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx 28rpx 56rpx;
+  background:
+    radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
+    linear-gradient(180deg, #ffe1d6 0%, #fff1ea 260rpx, #fff7f2 520rpx, #fffaf7 100%);
+}
+
+.card {
+  border-radius: 34rpx;
+  background: #fffdfc;
+  border: 1rpx solid rgba(240, 68, 47, 0.08);
+  box-shadow: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+}
+
+.tomato-button {
+  height: 92rpx;
+  border-radius: 46rpx;
+  background: linear-gradient(135deg, #ff7d63 0%, #f0442f 100%);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14rpx 30rpx rgba(240, 68, 47, 0.28);
+}
+
+.ghost-button {
+  height: 78rpx;
+  border-radius: 39rpx;
+  color: #f0442f;
+  background: #fff0ea;
+  font-size: 28rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fade-up {
+  animation: fadeUp 180ms ease both;
+}
+
+.soft-pop {
+  animation: softPop 220ms ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes softPop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

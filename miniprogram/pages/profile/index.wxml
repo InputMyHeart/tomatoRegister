@@ -1,0 +1,140 @@
+<view class="page profile-page">
+  <custom-navbar title="我的"></custom-navbar>
+
+  <view class="identity-card card fade-up" bindtap="handleIdentityTap">
+    <image class="identity-logo" wx:if="{{!loggedIn}}" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+    <image class="avatar-img" wx:else src="{{userAvatar}}" mode="aspectFill"></image>
+    <view class="identity-main">
+      <view class="user-name">{{loggedIn ? userName : '微信登录'}}</view>
+      <view class="user-tip">{{loggedIn ? userGender : '登录后同步家庭账本'}}</view>
+    </view>
+    <view class="login-pill" wx:if="{{!loggedIn}}">登录</view>
+    <view class="profile-setting" wx:else>
+      <ri-icon name="settings-3-line" size="30" color="#f0442f"></ri-icon>
+    </view>
+  </view>
+
+  <view class="stats-card card fade-up {{loggedIn ? '' : 'locked'}}">
+    <view class="stat-item">
+      <view class="stat-value">{{usageDays}}</view>
+      <view class="stat-label">使用天数</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-value">{{recordCount}}</view>
+      <view class="stat-label">记录笔数</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-value">{{ledgerCount}}</view>
+      <view class="stat-label">账本总数</view>
+    </view>
+    <view class="stats-lock" wx:if="{{!loggedIn}}">登录后查看</view>
+  </view>
+
+  <view class="section-block fade-up">
+    <view class="section-title">账本管理</view>
+    <view class="menu-card card">
+      <view class="menu-row" bindtap="createLedger">
+        <view class="menu-icon"><ri-icon name="book-2-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">创建账本</view>
+          <view class="menu-tip">创建独立账本或家庭共享账本</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="joinLedger">
+        <view class="menu-icon"><ri-icon name="key-2-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">加入账本</view>
+          <view class="menu-tip">优先使用邀请码加入家庭账本</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row last" bindtap="ledgerConfig">
+        <view class="menu-icon"><ri-icon name="settings-3-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">账本配置</view>
+          <view class="menu-tip">管理账本信息、成员邀请与查看权限</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-block fade-up">
+    <view class="section-title">记账设置</view>
+    <view class="menu-card card">
+      <view class="menu-row" bindtap="manageCategories">
+        <view class="menu-icon"><ri-icon name="price-tag-3-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">分类管理</view>
+          <view class="menu-tip">默认分类可直接使用，也支持自定义新增</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="manageAccounts">
+        <view class="menu-icon"><ri-icon name="bank-card-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">支付账户</view>
+          <view class="menu-tip">微信、支付宝、银行卡、现金</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="manageBudget">
+        <view class="menu-icon"><ri-icon name="calendar-check-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">月预算</view>
+          <view class="menu-tip">轻提醒，不做压力型展示</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row last" bindtap="manageMonthStartDay">
+        <view class="menu-icon"><ri-icon name="calendar-event-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">月度起始日</view>
+          <view class="menu-tip">当前每月 {{monthStartDay}} 日开始统计</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-block fade-up">
+    <view class="section-title">其他</view>
+    <view class="menu-card card">
+      <view class="menu-row" bindtap="importBill">
+        <view class="menu-icon"><ri-icon name="upload-2-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">导入账单</view>
+          <view class="menu-tip">从外部账单导入记录</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="exportBill">
+        <view class="menu-icon"><ri-icon name="download-2-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">导出账单</view>
+          <view class="menu-tip">导出账本记录</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="feedback">
+        <view class="menu-icon"><ri-icon name="message-3-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">意见反馈</view>
+          <view class="menu-tip">告诉我们哪里还可以更好用</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row last" bindtap="viewChangelog">
+        <view class="menu-icon"><ri-icon name="history-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">更新日志</view>
+          <view class="menu-tip">查看番茄记账最近变化</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+    </view>
+  </view>
+
+  <button class="logout-button fade-up" wx:if="{{loggedIn}}" bindtap="logout">退出账号</button>
+</view>

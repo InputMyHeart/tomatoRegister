@@ -1,0 +1,52 @@
+<view class="page edit-page">
+  <custom-navbar title="记一笔" showBack="{{true}}"></custom-navbar>
+  <view class="page-head fade-up">
+    <view class="eyebrow">记一笔</view>
+    <view class="title">今天发生了什么收支？</view>
+  </view>
+
+  <view class="form-card card fade-up">
+    <view class="type-switch">
+      <view class="type-item {{type === 'expense' ? 'active expense' : ''}}" data-type="expense" bindtap="switchType">支出</view>
+      <view class="type-item {{type === 'income' ? 'active income' : ''}}" data-type="income" bindtap="switchType">收入</view>
+    </view>
+
+    <view class="amount-box">
+      <text class="currency">¥</text>
+      <input class="amount-input" type="digit" placeholder="0.00" value="{{amount}}" bindinput="onAmountInput" focus />
+    </view>
+
+    <view class="quick-amounts">
+      <view class="quick-chip" wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="setQuickAmount">¥{{item}}</view>
+    </view>
+
+    <view class="chip-section">
+      <view class="field-label">分类</view>
+      <scroll-view scroll-x class="category-scroll" show-scrollbar="false">
+        <view class="category-chip {{index === categoryIndex ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" data-index="{{index}}" bindtap="selectCategory">{{item}}</view>
+      </scroll-view>
+    </view>
+
+    <view class="field-row">
+      <view class="field-label">账户</view>
+      <picker mode="selector" range="{{accounts}}" value="{{accountIndex}}" bindchange="onAccountChange">
+        <view class="field-value">{{accounts[accountIndex]}}</view>
+      </picker>
+    </view>
+    <view class="field-row">
+      <view class="field-label">日期</view>
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="field-value">{{date}}</view>
+      </picker>
+    </view>
+    <view class="note-box">
+      <view class="field-label">备注</view>
+      <input class="note-input" placeholder="比如：周末家庭晚餐" value="{{note}}" bindinput="onNoteInput" />
+      <view class="note-chips">
+        <view class="note-chip" wx:for="{{quickNotes}}" wx:key="*this" data-note="{{item}}" bindtap="setQuickNote">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <button class="tomato-button save-button fade-up" bindtap="saveRecord">保存记录</button>
+</view>

@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+miniprogram/miniprogram_npm/
+
+# local/dev artifacts
+.DS_Store
+*.log
+work/
+.codegraph/
+.codex/
+.agents/
+
+# WeChat developer private config
+project.private.config.json
+
+# archives
+*.tgz
+*.zip

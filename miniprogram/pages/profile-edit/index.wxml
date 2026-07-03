@@ -1,0 +1,30 @@
+<view class="page profile-edit-page">
+  <custom-navbar title="编辑资料" showBack="{{true}}"></custom-navbar>
+
+  <view class="edit-card card fade-up">
+    <view class="form-group avatar-row">
+      <view class="form-label">头像</view>
+      <button class="avatar-field" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="edit-avatar {{isDefaultAvatar ? 'default' : ''}}" src="{{avatarUrl}}" mode="aspectFill"></image>
+        <ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon>
+      </button>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">昵称</view>
+      <input class="profile-input" type="nickname" value="{{nickName}}" placeholder="请输入昵称" bindinput="onNickNameInput" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">性别</view>
+      <picker class="form-picker" mode="selector" range="{{genderOptions}}" value="{{genderIndex}}" bindchange="onGenderChange">
+        <view class="picker-value">
+          <text>{{gender}}</text>
+          <ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <button class="save-button fade-up" loading="{{saving}}" bindtap="saveProfile">保存资料</button>
+</view>

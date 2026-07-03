@@ -1,0 +1,309 @@
+.home-page {
+  padding-bottom: 180rpx;
+}
+
+.hero,
+.summary-head,
+.section-head,
+.record-item,
+.mini-stats,
+.ledger-switch {
+  display: flex;
+  align-items: center;
+}
+
+.hero,
+.summary-head,
+.section-head {
+  justify-content: space-between;
+}
+
+.hero {
+  margin-bottom: 28rpx;
+}
+
+.ledger-switch {
+  color: #312522;
+  font-size: 48rpx;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.switch-arrow {
+  margin-left: 10rpx;
+  color: #f0442f;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+
+.month-line {
+  margin-top: 12rpx;
+  color: #9a8278;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.readonly-pill {
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: #fff0ea;
+  color: #f0442f;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.tomato-mark {
+  position: relative;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 38rpx 38rpx 44rpx 44rpx;
+  color: #fff;
+  background: linear-gradient(145deg, #ff8068, #f0442f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 18rpx 40rpx rgba(240, 68, 47, 0.3);
+}
+
+.tomato-leaf {
+  position: absolute;
+  top: -10rpx;
+  width: 34rpx;
+  height: 18rpx;
+  border-radius: 34rpx 34rpx 6rpx 6rpx;
+  background: #43a866;
+}
+
+.summary-card {
+  position: relative;
+  overflow: hidden;
+  padding: 34rpx;
+  background: linear-gradient(145deg, #fffdfb 0%, #fff0ea 100%);
+}
+
+.summary-glow {
+  position: absolute;
+  right: -72rpx;
+  top: -88rpx;
+  width: 230rpx;
+  height: 230rpx;
+  border-radius: 50%;
+  background: rgba(240, 68, 47, 0.12);
+}
+
+.section-kicker,
+.overview-label,
+.section-tip,
+.record-meta,
+.mini-label {
+  color: #9a8278;
+  font-size: 24rpx;
+}
+
+.summary-title {
+  margin-top: 10rpx;
+  color: #312522;
+  font-size: 36rpx;
+  font-weight: 900;
+}
+
+.tomato-badge {
+  position: relative;
+  z-index: 1;
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: #fffdfb;
+  color: #f0442f;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+  margin-top: 34rpx;
+}
+
+.overview-item {
+  min-width: 0;
+  padding: 22rpx 14rpx;
+  border-radius: 26rpx;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.overview-value {
+  margin-top: 10rpx;
+  color: #312522;
+  font-size: 27rpx;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.overview-value.income { color: #25a66a; }
+.overview-value.expense { color: #f0442f; }
+
+.mini-stats {
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+
+.mini-stat {
+  flex: 1;
+  min-height: 144rpx;
+  padding: 22rpx 16rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 253, 252, 0.9);
+  border: 1rpx solid rgba(240, 68, 47, 0.08);
+  box-shadow: 0 10rpx 28rpx rgba(165, 74, 47, 0.06);
+}
+
+.mini-icon {
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 16rpx;
+  background: #fff0ea;
+  color: #f0442f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 900;
+}
+
+.mini-value {
+  margin-top: 12rpx;
+  color: #312522;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.mini-label {
+  margin-top: 6rpx;
+}
+
+.budget-card,
+.records-card {
+  margin-top: 24rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  color: #312522;
+  font-size: 32rpx;
+  font-weight: 900;
+}
+
+.section-link,
+.budget-left {
+  color: #f0442f;
+  font-size: 26rpx;
+  font-weight: 900;
+}
+
+.progress-track {
+  height: 18rpx;
+  margin-top: 26rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #ffe3d8;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #ffb35f, #f0442f);
+  animation: growBar 760ms ease both;
+}
+
+.record-item {
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid #f7e4dc;
+}
+
+.record-item:last-child { border-bottom: none; }
+
+.category-dot {
+  width: 78rpx;
+  height: 78rpx;
+  border-radius: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 900;
+}
+
+.category-dot.expense { color: #f0442f; background: #fff0ea; }
+.category-dot.income { color: #25a66a; background: #edf9f2; }
+
+.record-main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20rpx;
+}
+
+.record-title {
+  color: #312522;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.record-amount {
+  font-size: 28rpx;
+  font-weight: 900;
+}
+
+.record-amount.expense { color: #f0442f; }
+.record-amount.income { color: #25a66a; }
+
+@keyframes growBar {
+  from { width: 0; }
+}
+
+/* icon optical alignment */
+.switch-arrow,
+.mini-icon,
+.tomato-mark {
+  box-sizing: border-box;
+  line-height: 1;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.switch-arrow {
+  width: 38rpx;
+  height: 38rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-2rpx);
+}
+
+.mini-icon {
+  padding-top: 1rpx;
+}
+
+.tomato-mark text {
+  transform: translateY(-1rpx);
+}
+
+/* remix icon replacements */
+.hero-logo {
+  width: 104rpx;
+  height: 104rpx;
+  flex: 0 0 104rpx;
+  filter: drop-shadow(0 18rpx 34rpx rgba(240, 68, 47, 0.24));
+}
+
+.ledger-switch ri-icon {
+  margin-left: 10rpx;
+  transform: translateY(1rpx);
+}
+
+.mini-icon ri-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

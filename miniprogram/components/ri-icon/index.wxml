@@ -1,0 +1,1 @@
+<text class="ri ri-{{name}}" style="font-size: {{size}}rpx; color: {{color}};"></text>
