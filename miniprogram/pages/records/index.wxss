@@ -262,6 +262,19 @@
   padding: 20rpx;
 }
 
+.retry-button {
+  width: 240rpx;
+  height: 76rpx;
+  margin: 24rpx auto 0;
+  border-radius: 999rpx;
+  background: #f0442f;
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 76rpx;
+  text-align: center;
+}
+
 .sheet-mask {
   position: fixed;
   inset: 0;

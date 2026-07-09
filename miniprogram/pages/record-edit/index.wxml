@@ -47,6 +47,12 @@
         <view class="field-value">{{date}}</view>
       </picker>
     </view>
+    <view class="field-row">
+      <view class="field-label">时间</view>
+      <picker mode="time" value="{{time}}" bindchange="onTimeChange">
+        <view class="field-value">{{time}}</view>
+      </picker>
+    </view>
     <view class="note-box">
       <view class="field-label">备注</view>
       <input class="note-input" placeholder="比如：周末家庭晚餐" value="{{note}}" bindinput="onNoteInput" />

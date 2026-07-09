@@ -75,7 +75,7 @@ Component({
         return;
       }
       if (reason === "readonly") {
-        wx.showToast({ title: "\u5f53\u524d\u8d26\u672c\u4ec5\u53ef\u67e5\u770b", icon: "none" });
+        wx.showToast({ title: "访客不能记账", icon: "none" });
         this.updateRecordDisabledReason();
         return;
       }

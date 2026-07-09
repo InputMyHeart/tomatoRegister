@@ -28,7 +28,16 @@
     </view>
   </view>
 
-  <view class="timeline fade-up" wx:if="{{hasRecords}}">
+  <view class="empty-wrap card fade-up" wx:if="{{loading}}">
+    <empty-state show="{{true}}" text="正在加载明细"></empty-state>
+  </view>
+
+  <view class="empty-wrap card fade-up" wx:elif="{{isError}}">
+    <empty-state show="{{true}}" text="明细加载失败"></empty-state>
+    <view class="retry-button" bindtap="reload">重新加载</view>
+  </view>
+
+  <view class="timeline fade-up" wx:elif="{{hasRecords}}">
     <view class="day-section" wx:for="{{recordGroups}}" wx:key="date">
       <view class="day-sticky">
         <view>
@@ -41,16 +50,18 @@
         </view>
       </view>
       <view class="record-row" wx:for="{{item.records}}" wx:for-item="record" wx:key="id" data-id="{{record.id}}" bindtap="openRecord">
-        <view class="category-mark {{record.type}}">{{record.categoryName}}</view>
+        <view class="category-mark {{record.type}}">
+          <ri-icon name="{{record.type === 'income' ? 'funds-line' : 'price-tag-3-line'}}" size="32" color="{{record.type === 'income' ? '#2f9d68' : '#f0442f'}}"></ri-icon>
+        </view>
         <view class="record-main">
           <view class="record-topline">
-            <view class="record-title">{{record.note}}</view>
-            <view class="record-amount {{record.type}}">{{record.sign}}¥{{record.amount}}</view>
+            <view class="record-title">{{record.categoryText}}</view>
+            <view class="record-amount {{record.type}}">{{record.sign}}¥{{record.amountText}}</view>
           </view>
           <view class="record-meta">
-            <text>{{record.time}}</text>
-            <text>{{record.ownerName}}</text>
-            <text>{{record.account}}</text>
+            <text>{{record.timeText}}</text>
+            <text>{{record.memberName}}</text>
+            <text>{{record.accountText}}</text>
           </view>
         </view>
       </view>
@@ -63,29 +74,5 @@
 
     </view>
   </scroll-view>
-
-  <view class="sheet-mask" wx:if="{{detailVisible}}" bindtap="closeDetail"></view>
-  <view class="detail-sheet {{detailVisible ? 'show' : ''}}" wx:if="{{selectedRecord}}">
-    <view class="sheet-handle"></view>
-    <view class="sheet-head">
-      <view>
-        <view class="sheet-category">{{selectedRecord.categoryName}}</view>
-        <view class="sheet-note">{{selectedRecord.note}}</view>
-      </view>
-      <view class="sheet-amount {{selectedRecord.type}}">{{selectedRecord.sign}}¥{{selectedRecord.amount}}</view>
-    </view>
-    <view class="detail-list">
-      <view class="detail-row"><text>时间</text><text>{{selectedRecord.dateLabel}} {{selectedRecord.time}}</text></view>
-      <view class="detail-row"><text>记录人</text><text>{{selectedRecord.ownerName}}</text></view>
-      <view class="detail-row"><text>支付账户</text><text>{{selectedRecord.account}}</text></view>
-      <view class="detail-row"><text>备注</text><text>{{selectedRecord.remark}}</text></view>
-    </view>
-    <view class="sheet-actions">
-      <button class="ghost-button" bindtap="closeDetail">关闭</button>
-      <button class="tomato-button" bindtap="editSelected" wx:if="{{selectedRecord.canEdit && !readonly}}">编辑</button>
-      <button class="disabled-button" wx:else>仅可查看</button>
-    </view>
-  </view>
-
   <custom-tabbar active="records" readonly="{{readonly}}"></custom-tabbar>
 </view>

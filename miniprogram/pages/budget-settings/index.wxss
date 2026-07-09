@@ -1,0 +1,86 @@
+.setting-card,
+.budget-card {
+  padding: 32rpx;
+}
+
+.setting-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.setting-title {
+  color: #312522;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.setting-subtitle,
+.range-line {
+  color: #9a8278;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.setting-subtitle {
+  margin-top: 10rpx;
+  line-height: 1.45;
+}
+
+.budget-card {
+  margin-top: 24rpx;
+}
+
+.budget-card.is-disabled {
+  opacity: 0.58;
+}
+
+.amount-label {
+  color: #9a8278;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.amount-input-row {
+  height: 112rpx;
+  display: flex;
+  align-items: baseline;
+  gap: 10rpx;
+  border-bottom: 1rpx solid #f3e5df;
+}
+
+.currency {
+  color: #f0442f;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+
+.amount-input {
+  flex: 1;
+  min-width: 0;
+  color: #312522;
+  font-size: 54rpx;
+  font-weight: 900;
+}
+
+.range-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 247, 242, 0.94);
+  backdrop-filter: blur(18rpx);
+}
+
+.save-button {
+  width: 100%;
+}

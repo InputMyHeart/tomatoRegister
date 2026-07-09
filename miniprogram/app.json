@@ -6,10 +6,13 @@
     "pages/analysis/index",
     "pages/profile/index",
     "pages/profile-edit/index",
+    "pages/budget-settings/index",
+    "pages/month-start-settings/index",
     "pages/ledger-create/index",
     "pages/ledger-settings/index",
     "pages/ledger-join-result/index",
     "pages/record-category/index",
+    "pages/record-detail/index",
     "pages/record-edit/index"
   ],
   "window": {

@@ -23,8 +23,7 @@
             </view>
             <view class="month-line">{{monthLabel}}</view>
           </view>
-          <view class="readonly-pill" wx:if="{{readonly}}">只读</view>
-          <image class="hero-logo soft-pop" wx:else src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+          <image class="hero-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
         </block>
       </view>
 
@@ -64,7 +63,7 @@
               <view class="section-kicker">本月概览</view>
               <view class="summary-title">{{familyMood}}</view>
             </view>
-            <view class="tomato-badge">{{ledgerTypeText}}账本</view>
+            <view class="tomato-badge">{{ledgerTypeText}}</view>
           </view>
           <view class="overview-grid">
             <view class="overview-item">
@@ -104,11 +103,12 @@
           <view class="section-head">
             <view>
               <view class="section-title">月预算</view>
-              <view class="section-tip">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
+              <view class="section-tip" wx:if="{{budgetEnabled}}">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
+              <view class="section-tip" wx:else>未启用月预算</view>
             </view>
-            <view class="budget-left">剩 ¥{{budgetLeft}}</view>
+            <view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view>
           </view>
-          <view class="progress-track">
+          <view class="progress-track" wx:if="{{budgetEnabled}}">
             <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
           </view>
         </view>
@@ -118,14 +118,22 @@
             <view class="section-title">最近记录</view>
             <view class="section-link" bindtap="goRecords">全部</view>
           </view>
-          <view class="record-item" wx:for="{{recentRecords}}" wx:key="id">
-            <view class="category-dot {{item.type}}">{{item.categoryText}}</view>
-            <view class="record-main">
-              <view class="record-title">{{item.noteText}}</view>
-              <view class="record-meta">{{item.date}} · {{item.memberName}} · {{item.categoryText}}</view>
+          <view class="record-item" wx:for="{{recentRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="goRecordDetail">
+            <view class="category-dot {{item.type}}">
+              <ri-icon name="{{item.typeIcon}}" size="34" color="{{item.typeIconColor}}"></ri-icon>
             </view>
-            <view class="record-amount {{item.type}}">
-              {{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}
+            <view class="record-main">
+              <view class="record-title">{{item.categoryText}}</view>
+              <view class="record-meta">{{item.selectedTimeText}}</view>
+            </view>
+            <view class="record-side">
+              <view class="record-amount {{item.type}}">
+                {{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}
+              </view>
+              <view class="record-member">
+                <image class="record-avatar" src="{{item.memberAvatar}}" mode="aspectFill"></image>
+                <text class="record-member-name">{{item.memberName}}</text>
+              </view>
             </view>
           </view>
           <view class="record-limit-tip">—仅展示当月最近10笔—</view>

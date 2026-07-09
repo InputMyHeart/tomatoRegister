@@ -31,7 +31,7 @@ Page({
     currentLedger: {
       id: "",
       name: "我家账本",
-      roleText: "创建者",
+      roleText: "拥有者",
       readonly: false,
     },
   },
@@ -55,11 +55,12 @@ Page({
       usageDays: getUsageDays(user),
       recordCount: Number((stats && stats.recordCount) || 0),
       ledgerCount: Number((stats && stats.ledgerCount) || 0),
+      monthStartDay: Number((currentLedger && currentLedger.monthStartDay) || 1),
       readonly: Boolean(currentLedger && currentLedger.readonly),
       currentLedger: {
         id: (currentLedger && currentLedger._id) || user.currentLedgerId || "",
         name: (currentLedger && currentLedger.name) || "我家账本",
-        roleText: (currentLedger && currentLedger.ownerOpenid === app.globalData.openid) ? "创建者" : "成员",
+        roleText: (currentLedger && currentLedger.ownerOpenid === app.globalData.openid) ? "拥有者" : (currentLedger && currentLedger.readonly) ? "访客" : "成员",
         readonly: Boolean(currentLedger && currentLedger.readonly),
       },
     });
@@ -116,7 +117,7 @@ Page({
   joinLedger() {
     wx.showModal({
       title: "邀请码加入",
-      content: "第一版优先支持输入邀请码加入共享账本，同时保留微信分享卡片入口。",
+      content: "第一版优先支持输入邀请码加入账本，同时保留微信分享卡片入口。",
       showCancel: false,
     });
   },
@@ -138,11 +139,11 @@ Page({
   },
 
   manageBudget() {
-    wx.showToast({ title: "预算设置入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/budget-settings/index" });
   },
 
   manageMonthStartDay() {
-    wx.showToast({ title: "月度起始日入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/month-start-settings/index" });
   },
 
   importBill() {

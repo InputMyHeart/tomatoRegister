@@ -8,6 +8,11 @@ function today() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
+function currentTime() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
 function quickAmountsFor(type) {
   return type === "income" ? [200, 500, 1000, 5000] : [18, 32, 68, 128];
 }
@@ -54,6 +59,7 @@ Page({
     tagInput: "",
     tags: [],
     date: today(),
+    time: currentTime(),
     ledgerName: "我家账本",
     ledgerId: "",
     accountIndex: 0,
@@ -132,6 +138,7 @@ Page({
   onAmountInput(event) { this.setAmountExpression(event.detail.value); },
   onNoteInput(event) { this.setData({ note: event.detail.value }); },
   onDateChange(event) { this.setData({ date: event.detail.value }); },
+  onTimeChange(event) { this.setData({ time: event.detail.value }); },
   onAccountChange(event) { this.setData({ accountIndex: Number(event.detail.value) }); },
   onTagInput(event) { this.setData({ tagInput: event.detail.value }); },
 
@@ -170,6 +177,7 @@ Page({
             note: this.data.note,
             tags: finalTags,
             date: this.data.date,
+            time: this.data.time,
             categoryName: this.data.categoryName,
             categoryLabel: this.data.categoryLabel,
             categoryIcon: this.data.categoryIcon,

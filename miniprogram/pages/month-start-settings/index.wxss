@@ -1,0 +1,81 @@
+.setting-card,
+.calendar-card {
+  padding: 32rpx;
+}
+
+.setting-title {
+  color: #312522;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.setting-subtitle,
+.current-line,
+.week-row {
+  color: #9a8278;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.setting-subtitle {
+  margin-top: 10rpx;
+  line-height: 1.45;
+}
+
+.current-line {
+  margin-top: 22rpx;
+  color: #f0442f;
+  font-weight: 900;
+}
+
+.calendar-card {
+  margin-top: 24rpx;
+}
+
+.week-row,
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12rpx;
+}
+
+.week-row {
+  text-align: center;
+}
+
+.day-grid {
+  margin-top: 18rpx;
+}
+
+.day-cell {
+  aspect-ratio: 1;
+  border-radius: 18rpx;
+  background: #fff7f2;
+  color: #312522;
+  font-size: 28rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-cell.active {
+  color: #fff;
+  background: #f0442f;
+  box-shadow: 0 12rpx 24rpx rgba(240, 68, 47, 0.22);
+}
+
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 247, 242, 0.94);
+  backdrop-filter: blur(18rpx);
+}
+
+.save-button {
+  width: 100%;
+}

@@ -297,7 +297,9 @@ async function createLedger(openid, data = {}) {
     viewerOpenids: [],
     inviteCode,
     readonlyShareCode,
+    budgetEnabled: false,
     monthlyBudget: Number(data.monthlyBudget || 0),
+    monthStartDay: 1,
     accounts: data.accounts || ["微信", "支付宝", "银行卡", "现金"],
     createdAt: now(),
     updatedAt: now(),
@@ -332,6 +334,12 @@ function getLedgerRole(openid, ledger) {
   return "none";
 }
 
+function getRoleText(role) {
+  if (role === "owner") return "拥有者";
+  if (role === "member") return "成员";
+  return "访客";
+}
+
 function assertReadable(role) {
   if (!["owner", "member", "readonly"].includes(role)) throw new Error("NO_LEDGER_ACCESS");
 }
@@ -348,6 +356,27 @@ async function listLedgersForUser(openid) {
   ])).get();
   return ledgers.data || [];
 }
+
+async function getUsersByOpenids(openids = []) {
+  const uniqueOpenids = Array.from(new Set(openids.filter(Boolean)));
+  if (!uniqueOpenids.length) return {};
+  const result = await db.collection("users").where({ openid: _.in(uniqueOpenids) }).get();
+  return (result.data || []).reduce((map, user) => {
+    map[user.openid] = user;
+    return map;
+  }, {});
+}
+
+function attachRecordOwner(record = {}, ownerMap = {}, currentOpenid = "") {
+  const owner = ownerMap[record.ownerOpenid] || {};
+  return {
+    ...record,
+    id: record._id || record.id,
+    memberName: owner.nickName || (record.ownerOpenid === currentOpenid ? "我" : "成员"),
+    memberAvatar: owner.avatarUrl || defaultAvatarUrl,
+  };
+}
+
 async function listLedgers(openid) {
   const ledgers = await listLedgersForUser(openid);
   return ok({ ledgers });
@@ -384,6 +413,7 @@ async function createRecord(openid, data = {}) {
     tags: Array.isArray(data.tags) ? data.tags.slice(0, 8) : [],
     account: data.account || "微信",
     date: data.date || new Date().toISOString().slice(0, 10),
+    time: data.time || "",
     createdAt: now(),
     updatedAt: now(),
   };
@@ -398,8 +428,47 @@ async function listRecords(openid, data = {}) {
 
   const query = { ledgerId: ledger._id };
   if (data.type && data.type !== "all") query.type = data.type;
-  const result = await db.collection("records").where(query).orderBy("date", "desc").limit(100).get();
-  return ok({ records: result.data, role });
+  if (data.start && data.end) query.date = _.gte(data.start).and(_.lt(data.end));
+  const result = await db.collection("records").where(query).orderBy("date", "desc").orderBy("time", "desc").limit(100).get();
+  const records = result.data || [];
+  const ownerMap = await getUsersByOpenids(records.map((item) => item.ownerOpenid));
+  return ok({
+    records: records.map((item) => attachRecordOwner(item, ownerMap, openid)),
+    ledger: {
+      _id: ledger._id,
+      name: ledger.name,
+      type: ledger.type || "personal",
+      budgetEnabled: Boolean(ledger.budgetEnabled),
+      monthlyBudget: Number(ledger.monthlyBudget || 0),
+      monthStartDay: Number(ledger.monthStartDay || 1),
+    },
+    role,
+    roleText: getRoleText(role),
+    readonly: role === "readonly",
+  });
+}
+
+async function getRecord(openid, data = {}) {
+  const recordId = data.recordId || data.id;
+  if (!recordId) return fail("记录不存在", "RECORD_NOT_FOUND");
+  const recordRes = await db.collection("records").doc(recordId).get();
+  const record = recordRes.data;
+  if (!record) return fail("记录不存在", "RECORD_NOT_FOUND");
+  const ledger = await getLedgerForUser(openid, record.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  assertReadable(role);
+  const ownerMap = await getUsersByOpenids([record.ownerOpenid]);
+  return ok({
+    record: attachRecordOwner(record, ownerMap, openid),
+    ledger: {
+      _id: ledger._id,
+      name: ledger.name,
+      type: ledger.type || "personal",
+    },
+    role,
+    roleText: getRoleText(role),
+    readonly: role === "readonly",
+  });
 }
 
 async function updateRecord(openid, data = {}) {
@@ -423,6 +492,7 @@ async function updateRecord(openid, data = {}) {
       tags: Array.isArray(data.tags) ? data.tags.slice(0, 8) : (record.tags || []),
       account: data.account || record.account,
       date: data.date || record.date,
+      time: data.time || record.time || "",
       updatedAt: now(),
     },
   });
@@ -441,14 +511,29 @@ async function deleteRecord(openid, data = {}) {
   return ok();
 }
 
-function getCurrentMonthRange() {
+function makeDateText(year, month, day) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function addMonth(year, month, delta) {
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1));
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
+}
+
+function getCurrentMonthRange(monthStartDay = 1) {
+  const startDay = Math.min(28, Math.max(1, Number(monthStartDay || 1)));
   const nowDate = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  const year = nowDate.getUTCFullYear();
-  const month = nowDate.getUTCMonth() + 1;
-  const start = `${year}-${String(month).padStart(2, "0")}-01`;
-  const nextYear = month === 12 ? year + 1 : year;
-  const nextMonth = month === 12 ? 1 : month + 1;
-  const end = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+  let year = nowDate.getUTCFullYear();
+  let month = nowDate.getUTCMonth() + 1;
+  const day = nowDate.getUTCDate();
+  if (day < startDay) {
+    const previous = addMonth(year, month, -1);
+    year = previous.year;
+    month = previous.month;
+  }
+  const next = addMonth(year, month, 1);
+  const start = makeDateText(year, month, startDay);
+  const end = makeDateText(next.year, next.month, startDay);
   return { year, month, start, end };
 }
 
@@ -458,14 +543,17 @@ async function getDashboard(openid, data = {}) {
   const role = getLedgerRole(openid, ledger);
   assertReadable(role);
 
-  const monthRange = getCurrentMonthRange();
+  const monthStartDay = Number(ledger.monthStartDay || 1);
+  const monthRange = getCurrentMonthRange(monthStartDay);
   const query = { ledgerId: ledger._id, date: _.gte(monthRange.start).and(_.lt(monthRange.end)) };
   const records = await db.collection("records").where(query).orderBy("date", "desc").limit(10).get();
   const monthRecords = records.data || [];
+  const ownerMap = await getUsersByOpenids(monthRecords.map((item) => item.ownerOpenid));
   const monthIncome = monthRecords.filter((item) => item.type === "income").reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const monthExpense = monthRecords.filter((item) => item.type === "expense").reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const budget = Number(ledger.monthlyBudget || 0);
-  const budgetRate = budget ? Math.min(100, Math.round((monthExpense / budget) * 100)) : 0;
+  const budgetEnabled = Boolean(ledger.budgetEnabled);
+  const budget = budgetEnabled ? Number(ledger.monthlyBudget || 0) : 0;
+  const budgetRate = budgetEnabled && budget ? Math.min(100, Math.round((monthExpense / budget) * 100)) : 0;
   const expenseMap = {};
   monthRecords.forEach((item) => {
     if (item.type !== "expense") return;
@@ -478,19 +566,22 @@ async function getDashboard(openid, data = {}) {
     ledgerId: ledger._id,
     ledgerName: ledger.name,
     ledgerType: ledger.type || "personal",
-    roleText: role === "owner" ? "创建者" : role === "member" ? "成员" : "只读",
+    role,
+    roleText: getRoleText(role),
     readonly: role === "readonly",
     monthIncome,
     monthExpense,
     balance: Number((monthIncome - monthExpense).toFixed(2)),
     budget,
-    budgetLeft: Number((budget - monthExpense).toFixed(2)),
+    budgetEnabled,
+    budgetLeft: budgetEnabled ? Number((budget - monthExpense).toFixed(2)) : 0,
     budgetRate,
+    monthStartDay,
     recordCount: monthRecords.length,
     topCategory,
     familyMood: monthRecords.length ? "本月记录持续更新" : "本月还没有记录",
     monthRange,
-    recentRecords: monthRecords.map((item) => ({ ...item, id: item._id, memberName: item.ownerOpenid === openid ? "我" : "家人" })),
+    recentRecords: monthRecords.map((item) => attachRecordOwner(item, ownerMap, openid)),
   });
 }
 
@@ -498,8 +589,19 @@ async function updateBudget(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
   if (role !== "owner") throw new Error("ONLY_OWNER_CAN_UPDATE_BUDGET");
-  await db.collection("ledgers").doc(ledger._id).update({ data: { monthlyBudget: Number(data.monthlyBudget || 0), updatedAt: now() } });
-  return ok();
+  const budgetEnabled = Boolean(data.budgetEnabled);
+  const monthlyBudget = budgetEnabled ? Math.min(999999, Math.max(1, Number(data.monthlyBudget || 1))) : 0;
+  await db.collection("ledgers").doc(ledger._id).update({ data: { budgetEnabled, monthlyBudget, updatedAt: now() } });
+  return ok({ ledger: { ...ledger, budgetEnabled, monthlyBudget } });
+}
+
+async function updateMonthStartDay(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  if (role !== "owner") throw new Error("ONLY_OWNER_CAN_UPDATE_MONTH_START_DAY");
+  const monthStartDay = Math.min(28, Math.max(1, Number(data.monthStartDay || 1)));
+  await db.collection("ledgers").doc(ledger._id).update({ data: { monthStartDay, updatedAt: now() } });
+  return ok({ ledger: { ...ledger, monthStartDay } });
 }
 
 
@@ -597,7 +699,7 @@ async function joinLedger(openid, data = {}) {
 async function joinReadonlyLedger(openid, data = {}) {
   const found = await db.collection("ledgers").where({ readonlyShareCode: data.readonlyShareCode }).limit(1).get();
   const ledger = found.data[0];
-  if (!ledger) return fail("只读分享码无效", "INVALID_READONLY_CODE");
+  if (!ledger) return fail("访客分享码无效", "INVALID_READONLY_CODE");
   if ((ledger.viewerOpenids || []).includes(openid)) return ok({ ledgerId: ledger._id, ledger });
   await db.collection("ledgers").doc(ledger._id).update({
     data: { viewers: _.push([{ openid, joinedAt: new Date() }]), viewerOpenids: _.push([openid]), updatedAt: now() },
@@ -685,11 +787,13 @@ exports.main = async (event) => {
       case "setCurrentLedger": return await setCurrentLedger(OPENID, data);
       case "deleteLedger": return await deleteLedger(OPENID, data);
       case "createRecord": return await createRecord(OPENID, data);
+      case "getRecord": return await getRecord(OPENID, data);
       case "listRecords": return await listRecords(OPENID, data);
       case "updateRecord": return await updateRecord(OPENID, data);
       case "deleteRecord": return await deleteRecord(OPENID, data);
       case "getDashboard": return await getDashboard(OPENID, data);
       case "updateBudget": return await updateBudget(OPENID, data);
+      case "updateMonthStartDay": return await updateMonthStartDay(OPENID, data);
       case "createLedgerInviteToken": return await createLedgerInviteToken(OPENID, data);
       case "joinLedgerByInviteToken": return await joinLedgerByInviteToken(OPENID, data);
       case "joinLedger": return await joinLedger(OPENID, data);

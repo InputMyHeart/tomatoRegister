@@ -10,6 +10,16 @@ function money(value) {
   return num.toFixed(num % 1 === 0 ? 0 : 2);
 }
 
+function getLedgerTypeText(type) {
+  return type === "shared" ? "共享账本" : "个人账本";
+}
+
+function getRoleText(role) {
+  if (role === "owner") return "拥有者";
+  if (role === "member") return "成员";
+  return "访客";
+}
+
 function getStatusFlags(status) {
   return {
     pageStatus: status,
@@ -23,13 +33,21 @@ function getStatusFlags(status) {
 }
 
 function normalizeRecord(item = {}) {
+  const type = item.type === "income" ? "income" : "expense";
+  const categoryText = item.categoryName || item.categoryLabel || "其他";
+  const selectedTimeText = [item.date, item.time].filter(Boolean).join(" ") || "未选择时间";
   return {
     ...item,
     id: item.id || item._id || "",
+    type,
+    typeIcon: type === "income" ? "funds-line" : "price-tag-3-line",
+    typeIconColor: type === "income" ? "#25a66a" : "#f0442f",
     amountText: money(item.amount),
-    noteText: item.note || item.categoryName || "未填写备注",
-    categoryText: item.categoryName || "其他",
-    memberName: item.memberName || "我",
+    noteText: item.note || "未填写备注",
+    categoryText,
+    selectedTimeText,
+    memberName: item.memberName || item.ownerName || "我",
+    memberAvatar: item.memberAvatar || "/images/brand/tomato-ledger-logo-256-transparent.png",
   };
 }
 
@@ -40,14 +58,15 @@ function normalizeDashboard(data = {}) {
     ledgerId: data.ledgerId || "",
     ledgerName: data.ledgerName || "我的账本",
     ledgerType: data.ledgerType || "personal",
-    ledgerTypeText: data.ledgerType === "shared" ? "共享" : "个人",
+    ledgerTypeText: getLedgerTypeText(data.ledgerType),
     monthLabel: getMonthLabel(),
-    roleText: data.roleText || "",
+    roleText: data.roleText || getRoleText(data.role),
     readonly: Boolean(data.readonly),
     monthIncome: money(data.monthIncome),
     monthExpense: money(data.monthExpense),
     balance: money(data.balance),
     budget: money(data.budget),
+    budgetEnabled: Boolean(data.budgetEnabled),
     budgetLeft: money(data.budgetLeft),
     budgetRate: Number(data.budgetRate || 0),
     recordCount,
@@ -68,7 +87,7 @@ Page({
     ledgerId: "",
     ledgerName: "我的账本",
     ledgerType: "personal",
-    ledgerTypeText: "个人",
+    ledgerTypeText: "个人账本",
     monthLabel: getMonthLabel(),
     roleText: "",
     readonly: false,
@@ -76,6 +95,7 @@ Page({
     monthExpense: "0",
     balance: "0",
     budget: "0",
+    budgetEnabled: false,
     budgetLeft: "0",
     budgetRate: 0,
     recordCount: 0,
@@ -128,7 +148,7 @@ Page({
           ledgerId: "",
           ledgerName: "还没有账本",
           ledgerType: "personal",
-          ledgerTypeText: "未创建",
+          ledgerTypeText: "个人账本",
           monthLabel: getMonthLabel(),
           recentRecords: [],
           recordCount: 0,
@@ -144,6 +164,9 @@ Page({
         name: normalized.ledgerName,
         type: normalized.ledgerType,
         readonly: normalized.readonly,
+        budgetEnabled: normalized.budgetEnabled,
+        monthlyBudget: Number(normalized.budget || 0),
+        monthStartDay: Number(dashboard.data.monthStartDay || 1),
       };
       app.globalData.readonly = normalized.readonly;
       app.persistAuthState();
@@ -185,7 +208,7 @@ Page({
   normalizeLedgers(ledgers = []) {
     return ledgers.map((item) => {
       const id = item._id || item.id || "";
-      const typeTag = item.type === "shared" ? "共享账本" : "个人账本";
+      const typeTag = getLedgerTypeText(item.type);
       const roleTag = this.getLedgerRoleTag(item);
       return {
         ...item,
@@ -268,7 +291,7 @@ Page({
 
   goRecordEdit() {
     if (this.data.readonly) {
-      wx.showToast({ title: "只读账本不能记账", icon: "none" });
+      wx.showToast({ title: "访客不能记账", icon: "none" });
       return;
     }
     if (!this.data.ledgerId) {
@@ -280,5 +303,11 @@ Page({
 
   goRecords() {
     wx.redirectTo({ url: "/pages/records/index" });
+  },
+
+  goRecordDetail(event) {
+    const recordId = event.currentTarget.dataset.id || "";
+    if (!recordId) return;
+    wx.navigateTo({ url: `/pages/record-detail/index?id=${encodeURIComponent(recordId)}` });
   },
 });

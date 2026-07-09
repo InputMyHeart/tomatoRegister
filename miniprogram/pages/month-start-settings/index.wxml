@@ -1,0 +1,33 @@
+<view class="page plain-page month-start-page">
+  <custom-navbar title="月度起始日" showBack="{{true}}"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view class="setting-card card fade-up">
+        <view class="setting-title">{{ledgerName}}</view>
+        <view class="setting-subtitle">配置符合自己的统计开始时刻</view>
+        <view class="current-line">当前从每月 {{monthStartDay}} 号开始统计</view>
+      </view>
+
+      <view class="calendar-card card fade-up">
+        <view class="week-row">
+          <text>一</text>
+          <text>二</text>
+          <text>三</text>
+          <text>四</text>
+          <text>五</text>
+          <text>六</text>
+          <text>日</text>
+        </view>
+        <view class="day-grid">
+          <view wx:for="{{days}}" wx:key="*this" class="day-cell {{item === monthStartDay ? 'active' : ''}}" data-day="{{item}}" bindtap="selectDay">
+            <text>{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="save-bar">
+    <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" bindtap="saveMonthStartDay">保存</button>
+  </view>
+</view>

@@ -35,7 +35,7 @@ function getShareOptions(ledger = {}) {
       {
         mode: "visitor",
         title: "邀请成为访客",
-        desc: "仅可查看账本数据，适合只需要了解情况的人。",
+        desc: "访客可查看账本数据，适合只需要了解情况的人。",
         icon: "eye-line",
       },
     ];
@@ -45,7 +45,7 @@ function getShareOptions(ledger = {}) {
     {
       mode: "visitor",
       title: "邀请成为访客",
-      desc: "个人账本仅支持可读分享，对方只能查看账本数据。",
+      desc: "个人账本可邀请访客，对方可查看账本数据。",
       icon: "eye-line",
     },
   ];

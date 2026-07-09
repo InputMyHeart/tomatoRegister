@@ -1,20 +1,71 @@
-const demoRecords = [
-  { id: "r1", type: "expense", categoryName: "餐饮", amount: 86.5, note: "周末家庭晚餐", date: "2026-07-02", time: "19:20", account: "微信", ownerName: "我", remark: "番茄牛腩和水果", canEdit: true },
-  { id: "r2", type: "expense", categoryName: "育儿", amount: 260, note: "绘本和文具", date: "2026-07-02", time: "16:05", account: "支付宝", ownerName: "家人", remark: "幼儿园手工课材料", canEdit: false },
-  { id: "r3", type: "income", categoryName: "工资", amount: 12800, note: "月度工资", date: "2026-07-01", time: "09:12", account: "银行卡", ownerName: "我", remark: "七月工资入账", canEdit: true },
-  { id: "r4", type: "expense", categoryName: "交通", amount: 32, note: "地铁通勤", date: "2026-07-01", time: "08:40", account: "微信", ownerName: "家人", remark: "早晚通勤", canEdit: false },
-  { id: "r5", type: "expense", categoryName: "购物", amount: 148.9, note: "厨房清洁用品", date: "2026-06-30", time: "20:18", account: "微信", ownerName: "我", remark: "洗碗块、保鲜袋", canEdit: true },
-];
+const app = getApp();
 
 const weekdayMap = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 function money(value) {
-  return Number(value || 0).toFixed(value % 1 === 0 ? 0 : 2);
+  const num = Number(value || 0);
+  return num.toFixed(num % 1 === 0 ? 0 : 2);
+}
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function makeDateText(year, month, day) {
+  return `${year}-${pad(month)}-${pad(day)}`;
+}
+
+function addMonth(year, month, delta) {
+  const date = new Date(year, month - 1 + delta, 1);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+}
+
+function getRange(year, month, monthStartDay) {
+  const startDay = Math.min(28, Math.max(1, Number(monthStartDay || 1)));
+  const next = addMonth(year, month, 1);
+  return {
+    year,
+    month,
+    start: makeDateText(year, month, startDay),
+    end: makeDateText(next.year, next.month, startDay),
+    label: `${year}年${month}月`,
+  };
+}
+
+function getCurrentRange(monthStartDay) {
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;
+  if (now.getDate() < Number(monthStartDay || 1)) {
+    const previous = addMonth(year, month, -1);
+    year = previous.year;
+    month = previous.month;
+  }
+  return getRange(year, month, monthStartDay);
 }
 
 function formatDateLabel(dateText) {
   const date = new Date(`${dateText}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateText || "未选择日期";
   return `${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+function normalizeRecord(record = {}) {
+  const type = record.type === "income" ? "income" : "expense";
+  return {
+    ...record,
+    id: record.id || record._id || "",
+    type,
+    amountText: money(record.amount),
+    sign: type === "income" ? "+" : "-",
+    categoryText: record.categoryName || record.categoryLabel || "其他",
+    noteText: record.note || "未填写备注",
+    dateLabel: formatDateLabel(record.date),
+    timeText: record.time || record.date || "未选择时间",
+    memberName: record.memberName || "我",
+    memberAvatar: record.memberAvatar || "/images/brand/tomato-ledger-logo-256-transparent.png",
+    accountText: record.account || "未选择账户",
+  };
 }
 
 function buildView(records, activeType) {
@@ -23,18 +74,12 @@ function buildView(records, activeType) {
   const groupMap = {};
 
   visibleRecords.forEach((record) => {
-    const normalized = {
-      ...record,
-      amount: money(record.amount),
-      sign: record.type === "income" ? "+" : "-",
-      dateLabel: formatDateLabel(record.date),
-    };
     if (!groupMap[record.date]) {
       const date = new Date(`${record.date}T00:00:00`);
       groupMap[record.date] = {
         date: record.date,
-        dateLabel: normalized.dateLabel,
-        weekday: weekdayMap[date.getDay()],
+        dateLabel: record.dateLabel,
+        weekday: Number.isNaN(date.getTime()) ? "" : weekdayMap[date.getDay()],
         income: 0,
         expense: 0,
         records: [],
@@ -42,20 +87,15 @@ function buildView(records, activeType) {
       groups.push(groupMap[record.date]);
     }
     const group = groupMap[record.date];
-    if (record.type === "income") group.income += Number(record.amount);
-    if (record.type === "expense") group.expense += Number(record.amount);
-    group.records.push(normalized);
+    if (record.type === "income") group.income += Number(record.amount || 0);
+    if (record.type === "expense") group.expense += Number(record.amount || 0);
+    group.records.push(record);
   });
 
-  const visibleIncome = visibleRecords
-    .filter((item) => item.type === "income")
-    .reduce((sum, item) => sum + Number(item.amount), 0);
-  const visibleExpense = visibleRecords
-    .filter((item) => item.type === "expense")
-    .reduce((sum, item) => sum + Number(item.amount), 0);
+  const visibleIncome = visibleRecords.filter((item) => item.type === "income").reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const visibleExpense = visibleRecords.filter((item) => item.type === "expense").reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
   return {
-    visibleRecords: visibleRecords.map((record) => ({ ...record, amount: money(record.amount), sign: record.type === "income" ? "+" : "-", dateLabel: formatDateLabel(record.date) })),
     recordGroups: groups.map((group) => ({
       ...group,
       income: money(group.income),
@@ -70,50 +110,121 @@ function buildView(records, activeType) {
 
 Page({
   data: {
-    ledgerName: "我家账本",
-    monthLabel: "2026年7月",
+    ledgerName: "我的账本",
+    ledgerId: "",
+    monthLabel: "",
+    monthStartDay: 1,
     activeType: "all",
     readonly: false,
-    records: demoRecords,
-    detailVisible: false,
-    selectedRecord: null,
-    ...buildView(demoRecords, "all"),
+    loading: true,
+    isError: false,
+    records: [],
+    currentRange: null,
+    ...buildView([], "all"),
   },
 
-  switchType(e) {
-    const activeType = e.currentTarget.dataset.type;
+  onShow() {
+    this.bootstrap();
+  },
+
+  async bootstrap() {
+    if (!app.globalData.loggedIn) {
+      wx.reLaunch({ url: "/pages/login/index" });
+      return;
+    }
+
+    await app.loginWithWechat();
+    const ledger = app.globalData.currentLedger || {};
+    const monthStartDay = Number(ledger.monthStartDay || 1);
+    const currentRange = this.data.currentRange || getCurrentRange(monthStartDay);
+    this.setData({
+      ledgerId: ledger._id || "",
+      ledgerName: ledger.name || "我的账本",
+      monthStartDay,
+      readonly: Boolean(ledger.readonly),
+      currentRange,
+      monthLabel: currentRange.label,
+    });
+    await this.loadRecords(currentRange);
+  },
+
+  async callApi(action, data = {}) {
+    if (!app.globalData.env) return null;
+    const res = await wx.cloud.callFunction({
+      name: "tomatoLedger",
+      data: { action, data },
+    });
+    return res.result;
+  },
+
+  async loadRecords(range = this.data.currentRange) {
+    if (!range) return;
+    this.setData({ loading: true, isError: false });
+    try {
+      const result = await this.callApi("listRecords", {
+        ledgerId: this.data.ledgerId,
+        start: range.start,
+        end: range.end,
+      });
+      if (!result || !result.success || !result.data) {
+        throw new Error((result && result.message) || "明细加载失败");
+      }
+
+      const ledger = result.data.ledger || {};
+      if (ledger._id) {
+        app.globalData.currentLedger = {
+          ...(app.globalData.currentLedger || {}),
+          ...ledger,
+        };
+        app.globalData.readonly = Boolean(result.data.readonly);
+        app.persistAuthState();
+      }
+
+      const records = (result.data.records || []).map(normalizeRecord);
+      this.setData({
+        loading: false,
+        records,
+        readonly: Boolean(result.data.readonly),
+        ...buildView(records, this.data.activeType),
+      });
+    } catch (error) {
+      console.warn("load records failed", error);
+      this.setData({ loading: false, isError: true, ...buildView([], this.data.activeType) });
+    }
+  },
+
+  switchType(event) {
+    const activeType = event.currentTarget.dataset.type;
     this.setData({ activeType, ...buildView(this.data.records, activeType) });
   },
 
   switchLedger() {
-    wx.showToast({ title: "账本切换入口已预留", icon: "none" });
+    wx.redirectTo({ url: "/pages/index/index" });
   },
 
   prevMonth() {
-    wx.showToast({ title: "切换上个月", icon: "none" });
+    const range = this.data.currentRange;
+    const previous = addMonth(range.year, range.month, -1);
+    const nextRange = getRange(previous.year, previous.month, this.data.monthStartDay);
+    this.setData({ currentRange: nextRange, monthLabel: nextRange.label });
+    this.loadRecords(nextRange);
   },
 
   nextMonth() {
-    wx.showToast({ title: "切换下个月", icon: "none" });
+    const range = this.data.currentRange;
+    const next = addMonth(range.year, range.month, 1);
+    const nextRange = getRange(next.year, next.month, this.data.monthStartDay);
+    this.setData({ currentRange: nextRange, monthLabel: nextRange.label });
+    this.loadRecords(nextRange);
   },
 
-  openRecord(e) {
-    const id = e.currentTarget.dataset.id;
-    const selectedRecord = this.data.visibleRecords.find((item) => item.id === id);
-    if (!selectedRecord) return;
-    this.setData({ selectedRecord, detailVisible: true });
+  openRecord(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id) return;
+    wx.navigateTo({ url: `/pages/record-detail/index?id=${encodeURIComponent(id)}` });
   },
 
-  closeDetail() {
-    this.setData({ detailVisible: false });
-  },
-
-  editSelected() {
-    const { selectedRecord, readonly } = this.data;
-    if (!selectedRecord || readonly || !selectedRecord.canEdit) {
-      wx.showToast({ title: "暂无权限操作这笔记录", icon: "none" });
-      return;
-    }
-    wx.navigateTo({ url: `/pages/record-edit/index?id=${selectedRecord.id}` });
+  reload() {
+    this.loadRecords();
   },
 });

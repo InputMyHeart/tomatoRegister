@@ -36,7 +36,7 @@
         <view class="menu-icon"><ri-icon name="book-2-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
           <view class="menu-title">创建账本</view>
-          <view class="menu-tip">创建独立账本或家庭共享账本</view>
+          <view class="menu-tip">创建个人账本或共享账本</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
@@ -44,7 +44,7 @@
         <view class="menu-icon"><ri-icon name="key-2-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
           <view class="menu-title">加入账本</view>
-          <view class="menu-tip">优先使用邀请码加入家庭账本</view>
+          <view class="menu-tip">通过邀请加入共享账本，或以访客查看账本</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
@@ -90,7 +90,7 @@
         <view class="menu-icon"><ri-icon name="calendar-check-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
           <view class="menu-title">月预算</view>
-          <view class="menu-tip">轻提醒，不做压力型展示</view>
+          <view class="menu-tip">设置预算，快速了解当前支出占比</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
@@ -98,7 +98,7 @@
         <view class="menu-icon"><ri-icon name="calendar-event-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
           <view class="menu-title">月度起始日</view>
-          <view class="menu-tip">当前每月 {{monthStartDay}} 日开始统计</view>
+          <view class="menu-tip">配置符合自己的统计开始时刻</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
