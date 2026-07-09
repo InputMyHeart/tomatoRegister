@@ -1,0 +1,76 @@
+.login-page {
+  position: relative;
+}
+
+.login-page custom-navbar {
+  position: absolute;
+  top: 0;
+  left: 28rpx;
+  right: 28rpx;
+  z-index: 2;
+}
+
+.login-content {
+  min-height: 100%;
+  padding: 0 22rpx env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.login-logo {
+  width: 188rpx;
+  height: 188rpx;
+  filter: drop-shadow(0 22rpx 42rpx rgba(240, 68, 47, 0.22));
+}
+
+.login-title {
+  margin-top: 32rpx;
+  color: #312522;
+  font-size: 48rpx;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.login-subtitle {
+  margin-top: 16rpx;
+  color: #8d756b;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.login-button {
+  width: 420rpx;
+  margin-top: 72rpx;
+  color: #fff;
+}
+
+.login-button[disabled],
+.login-button.is-loading {
+  color: #fff;
+  opacity: 0.92;
+}
+
+.login-button-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  color: #fff;
+}
+
+.login-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: loginSpin 760ms linear infinite;
+}
+
+@keyframes loginSpin {
+  to { transform: rotate(360deg); }
+}

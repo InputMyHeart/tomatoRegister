@@ -23,12 +23,42 @@ button::after {
   border: none;
 }
 
+/* Layout convention:
+ * custom-navbar is the fixed flex header.
+ * Put scrollable content in page-scroll > page-content.
+ * Use tabbar-page for native tabbar pages, plain-page for non-tabbar pages.
+ */
 .page {
+  box-sizing: border-box;
+  height: 100vh;
   min-height: 100vh;
-  padding: 32rpx 28rpx 56rpx;
+  padding: 0 28rpx;
   background:
     radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
     linear-gradient(180deg, #ffe1d6 0%, #fff1ea 260rpx, #fff7f2 520rpx, #fffaf7 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabbar-page,
+.plain-page {
+  padding-bottom: 0;
+}
+
+.page-scroll {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: hidden;
+}
+
+.page-content {
+  width: 100%;
+  min-height: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .card {

@@ -1,0 +1,83 @@
+<view class="page ledger-settings-page">
+  <custom-navbar title="账本设置" showBack="{{true}}"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view wx:if="{{loading}}" class="settings-card card fade-up">
+        <view class="loading-line wide"></view>
+        <view class="loading-line"></view>
+        <view class="loading-line short"></view>
+      </view>
+
+      <view wx:elif="{{!ledgers.length}}" class="settings-card card empty-card fade-up">
+        <empty-state text="还没有账本"></empty-state>
+      </view>
+
+      <view wx:else class="ledger-list fade-up">
+        <view wx:for="{{ledgers}}" wx:key="id" class="ledger-card card {{item.isCurrent ? 'is-current' : ''}} {{item.id === focusLedgerId ? 'is-focus' : ''}}">
+          <view class="ledger-card-head">
+            <view class="ledger-name-wrap">
+              <view class="ledger-name">{{item.displayName}}</view>
+              <view wx:if="{{item.isCurrent}}" class="current-pill">当前</view>
+            </view>
+          </view>
+
+          <view class="ledger-tags">
+            <text class="ledger-tag type-tag {{item.typeClass}}">{{item.typeText}}</text>
+            <text class="ledger-tag role-tag {{item.roleClass}}">{{item.roleText}}</text>
+          </view>
+
+          <view class="ledger-remark {{item.hasRemark ? '' : 'is-empty'}}">{{item.remarkText}}</view>
+
+          <view class="ledger-meta">
+            <text>成员 {{item.memberCount}}</text>
+            <text>访客 {{item.visitorCount}}</text>
+          </view>
+
+          <view wx:if="{{item.isOwner}}" class="ledger-actions">
+            <view class="ledger-action action-edit" data-id="{{item.id}}" bindtap="editLedger">
+              <ri-icon name="edit-line" size="24" color="#6f625d"></ri-icon>
+              <text>编辑</text>
+            </view>
+            <view class="ledger-action action-invite" data-id="{{item.id}}" bindtap="inviteLedger">
+              <ri-icon name="group-line" size="24" color="#c85d4a"></ri-icon>
+              <text>邀请</text>
+            </view>
+            <view class="ledger-action action-member" data-id="{{item.id}}" bindtap="manageMembers">
+              <ri-icon name="team-line" size="24" color="#58736f"></ri-icon>
+              <text>成员</text>
+            </view>
+            <view class="ledger-action action-delete" data-id="{{item.id}}" bindtap="deleteLedger">
+              <ri-icon name="delete-bin-line" size="24" color="#c55249"></ri-icon>
+              <text>删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{shareSheetVisible}}" class="sheet-mask" bindtap="closeShareSheet">
+    <view class="share-sheet" catchtap="stopSheetTap">
+      <view class="sheet-drag"></view>
+      <view class="sheet-head">
+        <view class="sheet-title-group">
+          <view class="sheet-title">选择邀请方式</view>
+          <view class="sheet-ledger">{{shareLedger.displayName}}</view>
+        </view>
+        <view class="sheet-close" bindtap="closeShareSheet">×</view>
+      </view>
+
+      <view class="share-options {{shareOptions.length === 1 ? 'single' : ''}}">
+        <button wx:for="{{shareOptions}}" wx:key="mode" class="share-option {{item.mode}}" open-type="share" data-mode="{{item.mode}}" bindtap="selectShareMode">
+          <view class="share-option-icon {{item.mode}}">
+            <ri-icon name="{{item.icon}}" size="30" color="{{item.mode === 'member' ? '#58736f' : '#c85d4a'}}"></ri-icon>
+          </view>
+          <view class="share-option-content">
+            <view class="share-option-title">{{item.title}}</view>
+            <view class="share-option-desc">{{item.desc}}</view>
+          </view>
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

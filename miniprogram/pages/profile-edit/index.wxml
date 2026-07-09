@@ -1,5 +1,7 @@
-<view class="page profile-edit-page">
+<view class="page plain-page profile-edit-page">
   <custom-navbar title="编辑资料" showBack="{{true}}"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
 
   <view class="edit-card card fade-up">
     <view class="form-group avatar-row">
@@ -27,4 +29,6 @@
   </view>
 
   <button class="save-button fade-up" loading="{{saving}}" bindtap="saveProfile">保存资料</button>
+    </view>
+  </scroll-view>
 </view>

@@ -1,5 +1,7 @@
-<view class="page records-page">
+<view class="page tabbar-page records-page">
   <custom-navbar title="明细"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
 
   <view class="records-toolbar fade-up">
     <view class="ledger-chip" bindtap="switchLedger">
@@ -59,6 +61,9 @@
     <empty-state show="{{true}}" text="暂无数据"></empty-state>
   </view>
 
+    </view>
+  </scroll-view>
+
   <view class="sheet-mask" wx:if="{{detailVisible}}" bindtap="closeDetail"></view>
   <view class="detail-sheet {{detailVisible ? 'show' : ''}}" wx:if="{{selectedRecord}}">
     <view class="sheet-handle"></view>
@@ -82,5 +87,5 @@
     </view>
   </view>
 
-  <floating-record-button readonly="{{readonly}}"></floating-record-button>
+  <custom-tabbar active="records" readonly="{{readonly}}"></custom-tabbar>
 </view>

@@ -5,10 +5,12 @@
       <view wx:if="{{showBack}}" class="back-button" bindtap="handleBack">
         <ri-icon name="arrow-left-s-line" size="42" color="#f0442f"></ri-icon>
       </view>
-      <image wx:else class="brand-mark" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
-      <text wx:if="{{!showBack}}" class="brand-name">番茄记账</text>
+      <block wx:elif="{{!hideBrand}}">
+        <image class="brand-mark" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+        <text class="brand-name">番茄记一笔</text>
+      </block>
     </view>
-    <view class="nav-center">{{title}}</view>
+    <view wx:if="{{!hideTitle}}" class="nav-center">{{title}}</view>
     <view class="nav-right"></view>
   </view>
 </view>

@@ -16,9 +16,8 @@ Page({
 
   onLoad() {
     const user = app.globalData.user;
-    if (!app.globalData.loggedIn || !user) {
-      wx.showToast({ title: "请先登录", icon: "none" });
-      wx.navigateBack();
+    if (!user) {
+      wx.reLaunch({ url: "/pages/login/index" });
       return;
     }
 

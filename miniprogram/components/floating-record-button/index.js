@@ -26,7 +26,7 @@ Component({
       if (this.data.defaultType) params.push(`type=${this.data.defaultType}`);
       if (this.data.defaultCategory) params.push(`category=${this.data.defaultCategory}`);
       const query = params.length ? `?${params.join("&")}` : "";
-      wx.navigateTo({ url: `/pages/record-edit/index${query}` });
+      wx.navigateTo({ url: `/pages/record-category/index${query}` });
     },
   },
 });

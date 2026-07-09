@@ -1,0 +1,30 @@
+<view class="page join-result-page">
+  <custom-navbar title="加入账本" showBack="{{false}}"></custom-navbar>
+  <view class="join-result-content">
+    <view class="join-result-main {{status === 'notice' ? 'is-notice' : ''}}">
+      <view wx:if="{{status !== 'notice'}}" class="result-icon {{status}}">
+        <ri-icon wx:if="{{status === 'success'}}" name="check-line" size="92" color="#ffffff"></ri-icon>
+        <text wx:elif="{{status === 'error'}}" class="result-symbol">!</text>
+        <text wx:else class="result-symbol small">...</text>
+      </view>
+
+      <view class="result-title {{status === 'notice' ? 'notice-title' : ''}}">{{message}}</view>
+      <view wx:if="{{status === 'success'}}" class="result-ledger">{{ledgerName}}</view>
+      <view wx:if="{{status !== 'notice'}}" class="result-desc">
+        <block wx:if="{{status === 'success'}}">你已成为{{roleText}}，现在开始记录你的账单吧</block>
+        <block wx:elif="{{status === 'login'}}">为了保护账本数据，需要先登录后再加入邀请。</block>
+        <block wx:elif="{{status === 'joining' || status === 'checking'}}">正在为你处理邀请，请稍候。</block>
+        <block wx:else>邀请暂时无法完成，可以重试或返回首页。</block>
+      </view>
+    </view>
+
+    <view class="join-actions">
+      <button wx:if="{{status === 'login'}}" class="primary-action" loading="{{busy}}" bindtap="loginAndJoin">{{actionText}}</button>
+      <button wx:elif="{{status === 'success'}}" class="primary-action" bindtap="viewLedger"><view wx:if="{{activating}}" class="button-spinner"></view><text wx:if="{{activating}}">正在打开</text><text wx:else>查看账本</text></button>
+      <button wx:elif="{{status === 'error'}}" class="primary-action" loading="{{busy}}" bindtap="retry">重试</button>
+      <button wx:elif="{{status === 'notice' && ledgerId}}" class="primary-action" bindtap="viewLedger"><view wx:if="{{activating}}" class="button-spinner"></view><text wx:if="{{activating}}">正在打开</text><text wx:else>查看账本</text></button>
+      <button wx:elif="{{status !== 'notice'}}" class="primary-action is-disabled">处理中</button>
+      <button wx:if="{{status === 'success' || status === 'error' || status === 'notice'}}" class="secondary-action" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+</view>

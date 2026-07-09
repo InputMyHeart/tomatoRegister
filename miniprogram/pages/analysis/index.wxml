@@ -1,5 +1,7 @@
-<view class="page analysis-page">
+<view class="page tabbar-page analysis-page">
   <custom-navbar title="分析"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
   <view class="page-head fade-up">
     <view class="eyebrow">收支分析</view>
     <view class="title">本月花得清清楚楚</view>
@@ -71,4 +73,8 @@
       </view>
     </view>
   </view>
+    </view>
+  </scroll-view>
+
+  <custom-tabbar active="analysis" readonly="{{readonly}}"></custom-tabbar>
 </view>

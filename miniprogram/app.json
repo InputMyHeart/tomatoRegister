@@ -1,59 +1,32 @@
 {
   "pages": [
+    "pages/login/index",
     "pages/index/index",
     "pages/records/index",
     "pages/analysis/index",
     "pages/profile/index",
     "pages/profile-edit/index",
+    "pages/ledger-create/index",
+    "pages/ledger-settings/index",
+    "pages/ledger-join-result/index",
+    "pages/record-category/index",
     "pages/record-edit/index"
   ],
   "window": {
     "backgroundColor": "#FFF7F2",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#FFF7F2",
-    "navigationBarTitleText": "番茄记账",
+    "navigationBarTitleText": "番茄记一笔",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
-  },
-  "tabBar": {
-    "color": "#B39A90",
-    "selectedColor": "#F0442F",
-    "backgroundColor": "#FFFDFC",
-    "borderStyle": "white",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "images/tabbar/home.png",
-        "selectedIconPath": "images/tabbar/home-active.png"
-      },
-      {
-        "pagePath": "pages/records/index",
-        "text": "明细",
-        "iconPath": "images/tabbar/records.png",
-        "selectedIconPath": "images/tabbar/records-active.png"
-      },
-      {
-        "pagePath": "pages/analysis/index",
-        "text": "分析",
-        "iconPath": "images/tabbar/analysis.png",
-        "selectedIconPath": "images/tabbar/analysis-active.png"
-      },
-      {
-        "pagePath": "pages/profile/index",
-        "text": "我的",
-        "iconPath": "images/tabbar/profile.png",
-        "selectedIconPath": "images/tabbar/profile-active.png"
-      }
-    ]
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",
   "usingComponents": {
-    "floating-record-button": "/components/floating-record-button/index",
     "empty-state": "/components/empty-state/index",
     "custom-navbar": "/components/custom-navbar/index",
-    "ri-icon": "/components/ri-icon/index"
+    "ri-icon": "/components/ri-icon/index",
+    "custom-tabbar": "/components/custom-tabbar/index"
   }
 }

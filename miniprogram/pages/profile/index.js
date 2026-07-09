@@ -1,16 +1,25 @@
 const app = getApp();
 
+function normalizeCreatedAt(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (value.$date) return new Date(value.$date);
+  if (value.seconds) return new Date(value.seconds * 1000);
+  return new Date(value);
+}
+
 function getUsageDays(user) {
   if (!user || !user.createdAt) return 1;
-  const createdAt = user.createdAt instanceof Date ? user.createdAt : new Date(user.createdAt);
-  if (Number.isNaN(createdAt.getTime())) return 1;
-  const diff = Date.now() - createdAt.getTime();
-  return Math.max(1, Math.floor(diff / 86400000) + 1);
+  const createdAt = normalizeCreatedAt(user.createdAt);
+  if (!createdAt || Number.isNaN(createdAt.getTime())) return 1;
+  const createdDay = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.max(1, Math.floor((today - createdDay) / 86400000) + 1);
 }
 
 Page({
   data: {
-    loggedIn: false,
     userName: "番茄用户",
     userAvatar: "/images/brand/tomato-ledger-logo-256-transparent.png",
     userGender: "喵星人",
@@ -18,6 +27,7 @@ Page({
     recordCount: 0,
     ledgerCount: 0,
     monthStartDay: 1,
+    readonly: false,
     currentLedger: {
       id: "",
       name: "我家账本",
@@ -28,31 +38,24 @@ Page({
 
   onShow() {
     this.syncAuthState();
+    this.refreshHeroData();
   },
 
   syncAuthState() {
-    const { loggedIn, user, currentLedger, stats } = app.globalData;
-    if (!loggedIn || !user) {
-      this.setData({
-        loggedIn: false,
-        userName: "微信登录",
-        userAvatar: "/images/brand/tomato-ledger-logo-256-transparent.png",
-        userGender: "喵星人",
-        usageDays: 1,
-        recordCount: 0,
-        ledgerCount: 0,
-      });
+    const { user, currentLedger, stats } = app.globalData;
+    if (!user) {
+      wx.reLaunch({ url: "/pages/login/index" });
       return;
     }
 
     this.setData({
-      loggedIn: true,
       userName: user.nickName || "番茄用户",
       userAvatar: user.avatarUrl || "/images/brand/tomato-ledger-logo-256-transparent.png",
       userGender: user.gender || "喵星人",
       usageDays: getUsageDays(user),
       recordCount: Number((stats && stats.recordCount) || 0),
       ledgerCount: Number((stats && stats.ledgerCount) || 0),
+      readonly: Boolean(currentLedger && currentLedger.readonly),
       currentLedger: {
         id: (currentLedger && currentLedger._id) || user.currentLedgerId || "",
         name: (currentLedger && currentLedger.name) || "我家账本",
@@ -62,30 +65,32 @@ Page({
     });
   },
 
-  handleIdentityTap() {
-    if (this.data.loggedIn) {
-      this.editProfile();
-      return;
-    }
-    this.login();
-  },
-
-  async login() {
-    if (this.data.loggedIn) return;
-    wx.showLoading({ title: "登录中" });
+  async refreshHeroData() {
+    if (this.refreshingHero || !app.globalData.loggedIn) return;
+    this.refreshingHero = true;
     try {
       await app.loginWithWechat();
       this.syncAuthState();
-      wx.showToast({ title: "登录成功", icon: "success" });
     } catch (error) {
-      wx.showToast({ title: error.message || "登录失败", icon: "none" });
+      console.error("refresh profile hero failed", error);
     } finally {
-      wx.hideLoading();
+      this.refreshingHero = false;
     }
   },
 
+
+  async callApi(action, data = {}) {
+    const res = await wx.cloud.callFunction({
+      name: "tomatoLedger",
+      data: { action, data },
+    });
+    return res.result || {};
+  },
+  handleIdentityTap() {
+    this.editProfile();
+  },
+
   editProfile() {
-    if (!this.data.loggedIn) return;
     wx.navigateTo({ url: "/pages/profile-edit/index" });
   },
 
@@ -98,14 +103,14 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         app.logout();
-        this.syncAuthState();
+        wx.reLaunch({ url: "/pages/login/index" });
         wx.showToast({ title: "已退出", icon: "none" });
       },
     });
   },
 
   createLedger() {
-    wx.showToast({ title: "创建账本入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/ledger-create/index" });
   },
 
   joinLedger() {
@@ -116,12 +121,16 @@ Page({
     });
   },
 
-  ledgerConfig() {
-    wx.showToast({ title: "账本配置入口已预留", icon: "none" });
+  ledgerSettings() {
+    wx.navigateTo({ url: "/pages/ledger-settings/index" });
   },
 
   manageCategories() {
     wx.showToast({ title: "分类管理入口已预留", icon: "none" });
+  },
+
+  manageQuickAmounts() {
+    wx.showToast({ title: "快捷金额入口已预留", icon: "none" });
   },
 
   manageAccounts() {
@@ -148,6 +157,40 @@ Page({
     wx.showToast({ title: "意见反馈入口已预留", icon: "none" });
   },
 
+
+  resetDatabase() {
+    wx.showModal({
+      title: "重置数据库",
+      content: "此操作会清空所有账本、分类、记录和邀请数据，用户信息会保留。确定继续吗？",
+      confirmText: "清空",
+      confirmColor: "#c55249",
+      success: (res) => {
+        if (!res.confirm) return;
+        this.confirmResetDatabase();
+      },
+    });
+  },
+
+  async confirmResetDatabase() {
+    wx.showLoading({ title: "清空中" });
+    try {
+      const result = await this.callApi("resetDatabase", { confirm: "RESET_TOMATO_LEDGER_DATABASE" });
+      if (!result || !result.success) {
+        wx.showToast({ title: (result && result.message) || "重置失败", icon: "none" });
+        return;
+      }
+      app.globalData.currentLedger = null;
+      app.globalData.stats = null;
+      if (app.globalData.user) app.globalData.user.currentLedgerId = "";
+      app.persistAuthState();
+      wx.reLaunch({ url: "/pages/index/index" });
+      wx.showToast({ title: "已清空", icon: "success" });
+    } catch (error) {
+      wx.showToast({ title: error.message || "重置失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
+    }
+  },
   viewChangelog() {
     wx.showToast({ title: "更新日志入口已预留", icon: "none" });
   },

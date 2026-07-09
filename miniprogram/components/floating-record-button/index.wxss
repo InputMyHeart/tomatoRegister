@@ -1,7 +1,7 @@
 .fab {
   position: fixed;
   right: 32rpx;
-  bottom: calc(132rpx + env(safe-area-inset-bottom));
+  bottom: calc(188rpx + env(safe-area-inset-bottom));
   z-index: 80;
   height: 92rpx;
   min-width: 190rpx;

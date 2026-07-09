@@ -1,20 +1,20 @@
-<view class="page profile-page">
+<view class="page tabbar-page profile-page">
   <custom-navbar title="我的"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
 
   <view class="identity-card card fade-up" bindtap="handleIdentityTap">
-    <image class="identity-logo" wx:if="{{!loggedIn}}" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
-    <image class="avatar-img" wx:else src="{{userAvatar}}" mode="aspectFill"></image>
+    <image class="avatar-img" src="{{userAvatar}}" mode="aspectFill"></image>
     <view class="identity-main">
-      <view class="user-name">{{loggedIn ? userName : '微信登录'}}</view>
-      <view class="user-tip">{{loggedIn ? userGender : '登录后同步家庭账本'}}</view>
+      <view class="user-name">{{userName}}</view>
+      <view class="user-tip">{{userGender}}</view>
     </view>
-    <view class="login-pill" wx:if="{{!loggedIn}}">登录</view>
-    <view class="profile-setting" wx:else>
+    <view class="profile-setting">
       <ri-icon name="settings-3-line" size="30" color="#f0442f"></ri-icon>
     </view>
   </view>
 
-  <view class="stats-card card fade-up {{loggedIn ? '' : 'locked'}}">
+  <view class="stats-card card fade-up">
     <view class="stat-item">
       <view class="stat-value">{{usageDays}}</view>
       <view class="stat-label">使用天数</view>
@@ -27,7 +27,6 @@
       <view class="stat-value">{{ledgerCount}}</view>
       <view class="stat-label">账本总数</view>
     </view>
-    <view class="stats-lock" wx:if="{{!loggedIn}}">登录后查看</view>
   </view>
 
   <view class="section-block fade-up">
@@ -49,11 +48,11 @@
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
-      <view class="menu-row last" bindtap="ledgerConfig">
+      <view class="menu-row last" bindtap="ledgerSettings">
         <view class="menu-icon"><ri-icon name="settings-3-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
-          <view class="menu-title">账本配置</view>
-          <view class="menu-tip">管理账本信息、成员邀请与查看权限</view>
+          <view class="menu-title">账本设置</view>
+          <view class="menu-tip">管理账本信息、成员邀请与访问权限</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
@@ -68,6 +67,14 @@
         <view class="menu-main">
           <view class="menu-title">分类管理</view>
           <view class="menu-tip">默认分类可直接使用，也支持自定义新增</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+      </view>
+      <view class="menu-row" bindtap="manageQuickAmounts">
+        <view class="menu-icon"><ri-icon name="wallet-3-line" size="28" color="#f0442f"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title">快捷金额</view>
+          <view class="menu-tip">设置常用金额，记一笔时更快选择</view>
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
@@ -125,7 +132,7 @@
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
-      <view class="menu-row last" bindtap="viewChangelog">
+      <view class="menu-row" bindtap="viewChangelog">
         <view class="menu-icon"><ri-icon name="history-line" size="28" color="#f0442f"></ri-icon></view>
         <view class="menu-main">
           <view class="menu-title">更新日志</view>
@@ -133,8 +140,20 @@
         </view>
         <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
       </view>
+      <view class="menu-row last danger-row" bindtap="resetDatabase">
+        <view class="menu-icon danger-icon"><ri-icon name="delete-bin-line" size="28" color="#c55249"></ri-icon></view>
+        <view class="menu-main">
+          <view class="menu-title danger-title">重置数据库</view>
+          <view class="menu-tip">清空所有账本、分类、记录和邀请数据</view>
+        </view>
+        <view class="menu-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#c55249"></ri-icon></view>
+      </view>
     </view>
   </view>
 
-  <button class="logout-button fade-up" wx:if="{{loggedIn}}" bindtap="logout">退出账号</button>
+  <button class="logout-button fade-up" bindtap="logout">退出账号</button>
+    </view>
+  </scroll-view>
+
+  <custom-tabbar active="profile" readonly="{{readonly}}"></custom-tabbar>
 </view>

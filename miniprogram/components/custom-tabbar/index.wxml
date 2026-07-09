@@ -1,0 +1,17 @@
+<view class="custom-tabbar">
+  <view class="tabbar-shell">
+    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{leftTabs}}" wx:key="key" data-key="{{item.key}}" data-path="{{item.pagePath}}" bindtap="switchTab">
+      <view class="tab-icon"><ri-icon name="{{active === item.key ? item.activeIcon : item.icon}}" size="36" color="{{active === item.key ? '#f0442f' : '#b39a90'}}"></ri-icon></view>
+      <text>{{item.text}}</text>
+    </view>
+
+    <view class="record-hub {{resolvedRecordDisabledReason ? 'readonly' : ''}}" bindtap="handleRecord">
+      <view class="hub-icon"><ri-icon name="add-line" size="44" color="#ffffff"></ri-icon></view>
+    </view>
+
+    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{rightTabs}}" wx:key="key" data-key="{{item.key}}" data-path="{{item.pagePath}}" bindtap="switchTab">
+      <view class="tab-icon"><ri-icon name="{{active === item.key ? item.activeIcon : item.icon}}" size="36" color="{{active === item.key ? '#f0442f' : '#b39a90'}}"></ri-icon></view>
+      <text>{{item.text}}</text>
+    </view>
+  </view>
+</view>

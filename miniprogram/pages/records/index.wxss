@@ -1,7 +1,3 @@
-.records-page {
-  padding-bottom: 168rpx;
-}
-
 .records-toolbar {
   display: flex;
   align-items: center;

@@ -8,11 +8,20 @@ Component({
       type: Boolean,
       value: false,
     },
+    hideBrand: {
+      type: Boolean,
+      value: false,
+    },
+    hideTitle: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   data: {
     statusBarHeight: 24,
     navHeight: 48,
+    navbarHeight: 72,
   },
 
   lifetimes: {
@@ -21,7 +30,7 @@ Component({
       const menu = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
       const statusBarHeight = info.statusBarHeight || 24;
       const navHeight = menu ? menu.bottom + menu.top - statusBarHeight * 2 : 48;
-      this.setData({ statusBarHeight, navHeight });
+      this.setData({ statusBarHeight, navHeight, navbarHeight: statusBarHeight + navHeight });
     },
   },
 
@@ -32,7 +41,7 @@ Component({
         wx.navigateBack();
         return;
       }
-      wx.switchTab({ url: "/pages/index/index" });
+      wx.redirectTo({ url: "/pages/index/index" });
     },
   },
 });

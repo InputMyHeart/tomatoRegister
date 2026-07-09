@@ -1,89 +1,169 @@
-<view class="page home-page">
-  <custom-navbar title="首页"></custom-navbar>
-  <view class="hero fade-up">
-    <view>
-      <view class="ledger-switch">
-        <text>{{ledgerName}}</text>
-        <ri-icon name="arrow-down-s-line" size="38" color="#f0442f"></ri-icon>
+<view class="page tabbar-page home-page">
+  <custom-navbar title=""></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view wx:if="{{isLoading || showLedgerInfo}}" class="hero fade-up">
+        <block wx:if="{{isLoading}}">
+          <view class="hero-main hero-skeleton-main">
+            <view class="ledger-info-skeleton-row">
+              <view class="ledger-title-skeleton"></view>
+              <view class="ledger-tag-skeleton"></view>
+              <view class="ledger-arrow-skeleton"></view>
+            </view>
+            <view class="ledger-month-skeleton"></view>
+          </view>
+          <view class="ledger-logo-skeleton"></view>
+        </block>
+        <block wx:else>
+          <view class="hero-main">
+            <view class="ledger-switch" bindtap="switchLedger">
+              <text class="ledger-title">{{ledgerName}}</text>
+              <view class="ledger-type-tag">{{ledgerTypeText}}</view>
+              <ri-icon name="arrow-down-s-line" size="38" color="#f0442f"></ri-icon>
+            </view>
+            <view class="month-line">{{monthLabel}}</view>
+          </view>
+          <view class="readonly-pill" wx:if="{{readonly}}">只读</view>
+          <image class="hero-logo soft-pop" wx:else src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+        </block>
       </view>
-      <view class="month-line">{{monthLabel}}</view>
+
+      <view wx:if="{{isLoading}}" class="loading-card card fade-up">
+        <view class="skeleton-title"></view>
+        <view class="skeleton-line wide"></view>
+        <view class="skeleton-grid">
+          <view class="skeleton-block"></view>
+          <view class="skeleton-block"></view>
+          <view class="skeleton-block"></view>
+        </view>
+        <view class="skeleton-line"></view>
+        <view class="skeleton-line short"></view>
+      </view>
+
+      <view wx:elif="{{isNoLedger}}" class="state-card card fade-up">
+        <empty-state text="还没有账本"></empty-state>
+        <view class="state-copy">创建自己的第一个账本，开始记录每一笔收入和支出。</view>
+        <view class="primary-action" bindtap="goCreateLedger">创建账本</view>
+      </view>
+
+      <view wx:elif="{{isEmpty}}" class="state-card card fade-up">
+        <empty-state text="本月暂无记账数据"></empty-state>
+        <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
+      </view>
+
+      <view wx:elif="{{isError}}" class="state-card card fade-up">
+        <empty-state text="数据加载失败，请稍后重试"></empty-state>
+        <view class="primary-action" bindtap="bootstrap">重新加载</view>
+      </view>
+
+      <block wx:else>
+        <view class="summary-card card fade-up">
+          <view class="summary-glow"></view>
+          <view class="summary-head">
+            <view>
+              <view class="section-kicker">本月概览</view>
+              <view class="summary-title">{{familyMood}}</view>
+            </view>
+            <view class="tomato-badge">{{ledgerTypeText}}账本</view>
+          </view>
+          <view class="overview-grid">
+            <view class="overview-item">
+              <view class="overview-label">收入</view>
+              <view class="overview-value income">¥{{monthIncome}}</view>
+            </view>
+            <view class="overview-item">
+              <view class="overview-label">支出</view>
+              <view class="overview-value expense">¥{{monthExpense}}</view>
+            </view>
+            <view class="overview-item">
+              <view class="overview-label">结余</view>
+              <view class="overview-value">¥{{balance}}</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="mini-stats fade-up">
+          <view class="mini-stat">
+            <view class="mini-icon"><ri-icon name="file-list-3-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-value">{{recordCount}}</view>
+            <view class="mini-label">本月记录</view>
+          </view>
+          <view class="mini-stat">
+            <view class="mini-icon"><ri-icon name="restaurant-2-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-value">{{topCategory}}</view>
+            <view class="mini-label">支出最大</view>
+          </view>
+          <view class="mini-stat">
+            <view class="mini-icon"><ri-icon name="funds-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-value">{{budgetRate}}%</view>
+            <view class="mini-label">预算进度</view>
+          </view>
+        </view>
+
+        <view class="budget-card card fade-up">
+          <view class="section-head">
+            <view>
+              <view class="section-title">月预算</view>
+              <view class="section-tip">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
+            </view>
+            <view class="budget-left">剩 ¥{{budgetLeft}}</view>
+          </view>
+          <view class="progress-track">
+            <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
+          </view>
+        </view>
+
+        <view class="records-card card fade-up">
+          <view class="section-head">
+            <view class="section-title">最近记录</view>
+            <view class="section-link" bindtap="goRecords">全部</view>
+          </view>
+          <view class="record-item" wx:for="{{recentRecords}}" wx:key="id">
+            <view class="category-dot {{item.type}}">{{item.categoryText}}</view>
+            <view class="record-main">
+              <view class="record-title">{{item.noteText}}</view>
+              <view class="record-meta">{{item.date}} · {{item.memberName}} · {{item.categoryText}}</view>
+            </view>
+            <view class="record-amount {{item.type}}">
+              {{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}
+            </view>
+          </view>
+          <view class="record-limit-tip">—仅展示当月最近10笔—</view>
+        </view>
+      </block>
     </view>
-    <view class="readonly-pill" wx:if="{{readonly}}">只读</view>
-    <image class="hero-logo soft-pop" wx:else src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+  </scroll-view>
+
+  <view wx:if="{{isLedgerSwitcherVisible}}" class="ledger-switcher-mask" catchtap="closeLedgerSwitcher">
+    <view class="ledger-switcher-panel" catchtap="noop">
+      <view class="ledger-switcher-handle"></view>
+      <view class="ledger-switcher-head">
+        <view>
+          <view class="ledger-switcher-title">切换账本</view>
+          <view class="ledger-switcher-subtitle">点击账本即可切换</view>
+        </view>
+        <view class="ledger-switcher-close" bindtap="closeLedgerSwitcher">×</view>
+      </view>
+      <scroll-view class="ledger-option-list" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+        <view wx:for="{{ledgers}}" wx:key="id" class="ledger-option {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" bindtap="chooseLedger">
+          <view class="ledger-option-main">
+            <view class="ledger-option-name-row"><text class="ledger-option-name">{{item.displayName || item.name}}</text><text wx:if="{{item.isCurrent}}" class="ledger-current-mark">当前</text></view>
+            <view class="ledger-option-tags">
+              <text class="ledger-option-tag type-tag {{item.typeClass}}">{{item.typeTag}}</text>
+              <text class="ledger-option-tag role-tag {{item.roleClass}}">{{item.roleTag}}</text>
+            </view>
+          </view>
+          <view class="ledger-option-actions">
+            <view wx:if="{{item.canManage}}" class="ledger-settings-button {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" catchtap="goLedgerSettings">
+              <ri-icon name="settings-3-line" size="22" color="#f0442f"></ri-icon>
+              <text>设置</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="ledger-create-entry" bindtap="goCreateLedger">新建账本</view>
+    </view>
   </view>
 
-  <view class="summary-card card fade-up">
-    <view class="summary-glow"></view>
-    <view class="summary-head">
-      <view>
-        <view class="section-kicker">本月概览</view>
-        <view class="summary-title">{{familyMood}}</view>
-      </view>
-      <view class="tomato-badge">番茄账本</view>
-    </view>
-    <view class="overview-grid">
-      <view class="overview-item">
-        <view class="overview-label">收入</view>
-        <view class="overview-value income">¥{{monthIncome}}</view>
-      </view>
-      <view class="overview-item">
-        <view class="overview-label">支出</view>
-        <view class="overview-value expense">¥{{monthExpense}}</view>
-      </view>
-      <view class="overview-item">
-        <view class="overview-label">结余</view>
-        <view class="overview-value">¥{{balance}}</view>
-      </view>
-    </view>
-  </view>
-
-  <view class="mini-stats fade-up">
-    <view class="mini-stat">
-      <view class="mini-icon"><ri-icon name="file-list-3-line" size="24" color="#f0442f"></ri-icon></view>
-      <view class="mini-value">{{recordCount}}</view>
-      <view class="mini-label">本月记录</view>
-    </view>
-    <view class="mini-stat">
-      <view class="mini-icon"><ri-icon name="restaurant-2-line" size="24" color="#f0442f"></ri-icon></view>
-      <view class="mini-value">{{topCategory}}</view>
-      <view class="mini-label">支出最大</view>
-    </view>
-    <view class="mini-stat">
-      <view class="mini-icon"><ri-icon name="funds-line" size="24" color="#f0442f"></ri-icon></view>
-      <view class="mini-value">{{budgetRate}}%</view>
-      <view class="mini-label">预算进度</view>
-    </view>
-  </view>
-
-  <view class="budget-card card fade-up">
-    <view class="section-head">
-      <view>
-        <view class="section-title">月预算</view>
-        <view class="section-tip">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
-      </view>
-      <view class="budget-left">剩 ¥{{budgetLeft}}</view>
-    </view>
-    <view class="progress-track">
-      <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
-    </view>
-  </view>
-
-  <view class="records-card card fade-up">
-    <view class="section-head">
-      <view class="section-title">最近记录</view>
-      <view class="section-link" bindtap="goRecords">全部</view>
-    </view>
-    <view class="record-item" wx:for="{{recentRecords}}" wx:key="id">
-      <view class="category-dot {{item.type}}">{{item.categoryName}}</view>
-      <view class="record-main">
-        <view class="record-title">{{item.note}}</view>
-        <view class="record-meta">{{item.date}} · {{item.memberName}} · {{item.categoryName}}</view>
-      </view>
-      <view class="record-amount {{item.type}}">
-        {{item.type === 'income' ? '+' : '-'}}¥{{item.amount}}
-      </view>
-    </view>
-  </view>
-
-  <floating-record-button readonly="{{readonly}}"></floating-record-button>
+  <custom-tabbar active="index" readonly="{{readonly}}" record-disabled-reason="{{isNoLedger ? 'noLedger' : readonly ? 'readonly' : !canRecord ? 'unavailable' : ''}}"></custom-tabbar>
 </view>

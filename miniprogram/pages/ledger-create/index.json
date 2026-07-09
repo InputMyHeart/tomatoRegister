@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "创建账本",
+  "usingComponents": {
+    "custom-navbar": "/components/custom-navbar/index",
+    "ri-icon": "/components/ri-icon/index"
+  }
+}

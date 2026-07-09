@@ -1,9 +1,8 @@
 .custom-navbar {
-  position: relative;
-  z-index: 20;
-  width: calc(100% + 56rpx);
-  margin: -32rpx -28rpx 22rpx;
-  padding: 0 28rpx 8rpx;
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  margin-bottom: 22rpx;
   background: transparent;
 }
 
@@ -43,7 +42,7 @@
 }
 
 .back-button {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.72);
   color: #f0442f;
   font-size: 44rpx;
   font-weight: 900;
@@ -61,7 +60,7 @@
 .nav-center {
   position: absolute;
   left: 50%;
-  max-width: 230rpx;
+  max-width: 250rpx;
   transform: translateX(-50%);
   color: #312522;
   font-size: 30rpx;
@@ -72,7 +71,6 @@
   text-overflow: ellipsis;
 }
 
-/* icon optical alignment */
 .back-button {
   box-sizing: border-box;
   padding-bottom: 5rpx;
@@ -80,7 +78,6 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* remix icon replacements */
 .back-button ri-icon {
   display: flex;
   align-items: center;
