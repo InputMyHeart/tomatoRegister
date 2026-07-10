@@ -63,7 +63,7 @@
               <view class="section-kicker">本月概览</view>
               <view class="summary-title">{{familyMood}}</view>
             </view>
-            <view class="tomato-badge">{{ledgerTypeText}}</view>
+            <view class="tomato-badge">{{roleText}}</view>
           </view>
           <view class="overview-grid">
             <view class="overview-item">

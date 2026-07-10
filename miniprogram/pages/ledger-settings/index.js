@@ -187,6 +187,17 @@ Page({
     wx.showToast({ title: "成员入口已预留", icon: "none" });
   },
 
+  createLedger() {
+    wx.navigateTo({ url: "/pages/ledger-create/index" });
+  },
+
+  joinLedger() {
+    wx.showModal({
+      title: "邀请码加入",
+      content: "第一版优先支持输入邀请码加入账本，同时保留微信分享卡片入口。",
+      showCancel: false,
+    });
+  },
   deleteLedger(event) {
     const ledger = this.findLedger(event);
     if (!ledger || !ledger.isOwner) {

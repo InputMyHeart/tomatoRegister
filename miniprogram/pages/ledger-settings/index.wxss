@@ -1,5 +1,5 @@
 .ledger-settings-page .page-content {
-  padding-bottom: 48rpx;
+  padding-bottom: 160rpx;
 }
 
 .settings-card {
@@ -341,4 +341,40 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+.ledger-bottom-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 18rpx 30rpx calc(18rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  gap: 18rpx;
+  background: rgba(255, 250, 247, 0.94);
+  box-shadow: 0 -12rpx 30rpx rgba(104, 63, 47, 0.08);
+}
+
+.ledger-bottom-button {
+  flex: 1;
+  height: 82rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 900;
+  line-height: 82rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.ledger-bottom-button.secondary {
+  color: #f0442f;
+  background: #fffdfb;
+  border: 1rpx solid rgba(240, 68, 47, 0.18);
+}
+
+.ledger-bottom-button.primary {
+  color: #ffffff;
+  background: #f0442f;
+  box-shadow: 0 14rpx 28rpx rgba(240, 68, 47, 0.16);
 }

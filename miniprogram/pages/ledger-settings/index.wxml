@@ -56,6 +56,10 @@
     </view>
   </scroll-view>
 
+  <view class="ledger-bottom-actions">
+    <view class="ledger-bottom-button secondary" bindtap="createLedger">创建账本</view>
+    <view class="ledger-bottom-button primary" bindtap="joinLedger">加入账本</view>
+  </view>
   <view wx:if="{{shareSheetVisible}}" class="sheet-mask" bindtap="closeShareSheet">
     <view class="share-sheet" catchtap="stopSheetTap">
       <view class="sheet-drag"></view>
