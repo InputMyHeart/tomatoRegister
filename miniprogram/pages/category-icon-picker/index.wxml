@@ -1,0 +1,23 @@
+<view class="page plain-page icon-picker-page">
+  <custom-navbar title="选择图标" showBack="{{true}}"></custom-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view class="search-box">
+        <ri-icon name="search-line" size="30" color="#9a8278"></ri-icon>
+        <input value="{{keyword}}" placeholder="搜索图标，如：餐饮、交通、工资" confirm-type="search" bindinput="onKeywordInput" />
+      </view>
+      <view wx:if="{{visibleGroups.length}}" class="icon-groups">
+        <view wx:for="{{visibleGroups}}" wx:key="id" wx:for-item="group" class="icon-group">
+          <view class="group-title">{{group.label}}</view>
+          <view class="icon-grid">
+            <view wx:for="{{group.icons}}" wx:key="name" wx:for-item="item" class="icon-cell {{selected === item.name ? 'selected' : ''}}" data-icon="{{item.name}}" bindtap="select">
+              <ri-icon name="{{item.name}}" size="46" color="{{selected === item.name ? '#f0442f' : '#6f5a52'}}"></ri-icon>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-tip">没有匹配的图标</view>
+    </view>
+  </scroll-view>
+</view>

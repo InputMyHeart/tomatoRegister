@@ -1,7 +1,6 @@
 {
-  "usingComponents": {
-    "custom-navbar": "/components/custom-navbar/index",
-    "ri-icon": "/components/ri-icon/index",
-    "empty-state": "/components/empty-state/index"
-  }
+    "usingComponents":  {
+                            "custom-navbar":  "/components/custom-navbar/index",
+                            "empty-state":  "/components/empty-state/index"
+                        }
 }

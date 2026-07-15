@@ -10,8 +10,12 @@
     "pages/month-start-settings/index",
     "pages/ledger-create/index",
     "pages/ledger-settings/index",
+    "pages/ledger-detail-settings/index",
     "pages/ledger-join-result/index",
     "pages/record-category/index",
+    "pages/category-manage/index",
+    "pages/categoryOperation/index",
+    "pages/category-icon-picker/index",
     "pages/record-detail/index",
     "pages/record-edit/index"
   ],

@@ -103,7 +103,6 @@
 - `app.js`：统一登录态、资料更新、退出登录、本地缓存。
 - `custom-navbar`：区分 tabbar 页面和普通页面视觉。
 - `ri-icon`：本地 Remix Icon 字体组件。
-- `floating-record-button`：全局快速记一笔按钮。
 - `empty-state`：统一缺省组件。
 
 ## 下一步建议

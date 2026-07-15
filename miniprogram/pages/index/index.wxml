@@ -68,15 +68,15 @@
           <view class="overview-grid">
             <view class="overview-item">
               <view class="overview-label">收入</view>
-              <view class="overview-value income">¥{{monthIncome}}</view>
+              <view class="overview-value income">¥{{monthIncomeCompact}}</view>
             </view>
             <view class="overview-item">
               <view class="overview-label">支出</view>
-              <view class="overview-value expense">¥{{monthExpense}}</view>
+              <view class="overview-value expense">¥{{monthExpenseCompact}}</view>
             </view>
             <view class="overview-item">
               <view class="overview-label">结余</view>
-              <view class="overview-value">¥{{balance}}</view>
+              <view class="overview-value">¥{{balanceCompact}}</view>
             </view>
           </view>
         </view>
@@ -89,13 +89,13 @@
           </view>
           <view class="mini-stat">
             <view class="mini-icon"><ri-icon name="restaurant-2-line" size="24" color="#f0442f"></ri-icon></view>
-            <view class="mini-value">{{topCategory}}</view>
-            <view class="mini-label">支出最大</view>
+            <view class="mini-value">{{topExpenseCategory}}</view>
+            <view class="mini-label">支出最多</view>
           </view>
           <view class="mini-stat">
             <view class="mini-icon"><ri-icon name="funds-line" size="24" color="#f0442f"></ri-icon></view>
-            <view class="mini-value">{{budgetRate}}%</view>
-            <view class="mini-label">预算进度</view>
+            <view class="mini-value">¥{{largestExpenseCompact}}</view>
+            <view class="mini-label">支出最大</view>
           </view>
         </view>
 
@@ -105,11 +105,12 @@
               <view class="section-title">月预算</view>
               <view class="section-tip" wx:if="{{budgetEnabled}}">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
               <view class="section-tip" wx:else>未启用月预算</view>
+              <view wx:if="{{budgetEnabled}}" class="budget-status {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}">{{budgetRate >= 90 ? '预算预警，请控制支出' : budgetRate >= 70 ? '消费偏快，留意后续支出' : budgetRate >= 50 ? '已使用过半，注意节奏' : '预算充足，保持记录'}}</view>
             </view>
-            <view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view>
+            <view class="budget-right"><view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view><view class="budget-setting-link" bindtap="goBudgetSettings">设置</view></view>
           </view>
           <view class="progress-track" wx:if="{{budgetEnabled}}">
-            <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
+            <view class="progress-fill {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}" style="width: {{budgetRate}}%;"></view>
           </view>
         </view>
 
@@ -162,7 +163,7 @@
             </view>
           </view>
           <view class="ledger-option-actions">
-            <view wx:if="{{item.canManage}}" class="ledger-settings-button {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" catchtap="goLedgerSettings">
+            <view wx:if="{{item.id}}" class="ledger-settings-button {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" catchtap="goLedgerSettings">
               <ri-icon name="settings-3-line" size="22" color="#f0442f"></ri-icon>
               <text>设置</text>
             </view>

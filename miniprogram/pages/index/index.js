@@ -10,6 +10,12 @@ function money(value) {
   return num.toFixed(num % 1 === 0 ? 0 : 2);
 }
 
+function compactMoney(value) {
+  const num = Number(value || 0);
+  if (Math.abs(num) >= 100000) return `${(num / 10000).toFixed(1)}万`;
+  return money(num);
+}
+
 function getLedgerTypeText(type) {
   return type === "shared" ? "共享账本" : "个人账本";
 }
@@ -35,7 +41,7 @@ function getStatusFlags(status) {
 function normalizeRecord(item = {}) {
   const type = item.type === "income" ? "income" : "expense";
   const categoryText = item.categoryName || item.categoryLabel || "其他";
-  const selectedTimeText = [item.date, item.time].filter(Boolean).join(" ") || "未选择时间";
+  const selectedTimeText = item.date || "未选择日期";
   return {
     ...item,
     id: item.id || item._id || "",
@@ -63,14 +69,19 @@ function normalizeDashboard(data = {}) {
     roleText: data.roleText || getRoleText(data.role),
     readonly: Boolean(data.readonly),
     monthIncome: money(data.monthIncome),
+    monthIncomeCompact: compactMoney(data.monthIncome),
     monthExpense: money(data.monthExpense),
+    monthExpenseCompact: compactMoney(data.monthExpense),
     balance: money(data.balance),
+    balanceCompact: compactMoney(data.balance),
     budget: money(data.budget),
     budgetEnabled: Boolean(data.budgetEnabled),
     budgetLeft: money(data.budgetLeft),
     budgetRate: Number(data.budgetRate || 0),
     recordCount,
-    topCategory: data.topCategory || "暂无",
+    topExpenseCategory: data.topExpenseCategory || "暂无",
+    largestExpenseAmount: money(data.largestExpenseAmount),
+    largestExpenseCompact: compactMoney(data.largestExpenseAmount),
     familyMood: data.familyMood || "本月还没有记录",
     recentRecords,
     hasDashboardData: recordCount > 0 || recentRecords.length > 0,
@@ -91,15 +102,16 @@ Page({
     monthLabel: getMonthLabel(),
     roleText: "",
     readonly: false,
-    monthIncome: "0",
-    monthExpense: "0",
-    balance: "0",
+    monthIncome: "0", monthIncomeCompact: "0",
+    monthExpense: "0", monthExpenseCompact: "0",
+    balance: "0", balanceCompact: "0",
     budget: "0",
     budgetEnabled: false,
     budgetLeft: "0",
     budgetRate: 0,
     recordCount: 0,
-    topCategory: "暂无",
+    topExpenseCategory: "暂无",
+    largestExpenseAmount: "0", largestExpenseCompact: "0",
     familyMood: "本月还没有记录",
     recentRecords: [],
     hasDashboardData: false,
@@ -279,10 +291,14 @@ Page({
     }
   },
 
+  goBudgetSettings() {
+    wx.navigateTo({ url: "/pages/budget-settings/index" });
+  },
+
   goLedgerSettings(event) {
     const ledgerId = event.currentTarget.dataset.id || "";
     this.setData({ isLedgerSwitcherVisible: false });
-    wx.navigateTo({ url: `/pages/ledger-settings/index?ledgerId=${encodeURIComponent(ledgerId)}` });
+    wx.navigateTo({ url: `/pages/ledger-detail-settings/index?ledgerId=${encodeURIComponent(ledgerId)}` });
   },
   goCreateLedger() {
     this.setData({ isLedgerSwitcherVisible: false });
@@ -308,6 +324,6 @@ Page({
   goRecordDetail(event) {
     const recordId = event.currentTarget.dataset.id || "";
     if (!recordId) return;
-    wx.navigateTo({ url: `/pages/record-detail/index?id=${encodeURIComponent(recordId)}` });
+    wx.navigateTo({ url: `/pages/record-edit/index?id=${encodeURIComponent(recordId)}` });
   },
 });

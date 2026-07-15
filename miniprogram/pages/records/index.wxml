@@ -74,5 +74,11 @@
 
     </view>
   </scroll-view>
-  <custom-tabbar active="records" readonly="{{readonly}}"></custom-tabbar>
+  <view wx:if="{{isLedgerSwitcherVisible}}" class="view-ledger-mask" bindtap="closeLedgerSwitcher">
+    <view class="view-ledger-sheet" catchtap="stopLedgerSwitcherTap">
+      <view class="view-ledger-handle"></view>
+      <view class="view-ledger-title">切换账本明细</view>
+      <scroll-view class="view-ledger-list" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}"><view wx:for="{{ledgerOptions}}" wx:key="_id" class="view-ledger-option {{item._id === ledgerId ? 'is-viewing' : ''}}" data-id="{{item._id}}" bindtap="chooseViewLedger"><text>{{item.name}}</text><text wx:if="{{item._id === ledgerId}}">查看中</text></view></scroll-view>
+    </view>
+  </view>  <custom-tabbar active="records" readonly="{{readonly}}"></custom-tabbar>
 </view>

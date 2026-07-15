@@ -75,15 +75,7 @@
   "srcMiniprogramRoot": "miniprogram/",
   "packOptions": {
     "ignore": [
-      {
-        "type": "folder",
-        "value": "miniprogram/pages/example"
-      },
-      {
-        "type": "folder",
-        "value": "miniprogram/components/cloudTipModal"
-      },
-      {
+{
         "type": "file",
         "value": "miniprogram/images/create_cbr.png"
       },

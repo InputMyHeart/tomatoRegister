@@ -1,6 +1,0 @@
-<view wx:if="{{!readonly}}" class="fab" bindtap="handleTap" aria-role="button" aria-label="记一笔">
-  <view class="fab-icon">
-    <ri-icon name="add-line" size="34" color="#ffffff"></ri-icon>
-  </view>
-  <text class="fab-text">记一笔</text>
-</view>

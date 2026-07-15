@@ -8,10 +8,6 @@ function today() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-function currentTime() {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-}
 
 function quickAmountsFor(type) {
   return type === "income" ? [200, 500, 1000, 5000] : [18, 32, 68, 128];
@@ -43,6 +39,8 @@ function normalizeTags(input) {
 
 Page({
   data: {
+    recordId: "",
+    isEditing: false,
     type: "expense",
     typeLabel: "支出",
     typeIcon: "price-tag-3-line",
@@ -59,7 +57,7 @@ Page({
     tagInput: "",
     tags: [],
     date: today(),
-    time: currentTime(),
+
     ledgerName: "我家账本",
     ledgerId: "",
     accountIndex: 0,
@@ -92,8 +90,21 @@ Page({
       quickAmounts: quickAmountsFor(type),
       quickNotes: quickNotesFor(type, categoryName),
     });
+    if (options.id) this.loadRecord(decodeURIComponent(options.id));
   },
 
+  async loadRecord(recordId) {
+    try {
+      const res = await wx.cloud.callFunction({ name: "tomatoLedger", data: { action: "getRecord", data: { recordId } } });
+      const result = res.result || {};
+      const record = result.data && result.data.record;
+      if (!result.success || !record) throw new Error(result.message || "记录加载失败");
+      const recordType = record.type === "income" ? "income" : "expense";
+      const accountIndex = Math.max(0, accounts.indexOf(record.account));
+      this.setData({ recordId, isEditing: true, type: recordType, typeLabel: recordType === "income" ? "收入" : "支出", typeIcon: recordType === "income" ? "funds-line" : "price-tag-3-line", categoryName: record.categoryName || "其他", categoryLabel: record.categoryLabel || record.categoryName || "其他", categoryIcon: record.categoryIcon || "price-tag-3-line", parentCategory: record.parentCategory || "", parentIcon: record.parentIcon || "", amount: String(record.amount || ""), note: record.note || "", tags: Array.isArray(record.tags) ? record.tags : [], date: record.date || today(), ledgerId: record.ledgerId || "", ledgerName: (result.data.ledger && result.data.ledger.name) || "我的账本", accountIndex, quickAmounts: quickAmountsFor(recordType), quickNotes: quickNotesFor(recordType, record.categoryName) });
+      this.setAmountExpression(String(record.amount || ""));
+    } catch (error) { wx.showToast({ title: error.message || "记录加载失败", icon: "none" }); setTimeout(() => wx.navigateBack(), 500); }
+  },
   applyCategorySelection(selection = {}) {
     const type = selection.type === "income" ? "income" : "expense";
     this.setData({
@@ -138,7 +149,6 @@ Page({
   onAmountInput(event) { this.setAmountExpression(event.detail.value); },
   onNoteInput(event) { this.setData({ note: event.detail.value }); },
   onDateChange(event) { this.setData({ date: event.detail.value }); },
-  onTimeChange(event) { this.setData({ time: event.detail.value }); },
   onAccountChange(event) { this.setData({ accountIndex: Number(event.detail.value) }); },
   onTagInput(event) { this.setData({ tagInput: event.detail.value }); },
 
@@ -169,15 +179,15 @@ Page({
       const res = await wx.cloud.callFunction({
         name: "tomatoLedger",
         data: {
-          action: "createRecord",
+          action: this.data.isEditing ? "updateRecord" : "createRecord",
           data: {
+            recordId: this.data.recordId,
             ledgerId: this.data.ledgerId,
             type: this.data.type,
             amount: result.value,
             note: this.data.note,
             tags: finalTags,
             date: this.data.date,
-            time: this.data.time,
             categoryName: this.data.categoryName,
             categoryLabel: this.data.categoryLabel,
             categoryIcon: this.data.categoryIcon,
@@ -190,11 +200,11 @@ Page({
       const cloudResult = res.result || {};
       if (cloudResult.success === false) throw new Error(cloudResult.message || "保存失败");
       wx.hideLoading();
-      wx.showToast({ title: "已记一笔", icon: "success" });
+      wx.showToast({ title: this.data.isEditing ? "已保存修改" : "已记一笔", icon: "success" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {
       wx.hideLoading();
-      console.warn("createRecord failed", error);
+      console.warn("saveRecord failed", error);
       wx.showToast({ title: error.message || "保存失败", icon: "none" });
     }
   },

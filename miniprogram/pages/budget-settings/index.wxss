@@ -16,14 +16,10 @@
   font-weight: 900;
 }
 
-.setting-subtitle,
-.range-line {
+.setting-subtitle {
   color: #9a8278;
   font-size: 24rpx;
   font-weight: 700;
-}
-
-.setting-subtitle {
   margin-top: 10rpx;
   line-height: 1.45;
 }
@@ -45,7 +41,7 @@
 .amount-input-row {
   height: 112rpx;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10rpx;
   border-bottom: 1rpx solid #f3e5df;
 }
@@ -64,11 +60,6 @@
   font-weight: 900;
 }
 
-.range-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 .save-bar {
   position: fixed;

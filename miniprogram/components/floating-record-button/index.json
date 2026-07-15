@@ -1,6 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "ri-icon": "/components/ri-icon/index"
-  }
-}

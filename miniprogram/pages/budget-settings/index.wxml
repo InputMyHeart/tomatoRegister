@@ -16,12 +16,7 @@
         <view class="amount-label">月预算金额</view>
         <view class="amount-input-row">
           <text class="currency">¥</text>
-          <input class="amount-input" type="number" value="{{monthlyBudget}}" disabled="{{!budgetEnabled}}" bindinput="onBudgetInput" />
-        </view>
-        <slider min="1" max="999999" step="1" value="{{monthlyBudget}}" disabled="{{!budgetEnabled}}" activeColor="#f0442f" backgroundColor="#ffe1d9" block-color="#f0442f" block-size="24" bindchange="onSliderChange" />
-        <view class="range-line">
-          <text>¥1</text>
-          <text>¥999999</text>
+          <input class="amount-input" type="digit" value="{{monthlyBudget}}" disabled="{{!budgetEnabled}}" bindinput="onBudgetInput" />
         </view>
       </view>
     </view>

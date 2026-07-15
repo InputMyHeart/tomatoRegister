@@ -66,6 +66,10 @@ Page({
     });
   },
 
+  onAvatarError() {
+    this.setData({ userAvatar: "/images/brand/tomato-ledger-logo-256-transparent.png" });
+  },
+
   async refreshHeroData() {
     if (this.refreshingHero || !app.globalData.loggedIn) return;
     this.refreshingHero = true;
@@ -127,7 +131,7 @@ Page({
   },
 
   manageCategories() {
-    wx.showToast({ title: "分类管理入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/category-manage/index" });
   },
 
   manageQuickAmounts() {

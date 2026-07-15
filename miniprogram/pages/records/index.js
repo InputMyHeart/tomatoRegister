@@ -61,7 +61,7 @@ function normalizeRecord(record = {}) {
     categoryText: record.categoryName || record.categoryLabel || "其他",
     noteText: record.note || "未填写备注",
     dateLabel: formatDateLabel(record.date),
-    timeText: record.time || record.date || "未选择时间",
+    timeText: record.date || "未选择日期",
     memberName: record.memberName || "我",
     memberAvatar: record.memberAvatar || "/images/brand/tomato-ledger-logo-256-transparent.png",
     accountText: record.account || "未选择账户",
@@ -120,6 +120,8 @@ Page({
     isError: false,
     records: [],
     currentRange: null,
+    ledgerOptions: [],
+    isLedgerSwitcherVisible: false,
     ...buildView([], "all"),
   },
 
@@ -169,17 +171,6 @@ Page({
       if (!result || !result.success || !result.data) {
         throw new Error((result && result.message) || "明细加载失败");
       }
-
-      const ledger = result.data.ledger || {};
-      if (ledger._id) {
-        app.globalData.currentLedger = {
-          ...(app.globalData.currentLedger || {}),
-          ...ledger,
-        };
-        app.globalData.readonly = Boolean(result.data.readonly);
-        app.persistAuthState();
-      }
-
       const records = (result.data.records || []).map(normalizeRecord);
       this.setData({
         loading: false,
@@ -198,8 +189,25 @@ Page({
     this.setData({ activeType, ...buildView(this.data.records, activeType) });
   },
 
-  switchLedger() {
-    wx.redirectTo({ url: "/pages/index/index" });
+  async switchLedger() {
+    try {
+      const result = await this.callApi("listLedgers", {});
+      const ledgerOptions = result && result.success && result.data ? result.data.ledgers || [] : [];
+      this.setData({ ledgerOptions, isLedgerSwitcherVisible: true });
+    } catch (error) { wx.showToast({ title: "账本加载失败", icon: "none" }); }
+  },
+
+  closeLedgerSwitcher() { this.setData({ isLedgerSwitcherVisible: false }); },
+  stopLedgerSwitcherTap() {},
+
+  chooseViewLedger(event) {
+    const ledgerId = event.currentTarget.dataset.id;
+    const ledger = this.data.ledgerOptions.find((item) => (item._id || item.id) === ledgerId);
+    if (!ledger || ledgerId === this.data.ledgerId) { this.closeLedgerSwitcher(); return; }
+    const monthStartDay = Number(ledger.monthStartDay || 1);
+    const currentRange = getCurrentRange(monthStartDay);
+    this.setData({ ledgerId, ledgerName: ledger.name || "我的账本", monthStartDay, currentRange, monthLabel: currentRange.label, isLedgerSwitcherVisible: false, activeType: "all" });
+    this.loadRecords(currentRange);
   },
 
   prevMonth() {
@@ -221,7 +229,7 @@ Page({
   openRecord(event) {
     const id = event.currentTarget.dataset.id;
     if (!id) return;
-    wx.navigateTo({ url: `/pages/record-detail/index?id=${encodeURIComponent(id)}` });
+    wx.navigateTo({ url: `/pages/record-edit/index?id=${encodeURIComponent(id)}` });
   },
 
   reload() {

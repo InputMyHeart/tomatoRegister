@@ -51,13 +51,17 @@ Page({
   },
 
   async uploadAvatarIfNeeded(avatarUrl) {
-    if (!avatarUrl || avatarUrl.startsWith("cloud://") || avatarUrl.startsWith("http") || avatarUrl.startsWith("/images/")) {
-      return avatarUrl || defaultAvatar;
-    }
+    if (!avatarUrl || avatarUrl.startsWith("cloud://") || avatarUrl.startsWith("/images/")) return avatarUrl || defaultAvatar;
 
+    let filePath = avatarUrl;
+    if (avatarUrl.startsWith("http://127.0.0.1") || avatarUrl.startsWith("https://127.0.0.1")) {
+      const imageInfo = await new Promise((resolve, reject) => wx.getImageInfo({ src: avatarUrl, success: resolve, fail: reject }));
+      filePath = imageInfo.path;
+    }
     const cloudPath = `avatars/${app.globalData.openid || Date.now()}-${Date.now()}.png`;
-    const res = await wx.cloud.uploadFile({ cloudPath, filePath: avatarUrl });
-    return res.fileID || defaultAvatar;
+    const res = await wx.cloud.uploadFile({ cloudPath, filePath });
+    if (!res.fileID) throw new Error("头像上传失败，请重试");
+    return res.fileID;
   },
 
   async saveProfile() {

@@ -234,6 +234,11 @@ async function updateProfile(openid, data = {}) {
     return fail("该昵称为系统编号格式，请换一个昵称", "RESERVED_NICKNAME");
   }
 
+  const requestedAvatarUrl = String(data.avatarUrl || "");
+  if (requestedAvatarUrl && !requestedAvatarUrl.startsWith("cloud://") && !requestedAvatarUrl.startsWith("/images/")) {
+    return fail("头像尚未上传至云端，请重新选择后保存", "AVATAR_NOT_PERSISTED");
+  }
+
   const gender = data.gender || "喵星人";
   const allowedGenders = ["喵星人", "男生", "女生"];
   if (!allowedGenders.includes(gender)) return fail("请选择正确的性别", "INVALID_GENDER");
@@ -241,7 +246,7 @@ async function updateProfile(openid, data = {}) {
   const nextUser = {
     ...user,
     nickName,
-    avatarUrl: data.avatarUrl || user.avatarUrl || defaultAvatarUrl,
+    avatarUrl: requestedAvatarUrl || user.avatarUrl || defaultAvatarUrl,
     gender,
     updatedAt: now(),
   };
@@ -259,6 +264,7 @@ async function updateProfile(openid, data = {}) {
 }
 
 async function createDefaultCategories(ledgerId, openid) {
+  return ensureLedgerCategoryTree(ledgerId, openid);
   const rows = [];
   defaultExpenseCategories.forEach(([name, color], index) => {
     rows.push({ ledgerId, name, color, sort: index, type: "expense", isDefault: true, createdBy: openid, createdAt: now() });
@@ -273,6 +279,9 @@ async function createLedger(openid, data = {}) {
   if (!openid) return fail("微信登录失败，请稍后重试", "OPENID_MISSING");
 
   const name = String(data.name || "").trim() || "我家账本";
+  const budgetEnabled = Boolean(data.budgetEnabled);
+  const requestedBudget = Number(data.monthlyBudget);
+  const monthlyBudget = budgetEnabled && Number.isFinite(requestedBudget) ? Math.min(999999, Math.max(1, Math.round(requestedBudget * 100) / 100)) : 0;
   if (Array.from(name).length < 1 || Array.from(name).length > 8) return fail("账本名称需为1-8个字符", "INVALID_LEDGER_NAME");
 
   const remark = String(data.remark || "").trim();
@@ -297,8 +306,8 @@ async function createLedger(openid, data = {}) {
     viewerOpenids: [],
     inviteCode,
     readonlyShareCode,
-    budgetEnabled: false,
-    monthlyBudget: Number(data.monthlyBudget || 0),
+    budgetEnabled,
+    monthlyBudget,
     monthStartDay: 1,
     accounts: data.accounts || ["微信", "支付宝", "银行卡", "现金"],
     createdAt: now(),
@@ -429,8 +438,8 @@ async function listRecords(openid, data = {}) {
   const query = { ledgerId: ledger._id };
   if (data.type && data.type !== "all") query.type = data.type;
   if (data.start && data.end) query.date = _.gte(data.start).and(_.lt(data.end));
-  const result = await db.collection("records").where(query).orderBy("date", "desc").orderBy("time", "desc").limit(100).get();
-  const records = result.data || [];
+  const result = await db.collection("records").where(query).orderBy("date", "desc").limit(100).get();
+  const records = (result.data || []).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
   const ownerMap = await getUsersByOpenids(records.map((item) => item.ownerOpenid));
   return ok({
     records: records.map((item) => attachRecordOwner(item, ownerMap, openid)),
@@ -546,8 +555,8 @@ async function getDashboard(openid, data = {}) {
   const monthStartDay = Number(ledger.monthStartDay || 1);
   const monthRange = getCurrentMonthRange(monthStartDay);
   const query = { ledgerId: ledger._id, date: _.gte(monthRange.start).and(_.lt(monthRange.end)) };
-  const records = await db.collection("records").where(query).orderBy("date", "desc").limit(10).get();
-  const monthRecords = records.data || [];
+  const records = await db.collection("records").where(query).orderBy("date", "desc").limit(100).get();
+  const monthRecords = (records.data || []).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
   const ownerMap = await getUsersByOpenids(monthRecords.map((item) => item.ownerOpenid));
   const monthIncome = monthRecords.filter((item) => item.type === "income").reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const monthExpense = monthRecords.filter((item) => item.type === "expense").reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -557,10 +566,11 @@ async function getDashboard(openid, data = {}) {
   const expenseMap = {};
   monthRecords.forEach((item) => {
     if (item.type !== "expense") return;
-    const key = item.categoryName || "其他";
+    const key = item.parentCategory || item.categoryName || "其他";
     expenseMap[key] = (expenseMap[key] || 0) + Number(item.amount || 0);
   });
-  const topCategory = Object.keys(expenseMap).sort((a, b) => expenseMap[b] - expenseMap[a])[0] || "暂无";
+  const topExpenseCategory = Object.keys(expenseMap).sort((a, b) => expenseMap[b] - expenseMap[a])[0] || "暂无";
+  const largestExpenseAmount = monthRecords.filter((item) => item.type === "expense").reduce((max, item) => Math.max(max, Number(item.amount || 0)), 0);
 
   return ok({
     ledgerId: ledger._id,
@@ -578,10 +588,11 @@ async function getDashboard(openid, data = {}) {
     budgetRate,
     monthStartDay,
     recordCount: monthRecords.length,
-    topCategory,
+    topExpenseCategory,
+    largestExpenseAmount,
     familyMood: monthRecords.length ? "本月记录持续更新" : "本月还没有记录",
     monthRange,
-    recentRecords: monthRecords.map((item) => attachRecordOwner(item, ownerMap, openid)),
+    recentRecords: monthRecords.slice(0, 10).map((item) => attachRecordOwner(item, ownerMap, openid)),
   });
 }
 
@@ -590,7 +601,11 @@ async function updateBudget(openid, data = {}) {
   const role = getLedgerRole(openid, ledger);
   if (role !== "owner") throw new Error("ONLY_OWNER_CAN_UPDATE_BUDGET");
   const budgetEnabled = Boolean(data.budgetEnabled);
-  const monthlyBudget = budgetEnabled ? Math.min(999999, Math.max(1, Number(data.monthlyBudget || 1))) : 0;
+  const requestedBudget = Number(data.monthlyBudget);
+  if (budgetEnabled && (!Number.isFinite(requestedBudget) || requestedBudget < 1 || requestedBudget > 999999)) {
+    return fail('预算金额需为 1-999999', 'INVALID_MONTHLY_BUDGET');
+  }
+  const monthlyBudget = budgetEnabled && Number.isFinite(requestedBudget) ? Math.min(999999, Math.max(1, Math.round(requestedBudget * 100) / 100)) : 0;
   await db.collection("ledgers").doc(ledger._id).update({ data: { budgetEnabled, monthlyBudget, updatedAt: now() } });
   return ok({ ledger: { ...ledger, budgetEnabled, monthlyBudget } });
 }
@@ -771,6 +786,57 @@ async function resetDatabase(openid, data = {}) {
   }, {});
   return ok({ deleted });
 }
+const categoryTreeDefaults = {
+  expense: [
+    ["\u9910\u996e", "restaurant-2-line", ["\u65e9\u9910", "\u5348\u9910", "\u665a\u9910", "\u4e70\u83dc", "\u5496\u5561\u5976\u8336"]],
+    ["\u8d2d\u7269", "shopping-bag-3-line", ["\u65e5\u7528\u54c1", "\u670d\u9970\u978b\u5305", "\u6570\u7801\u7535\u5668", "\u7f8e\u5986\u4e2a\u62a4"]],
+    ["\u4ea4\u901a", "taxi-line", ["\u516c\u4ea4\u5730\u94c1", "\u6253\u8f66", "\u52a0\u6cb9\u5145\u7535", "\u505c\u8f66"]],
+    ["\u5c45\u5bb6", "home-4-line", ["\u623f\u79df\u623f\u8d37", "\u6c34\u7535\u71c3\u6c14", "\u7269\u4e1a", "\u7ef4\u4fee"]],
+    ["\u751f\u6d3b", "heart-pulse-line", ["\u533b\u7597", "\u5b66\u4e60", "\u5a31\u4e50", "\u65c5\u884c"]],
+    ["\u5176\u4ed6", "more-2-line", ["\u5176\u4ed6\u652f\u51fa"]],
+  ],
+  income: [
+    ["\u5de5\u4f5c\u6536\u5165", "wallet-3-line", ["\u5de5\u8d44", "\u5956\u91d1", "\u52a0\u73ed", "\u62a5\u9500"]],
+    ["\u526f\u4e1a\u6536\u5165", "briefcase-4-line", ["\u526f\u4e1a", "\u9879\u76ee", "\u7a3f\u8d39", "\u54a8\u8be2"]],
+    ["\u8d44\u4ea7\u6536\u5165", "funds-line", ["\u7406\u8d22", "\u5229\u606f", "\u5206\u7ea2", "\u623f\u79df"]],
+    ["\u5176\u4ed6", "more-2-line", ["\u7ea2\u5305", "\u9000\u6b3e", "\u793c\u91d1", "\u5176\u4ed6\u6536\u5165"]],
+  ],
+};
+async function addDefaultChild(ledgerId, parent, openid) {
+  const existing = await db.collection("categories").where({ ledgerId, level: "child", parentId: parent._id, isDefaultChild: true }).limit(1).get();
+  if (existing.data.length) return existing.data[0];
+  const res = await db.collection("categories").add({ data: { ledgerId, type: parent.type, level: "child", parentId: parent._id, parentName: parent.name, name: parent.name, icon: parent.icon || "price-tag-3-line", sort: -1, isDefaultChild: true, createdBy: openid, createdAt: now(), updatedAt: now() } });
+  return { _id: res._id, ledgerId, type: parent.type, level: "child", parentId: parent._id, parentName: parent.name, name: parent.name, icon: parent.icon || "price-tag-3-line", isDefaultChild: true };
+}
+async function ensureLedgerCategoryTree(ledgerId, openid) {
+  const parentResult = await db.collection("categories").where({ ledgerId, level: "parent" }).limit(200).get();
+  if (parentResult.data.length) { await Promise.all(parentResult.data.map((parent) => addDefaultChild(ledgerId, parent, openid))); return; }
+  for (const type of ["expense", "income"]) for (let index = 0; index < categoryTreeDefaults[type].length; index += 1) {
+    const [name, icon, children] = categoryTreeDefaults[type][index];
+    const parentRes = await db.collection("categories").add({ data: { ledgerId, type, level: "parent", name, icon, sort: index, isOther: name === "\u5176\u4ed6", createdBy: openid, createdAt: now(), updatedAt: now() } });
+    const parent = { _id: parentRes._id, ledgerId, type, name, icon };
+    await addDefaultChild(ledgerId, parent, openid);
+    await Promise.all(children.map((childName, childIndex) => db.collection("categories").add({ data: { ledgerId, type, level: "child", parentId: parentRes._id, parentName: name, name: childName, icon, sort: childIndex, isDefaultChild: false, createdBy: openid, createdAt: now(), updatedAt: now() } })));
+  }
+}
+async function listCategories(openid, data = {}) { const ledger = await getLedgerForUser(openid, data.ledgerId); const role = getLedgerRole(openid, ledger); assertReadable(role); await ensureLedgerCategoryTree(ledger._id, ledger.ownerOpenid); const result = await db.collection("categories").where({ ledgerId: ledger._id }).orderBy("sort", "asc").limit(200).get(); return ok({ categories: result.data || [], role }); }
+async function saveCategory(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId); const role = getLedgerRole(openid, ledger); const editing = Boolean(data.categoryId);
+  if (editing && role !== "owner") throw new Error("ONLY_OWNER_CAN_EDIT_CATEGORY"); if (!editing && !["owner", "member"].includes(role)) throw new Error("NO_CATEGORY_PERMISSION");
+  const name = Array.from(String(data.name || "").trim()).slice(0, 6).join(""); if (!name) throw new Error("INVALID_CATEGORY_NAME");
+  if (editing) { const category = (await db.collection("categories").doc(data.categoryId).get()).data; if (!category || category.ledgerId !== ledger._id) throw new Error("CATEGORY_NOT_FOUND"); if (category.isOther && category.level === "parent" && name !== "\u5176\u4ed6") throw new Error("OTHER_CATEGORY_NAME_LOCKED"); await db.collection("categories").doc(category._id).update({ data: { name, icon: data.icon || category.icon, updatedAt: now() } }); if (category.level === "parent") await db.collection("categories").where({ ledgerId: ledger._id, parentId: category._id }).update({ data: { parentName: name, updatedAt: now() } }); return ok(); }
+  const level = data.level === "parent" ? "parent" : "child"; if (level === "child" && !data.parentId) throw new Error("PARENT_REQUIRED"); const parent = level === "child" ? (await db.collection("categories").doc(data.parentId).get()).data : null; if (parent && (parent.ledgerId !== ledger._id || parent.level !== "parent")) throw new Error("PARENT_NOT_FOUND"); const type = data.type === "income" ? "income" : "expense"; const icon = data.icon || "price-tag-3-line"; const addResult = await db.collection("categories").add({ data: { ledgerId: ledger._id, type, level, parentId: parent ? parent._id : "", parentName: parent ? parent.name : "", name, icon, sort: Date.now(), isOther: false, isDefaultChild: false, createdBy: openid, createdAt: now(), updatedAt: now() } }); if (level === "parent") await addDefaultChild(ledger._id, { _id: addResult._id, type, name, icon }, openid); return ok();
+}
+async function getOtherDefaultChild(ledger, type, openid) { const other = (await db.collection("categories").where({ ledgerId: ledger._id, type, level: "parent", isOther: true }).limit(1).get()).data[0]; if (!other) throw new Error("OTHER_CATEGORY_NOT_FOUND"); return { parent: other, child: await addDefaultChild(ledger._id, other, openid) }; }
+async function migrateTo(ledger, fromParentName, fromChild, target) { const query = { ledgerId: ledger._id, parentCategory: fromParentName }; if (fromChild) query.categoryName = fromChild.name; await db.collection("records").where(query).update({ data: { parentCategory: target.parent.name, parentIcon: target.parent.icon || "more-2-line", categoryId: target.child._id, categoryName: target.child.name, categoryLabel: target.child.name, categoryIcon: target.child.icon || target.parent.icon || "price-tag-3-line", updatedAt: now() } }); }
+async function removeParentAndMigrate(ledger, parent, openid) { if (parent.isOther) throw new Error("OTHER_CATEGORY_CANNOT_DELETE"); const target = await getOtherDefaultChild(ledger, parent.type, openid); await migrateTo(ledger, parent.name, null, target); await db.collection("categories").where({ ledgerId: ledger._id, parentId: parent._id }).remove(); await db.collection("categories").doc(parent._id).remove(); }
+async function removeCategory(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId); if (getLedgerRole(openid, ledger) !== "owner") throw new Error("ONLY_OWNER_CAN_DELETE_CATEGORY"); const category = (await db.collection("categories").doc(data.categoryId).get()).data; if (!category || category.ledgerId !== ledger._id) throw new Error("CATEGORY_NOT_FOUND");
+  if (category.level === "parent") { await removeParentAndMigrate(ledger, category, openid); return ok(); }
+  const parent = (await db.collection("categories").doc(category.parentId).get()).data; if (!parent) throw new Error("PARENT_NOT_FOUND"); const children = (await db.collection("categories").where({ ledgerId: ledger._id, level: "child", parentId: parent._id }).limit(200).get()).data;
+  if (category.isDefaultChild) { if (children.some((item) => item._id !== category._id)) throw new Error("DEFAULT_CHILD_REQUIRES_EMPTY_PARENT"); await removeParentAndMigrate(ledger, parent, openid); return ok(); }
+  const defaultChild = children.find((item) => item.isDefaultChild) || await addDefaultChild(ledger._id, parent, openid); await migrateTo(ledger, parent.name, category, { parent, child: defaultChild }); await db.collection("categories").doc(category._id).remove(); return ok();
+}
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = event.action || event.type;
@@ -784,6 +850,9 @@ exports.main = async (event) => {
       case "updateProfile": return await updateProfile(OPENID, data);
       case "createLedger": return await createLedger(OPENID, data);
       case "listLedgers": return await listLedgers(OPENID);
+      case "listCategories": return await listCategories(OPENID, data);
+      case "saveCategory": return await saveCategory(OPENID, data);
+      case "removeCategory": return await removeCategory(OPENID, data);
       case "setCurrentLedger": return await setCurrentLedger(OPENID, data);
       case "deleteLedger": return await deleteLedger(OPENID, data);
       case "createRecord": return await createRecord(OPENID, data);

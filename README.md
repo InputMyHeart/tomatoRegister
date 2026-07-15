@@ -17,3 +17,18 @@
 `miniprogram/app.js` 中的 `globalData.env` 由项目维护者手动填写，后续开发不要覆盖或清空。
 
 云函数业务代码放在 `cloudfunctions/tomatoLedger`，不要改动 `cloudfunctions/quickstartFunctions`。
+
+## 本地启动
+
+1. 使用微信开发者工具导入项目根目录，导入类型选择“小程序”。
+2. 确认项目配置使用 `miniprogram/` 作为小程序根目录、`cloudfunctions/` 作为云函数根目录。
+3. 在微信开发者工具中开通或选择一个云开发环境。
+4. 将环境 ID 填入 `miniprogram/app.js` 的 `globalData.env`；不要提交真实环境 ID。
+5. 安装 `cloudfunctions/tomatoLedger` 的依赖，并以同名云函数部署。
+6. 编译小程序；首次登录时，云函数会按需创建所需集合和用户记录。
+
+## 云开发部署说明
+
+- 业务云函数位于 `cloudfunctions/tomatoLedger`；前端依赖云函数名称 `tomatoLedger`，请保持一致。
+- `resetDatabase` 仅可在测试环境验证；它会删除账本、分类、记录和邀请数据。
+- 当前数据结构、权限边界和人工回归清单见 [docs/BASELINE.md](./docs/BASELINE.md)。

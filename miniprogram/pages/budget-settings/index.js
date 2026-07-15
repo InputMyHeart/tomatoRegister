@@ -1,9 +1,14 @@
 const app = getApp();
 
-function clampBudget(value) {
-  const numberValue = Math.floor(Number(value || 1));
-  if (Number.isNaN(numberValue)) return 1;
-  return Math.min(999999, Math.max(1, numberValue));
+function normalizeBudget(value) {
+  const numberValue = Math.round(Number(value) * 100) / 100;
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function isValidBudget(value) {
+  return /^\d+(?:\.\d{1,2})?$/.test(String(value))
+    && normalizeBudget(value) >= 1
+    && normalizeBudget(value) <= 999999;
 }
 
 Page({
@@ -22,7 +27,7 @@ Page({
       ledgerId: ledger._id || "",
       ledgerName: ledger.name || "我的账本",
       budgetEnabled: Boolean(ledger.budgetEnabled),
-      monthlyBudget: clampBudget(ledger.monthlyBudget || 3000),
+      monthlyBudget: String(ledger.monthlyBudget || 3000),
       readonly: Boolean(ledger.readonly),
     });
   },
@@ -31,12 +36,9 @@ Page({
     this.setData({ budgetEnabled: Boolean(event.detail.value) });
   },
 
-  onSliderChange(event) {
-    this.setData({ monthlyBudget: clampBudget(event.detail.value) });
-  },
 
   onBudgetInput(event) {
-    this.setData({ monthlyBudget: clampBudget(event.detail.value) });
+    this.setData({ monthlyBudget: event.detail.value });
   },
 
   async saveBudget() {
@@ -45,6 +47,10 @@ Page({
       return;
     }
     if (this.data.saving) return;
+    if (this.data.budgetEnabled && !isValidBudget(this.data.monthlyBudget)) {
+      wx.showToast({ title: '预算金额需为 1-999999，最多两位小数', icon: 'none' });
+      return;
+    }
     this.setData({ saving: true });
     wx.showLoading({ title: "保存中" });
     try {
@@ -55,7 +61,7 @@ Page({
           data: {
             ledgerId: this.data.ledgerId,
             budgetEnabled: this.data.budgetEnabled,
-            monthlyBudget: this.data.monthlyBudget,
+            monthlyBudget: normalizeBudget(this.data.monthlyBudget),
           },
         },
       });
@@ -69,6 +75,11 @@ Page({
           ...ledger,
         };
         app.persistAuthState();
+        const pages = getCurrentPages();
+        const previousPage = pages[pages.length - 2];
+        if (previousPage && typeof previousPage.loadDashboard === "function") {
+          await previousPage.loadDashboard(ledger._id);
+        }
       }
       wx.showToast({ title: "已保存", icon: "success" });
       setTimeout(() => wx.navigateBack(), 650);
