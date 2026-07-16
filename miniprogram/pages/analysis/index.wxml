@@ -1,80 +1,89 @@
 <view class="page tabbar-page analysis-page">
-  <custom-navbar title="分析"></custom-navbar>
+  <tl-navbar title="分析">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
-  <view class="page-head fade-up">
-    <view class="eyebrow">收支分析</view>
-    <view class="title">本月花得清清楚楚</view>
-  </view>
-
-  <view class="compare-card card fade-up">
-    <view class="compare-head">
-      <view>
-        <view class="compare-title">收支结构</view>
-        <view class="compare-tip">储蓄率 {{saveRate}}%</view>
+      <view class="page-head fade-up">
+        <view class="eyebrow">收支分析</view>
+        <view class="title">本月花得清清楚楚</view>
       </view>
-      <view class="top-tag">{{topCategory}}最多</view>
-    </view>
-    <view class="compare-bars">
-      <view class="bar-row">
-        <view class="bar-label">收入</view>
-        <view class="bar-track"><view class="bar-fill income" style="width: {{incomeRate}}%;"></view></view>
-        <view class="bar-value">¥{{monthIncome}}</view>
-      </view>
-      <view class="bar-row">
-        <view class="bar-label">支出</view>
-        <view class="bar-track"><view class="bar-fill expense" style="width: {{expenseRate}}%;"></view></view>
-        <view class="bar-value">¥{{monthExpense}}</view>
-      </view>
-    </view>
-    <view class="insight-text">{{insightText}}</view>
-  </view>
-
-  <view class="insight-card card fade-up">
-    <view class="insight-title">预算进度</view>
-    <view class="insight-main">
-      <view>
-        <view class="big-number">{{budgetRate}}%</view>
-        <view class="muted">已支出 ¥{{monthExpense}} / ¥{{budget}}</view>
-      </view>
-      <view class="daily-box">
-        <view class="daily-label">日均可用</view>
-        <view class="daily-value">¥{{dailyAvailable}}</view>
-      </view>
-    </view>
-    <view class="progress-track">
-      <view class="progress-fill" style="width: {{budgetRate}}%;"></view>
-    </view>
-  </view>
-
-  <view class="section fade-up">
-    <view class="section-title">支出分类</view>
-    <view class="category-card card" wx:for="{{categories}}" wx:key="name">
-      <view class="cat-head">
-        <view class="cat-name">
-          <view class="cat-dot {{item.color}}"></view>
-          {{item.name}}
+      <view class="compare-card card fade-up">
+        <view class="compare-head">
+          <view>
+            <view class="compare-title">收支结构</view>
+            <view class="compare-tip">储蓄率 {{saveRate}}%</view>
+          </view>
+          <view class="top-tag">{{topCategory}}最多</view>
         </view>
-        <view class="cat-amount">¥{{item.amount}}</view>
+        <view class="compare-bars">
+          <view class="bar-row">
+            <view class="bar-label">收入</view>
+            <view class="bar-track">
+              <view class="bar-fill income" style="width: {{incomeRate}}%;">
+              </view>
+            </view>
+            <view class="bar-value">¥{{monthIncome}}</view>
+          </view>
+          <view class="bar-row">
+            <view class="bar-label">支出</view>
+            <view class="bar-track">
+              <view class="bar-fill expense" style="width: {{expenseRate}}%;">
+              </view>
+            </view>
+            <view class="bar-value">¥{{monthExpense}}</view>
+          </view>
+        </view>
+        <view class="insight-text">{{insightText}}</view>
       </view>
-      <view class="thin-track">
-        <view class="thin-fill {{item.color}}" style="width: {{item.rate}}%;"></view>
+      <view class="insight-card card fade-up">
+        <view class="insight-title">预算进度</view>
+        <view class="insight-main">
+          <view>
+            <view class="big-number">{{budgetRate}}%</view>
+            <view class="muted">已支出 ¥{{monthExpense}} / ¥{{budget}}</view>
+          </view>
+          <view class="daily-box">
+            <view class="daily-label">日均可用</view>
+            <view class="daily-value">¥{{dailyAvailable}}</view>
+          </view>
+        </view>
+        <view class="progress-track">
+          <view class="progress-fill" style="width: {{budgetRate}}%;">
+          </view>
+        </view>
       </view>
-    </view>
-  </view>
-
-  <view class="section fade-up">
-    <view class="section-title">成员支出</view>
-    <view class="member-card card">
-      <view class="member-row" wx:for="{{members}}" wx:key="name">
-        <view class="member-name">{{item.name}}</view>
-        <view class="member-bar"><view class="member-fill" style="width: {{item.rate}}%;"></view></view>
-        <view class="member-amount">¥{{item.amount}}</view>
+      <view class="section fade-up">
+        <view class="section-title">支出分类</view>
+        <view class="category-card card" wx:for="{{categories}}" wx:key="name">
+          <view class="cat-head">
+            <view class="cat-name">
+              <view class="cat-dot {{item.color}}">
+              </view>
+              {{item.name}}
+            </view>
+            <view class="cat-amount">¥{{item.amount}}</view>
+          </view>
+          <view class="thin-track">
+            <view class="thin-fill {{item.color}}" style="width: {{item.rate}}%;">
+            </view>
+          </view>
+        </view>
       </view>
-    </view>
-  </view>
+      <view class="section fade-up">
+        <view class="section-title">成员支出</view>
+        <view class="member-card card">
+          <view class="member-row" wx:for="{{members}}" wx:key="name">
+            <view class="member-name">{{item.name}}</view>
+            <view class="member-bar">
+              <view class="member-fill" style="width: {{item.rate}}%;">
+              </view>
+            </view>
+            <view class="member-amount">¥{{item.amount}}</view>
+          </view>
+        </view>
+      </view>
     </view>
   </scroll-view>
-
-  <custom-tabbar active="analysis" readonly="{{readonly}}"></custom-tabbar>
+  <tl-tabbar active="analysis" readonly="{{readonly}}">
+  </tl-tabbar>
 </view>

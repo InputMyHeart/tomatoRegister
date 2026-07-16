@@ -1,9 +1,7 @@
-const app = getApp();
-
-function money(value) {
-  const num = Number(value || 0);
-  return num.toFixed(num % 1 === 0 ? 0 : 2);
-}
+const recordService = require("../../services/record.service");
+const { formatDisplayMoney } = require("../../utils/money");
+const { formatDateTime } = require("../../utils/date");
+const { getId } = require("../../utils/mapper");
 
 function getLedgerTypeText(type) {
   return type === "shared" ? "共享账本" : "个人账本";
@@ -15,16 +13,16 @@ function getTypeText(type) {
 
 function normalizeRecord(record = {}, ledger = {}) {
   const type = record.type === "income" ? "income" : "expense";
-  const selectedTimeText = [record.date, record.time].filter(Boolean).join(" ") || "未选择时间";
+  const selectedTimeText = formatDateTime(record.date, record.time);
   const tags = Array.isArray(record.tags) ? record.tags : [];
   return {
     ...record,
-    id: record.id || record._id || "",
+    id: getId(record),
     type,
     typeText: getTypeText(type),
     typeIcon: type === "income" ? "funds-line" : "price-tag-3-line",
     typeIconColor: type === "income" ? "#25a66a" : "#f0442f",
-    amountText: money(record.amount),
+    amountText: formatDisplayMoney(record.amount),
     sign: type === "income" ? "+" : "-",
     categoryText: record.categoryName || record.categoryLabel || "其他",
     parentCategoryText: record.parentCategory || "未分类",
@@ -55,15 +53,6 @@ Page({
     this.loadRecord(recordId);
   },
 
-  async callApi(action, data = {}) {
-    if (!app.globalData.env) return null;
-    const res = await wx.cloud.callFunction({
-      name: "tomatoLedger",
-      data: { action, data },
-    });
-    return res.result;
-  },
-
   async loadRecord(recordId) {
     if (!recordId) {
       this.setData({ loading: false, isError: true });
@@ -72,15 +61,13 @@ Page({
 
     this.setData({ loading: true, isError: false });
     try {
-      const result = await this.callApi("getRecord", { recordId });
-      if (!result || !result.success || !result.data || !result.data.record) {
-        throw new Error((result && result.message) || "记录加载失败");
-      }
+      const data = await recordService.getRecord(recordId);
+      if (!data.record) throw new Error("记录加载失败");
 
       this.setData({
         loading: false,
-        readonly: Boolean(result.data.readonly),
-        record: normalizeRecord(result.data.record, result.data.ledger),
+        readonly: Boolean(data.readonly),
+        record: normalizeRecord(data.record, data.ledger),
       });
     } catch (error) {
       console.warn("load record detail failed", error);

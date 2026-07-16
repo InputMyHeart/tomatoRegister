@@ -1,4 +1,6 @@
 const app = getApp();
+const profileService = require("../../services/profile.service");
+const { getId } = require("../../utils/mapper");
 
 function normalizeCreatedAt(value) {
   if (!value) return null;
@@ -12,7 +14,11 @@ function getUsageDays(user) {
   if (!user || !user.createdAt) return 1;
   const createdAt = normalizeCreatedAt(user.createdAt);
   if (!createdAt || Number.isNaN(createdAt.getTime())) return 1;
-  const createdDay = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate()).getTime();
+  const createdDay = new Date(
+    createdAt.getFullYear(),
+    createdAt.getMonth(),
+    createdAt.getDate()
+  ).getTime();
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   return Math.max(1, Math.floor((today - createdDay) / 86400000) + 1);
@@ -58,9 +64,14 @@ Page({
       monthStartDay: Number((currentLedger && currentLedger.monthStartDay) || 1),
       readonly: Boolean(currentLedger && currentLedger.readonly),
       currentLedger: {
-        id: (currentLedger && currentLedger._id) || user.currentLedgerId || "",
+        id: getId(currentLedger || {}) || user.currentLedgerId || "",
         name: (currentLedger && currentLedger.name) || "我家账本",
-        roleText: (currentLedger && currentLedger.ownerOpenid === app.globalData.openid) ? "拥有者" : (currentLedger && currentLedger.readonly) ? "访客" : "成员",
+        roleText:
+          currentLedger && currentLedger.ownerOpenid === app.globalData.openid
+            ? "拥有者"
+            : currentLedger && currentLedger.readonly
+              ? "访客"
+              : "成员",
         readonly: Boolean(currentLedger && currentLedger.readonly),
       },
     });
@@ -83,14 +94,6 @@ Page({
     }
   },
 
-
-  async callApi(action, data = {}) {
-    const res = await wx.cloud.callFunction({
-      name: "tomatoLedger",
-      data: { action, data },
-    });
-    return res.result || {};
-  },
   handleIdentityTap() {
     this.editProfile();
   },
@@ -162,7 +165,6 @@ Page({
     wx.showToast({ title: "意见反馈入口已预留", icon: "none" });
   },
 
-
   resetDatabase() {
     wx.showModal({
       title: "重置数据库",
@@ -179,11 +181,7 @@ Page({
   async confirmResetDatabase() {
     wx.showLoading({ title: "清空中" });
     try {
-      const result = await this.callApi("resetDatabase", { confirm: "RESET_TOMATO_LEDGER_DATABASE" });
-      if (!result || !result.success) {
-        wx.showToast({ title: (result && result.message) || "重置失败", icon: "none" });
-        return;
-      }
+      await profileService.resetDatabase();
       app.globalData.currentLedger = null;
       app.globalData.stats = null;
       if (app.globalData.user) app.globalData.user.currentLedgerId = "";

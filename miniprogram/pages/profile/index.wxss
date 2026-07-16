@@ -63,7 +63,6 @@
   white-space: nowrap;
 }
 
-
 .user-tip,
 .stat-label {
   color: #9d867c;
@@ -91,8 +90,6 @@
   box-shadow: 0 8rpx 20rpx rgba(240, 68, 47, 0.08);
 }
 
-
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -109,7 +106,6 @@
   text-align: center;
 }
 
-
 .stat-value {
   color: #312522;
   font-size: 34rpx;
@@ -121,7 +117,7 @@
   margin-top: 10rpx;
 }
 
-.profile-setting ri-icon {
+.profile-setting tl-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,10 +243,10 @@
   color: #c55249;
 }
 
-.tool-icon ri-icon,
-.function-icon ri-icon,
-.function-arrow ri-icon,
-.profile-setting ri-icon {
+.tool-icon tl-icon,
+.function-icon tl-icon,
+.function-arrow tl-icon,
+.profile-setting tl-icon {
   display: flex;
   align-items: center;
   justify-content: center;

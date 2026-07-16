@@ -1,0 +1,22 @@
+<view class="tl-category-tree">
+  <view wx:for="{{groups}}" wx:key="id" class="tl-category-tree__group">
+    <view class="tl-category-tree__parent" data-id="{{item.id}}" bindtap="toggle">
+      <view class="tl-category-tree__parent-icon">
+        <tl-icon name="{{item.icon || 'folder-3-line'}}" size="34rpx">
+        </tl-icon>
+      </view>
+      <text class="tl-category-tree__parent-name">{{item.name}}</text>
+      <tl-icon name="{{expandedGroupId === item.id ? 'arrow-up-s-line' : 'arrow-down-s-line'}}" size="30rpx">
+      </tl-icon>
+    </view>
+    <view wx:if="{{expandedGroupId === item.id}}" class="tl-category-tree__children">
+      <view wx:for="{{item.children}}" wx:for-item="child" wx:key="id" class="tl-category-tree__child" data-category="{{child.name}}" data-category-label="{{child.label || child.name}}" data-category-icon="{{child.icon}}" data-parent="{{item.name}}" data-parent-icon="{{item.icon}}" bindtap="select">
+        <view class="tl-category-tree__child-icon">
+          <tl-icon name="{{child.icon || 'price-tag-3-line'}}" size="32rpx">
+          </tl-icon>
+        </view>
+        <text>{{child.label || child.name}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,3 +1,26 @@
+:root {
+  --tl-color-page: #fff7f2;
+  --tl-color-surface: #fffdfc;
+  --tl-color-primary: #f0442f;
+  --tl-color-primary-soft: #fff0ea;
+  --tl-color-income: #25a66a;
+  --tl-color-text: #312522;
+  --tl-color-text-secondary: #6f625d;
+  --tl-color-border: rgba(240, 68, 47, 0.08);
+  --tl-space-xs: 8rpx;
+  --tl-space-sm: 16rpx;
+  --tl-space-md: 24rpx;
+  --tl-space-lg: 32rpx;
+  --tl-radius-sm: 20rpx;
+  --tl-radius-md: 34rpx;
+  --tl-radius-pill: 999rpx;
+  --tl-font-sm: 24rpx;
+  --tl-font-md: 28rpx;
+  --tl-font-lg: 32rpx;
+  --tl-shadow-card: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+  --tl-z-content: 1;
+  --tl-z-overlay: 100;
+}
 page {
   min-height: 100%;
   background: #fff7f2;
@@ -24,7 +47,7 @@ button::after {
 }
 
 /* Layout convention:
- * custom-navbar is the fixed flex header.
+ * tl-navbar is the fixed flex header.
  * Put scrollable content in page-scroll > page-content.
  * Use tabbar-page for native tabbar pages, plain-page for non-tabbar pages.
  */
@@ -102,11 +125,19 @@ button::after {
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes softPop {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

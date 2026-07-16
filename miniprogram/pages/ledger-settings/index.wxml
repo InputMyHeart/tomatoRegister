@@ -1,1 +1,43 @@
-<view class="page ledger-settings-page"><custom-navbar title="账本设置" showBack="{{true}}"></custom-navbar><scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}"><view class="page-content"><view wx:if="{{loading}}" class="settings-card card fade-up"><view class="loading-line wide"></view><view class="loading-line"></view><view class="loading-line short"></view></view><view wx:elif="{{!ledgers.length}}" class="settings-card card empty-card fade-up"><empty-state text="还没有账本"></empty-state></view><view wx:else class="ledger-list fade-up"><view wx:for="{{ledgers}}" wx:key="id" class="ledger-card card"><view class="ledger-card-head"><view class="ledger-name">{{item.displayName}}</view><view class="ledger-settings-button" data-id="{{item.id}}" bindtap="openLedgerSettings"><ri-icon name="settings-3-line" size="34" color="#75645d"></ri-icon></view></view><view class="ledger-tags"><text class="ledger-tag type-tag {{item.typeClass}}">{{item.typeText}}</text><text class="ledger-tag role-tag {{item.roleClass}}">{{item.roleText}}</text></view><view class="ledger-meta"><text>成员 {{item.memberCount}}</text><text>访客 {{item.visitorCount}}</text></view></view></view></view></scroll-view><view class="ledger-bottom-actions"><view class="ledger-bottom-button secondary" bindtap="createLedger">创建账本</view><view class="ledger-bottom-button primary" bindtap="joinLedger">加入账本</view></view></view>
+<view class="page ledger-settings-page">
+  <tl-navbar title="账本设置" showBack="{{true}}">
+  </tl-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view wx:if="{{loading}}" class="settings-card card fade-up">
+        <view class="loading-line wide">
+        </view>
+        <view class="loading-line">
+        </view>
+        <view class="loading-line short">
+        </view>
+      </view>
+      <view wx:elif="{{!ledgers.length}}" class="settings-card card empty-card fade-up">
+        <tl-empty-state text="还没有账本">
+        </tl-empty-state>
+      </view>
+      <view wx:else class="ledger-list fade-up">
+        <view wx:for="{{ledgers}}" wx:key="id" class="ledger-card card">
+          <view class="ledger-card-head">
+            <view class="ledger-name">{{item.displayName}}</view>
+            <view class="ledger-settings-button" data-id="{{item.id}}" bindtap="openLedgerSettings">
+              <tl-icon name="settings-3-line" size="34" color="#75645d">
+              </tl-icon>
+            </view>
+          </view>
+          <view class="ledger-tags">
+            <text class="ledger-tag type-tag {{item.typeClass}}">{{item.typeText}}</text>
+            <text class="ledger-tag role-tag {{item.roleClass}}">{{item.roleText}}</text>
+          </view>
+          <view class="ledger-meta">
+            <text>成员 {{item.memberCount}}</text>
+            <text>访客 {{item.visitorCount}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="ledger-bottom-actions">
+    <view class="ledger-bottom-button secondary" bindtap="createLedger">创建账本</view>
+    <view class="ledger-bottom-button primary" bindtap="joinLedger">加入账本</view>
+  </view>
+</view>

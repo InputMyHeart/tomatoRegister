@@ -1,19 +1,17 @@
 const app = getApp();
+const ledgerService = require("../../services/ledger.service");
+const { formatDisplayMoney } = require("../../utils/money");
+const { getId, getLedgerRole } = require("../../utils/mapper");
 
 function getMonthLabel() {
   const now = new Date();
   return `${now.getFullYear()}年${now.getMonth() + 1}月`;
 }
 
-function money(value) {
-  const num = Number(value || 0);
-  return num.toFixed(num % 1 === 0 ? 0 : 2);
-}
-
 function compactMoney(value) {
   const num = Number(value || 0);
   if (Math.abs(num) >= 100000) return `${(num / 10000).toFixed(1)}万`;
-  return money(num);
+  return formatDisplayMoney(num);
 }
 
 function getLedgerTypeText(type) {
@@ -44,11 +42,11 @@ function normalizeRecord(item = {}) {
   const selectedTimeText = item.date || "未选择日期";
   return {
     ...item,
-    id: item.id || item._id || "",
+    id: getId(item),
     type,
     typeIcon: type === "income" ? "funds-line" : "price-tag-3-line",
     typeIconColor: type === "income" ? "#25a66a" : "#f0442f",
-    amountText: money(item.amount),
+    amountText: formatDisplayMoney(item.amount),
     noteText: item.note || "未填写备注",
     categoryText,
     selectedTimeText,
@@ -58,7 +56,9 @@ function normalizeRecord(item = {}) {
 }
 
 function normalizeDashboard(data = {}) {
-  const recentRecords = Array.isArray(data.recentRecords) ? data.recentRecords.map(normalizeRecord) : [];
+  const recentRecords = Array.isArray(data.recentRecords)
+    ? data.recentRecords.map(normalizeRecord)
+    : [];
   const recordCount = Number(data.recordCount || recentRecords.length || 0);
   return {
     ledgerId: data.ledgerId || "",
@@ -68,19 +68,19 @@ function normalizeDashboard(data = {}) {
     monthLabel: getMonthLabel(),
     roleText: data.roleText || getRoleText(data.role),
     readonly: Boolean(data.readonly),
-    monthIncome: money(data.monthIncome),
+    monthIncome: formatDisplayMoney(data.monthIncome),
     monthIncomeCompact: compactMoney(data.monthIncome),
-    monthExpense: money(data.monthExpense),
+    monthExpense: formatDisplayMoney(data.monthExpense),
     monthExpenseCompact: compactMoney(data.monthExpense),
-    balance: money(data.balance),
+    balance: formatDisplayMoney(data.balance),
     balanceCompact: compactMoney(data.balance),
-    budget: money(data.budget),
+    budget: formatDisplayMoney(data.budget),
     budgetEnabled: Boolean(data.budgetEnabled),
-    budgetLeft: money(data.budgetLeft),
+    budgetLeft: formatDisplayMoney(data.budgetLeft),
     budgetRate: Number(data.budgetRate || 0),
     recordCount,
     topExpenseCategory: data.topExpenseCategory || "暂无",
-    largestExpenseAmount: money(data.largestExpenseAmount),
+    largestExpenseAmount: formatDisplayMoney(data.largestExpenseAmount),
     largestExpenseCompact: compactMoney(data.largestExpenseAmount),
     familyMood: data.familyMood || "本月还没有记录",
     recentRecords,
@@ -93,6 +93,8 @@ Page({
     ...getStatusFlags("loading"),
     ledgers: [],
     isLedgerSwitcherVisible: false,
+    isLoadingLedgers: false,
+    ledgerLoadError: false,
     isSwitchingLedger: false,
     showLedgerInfo: false,
     ledgerId: "",
@@ -102,16 +104,20 @@ Page({
     monthLabel: getMonthLabel(),
     roleText: "",
     readonly: false,
-    monthIncome: "0", monthIncomeCompact: "0",
-    monthExpense: "0", monthExpenseCompact: "0",
-    balance: "0", balanceCompact: "0",
+    monthIncome: "0",
+    monthIncomeCompact: "0",
+    monthExpense: "0",
+    monthExpenseCompact: "0",
+    balance: "0",
+    balanceCompact: "0",
     budget: "0",
     budgetEnabled: false,
     budgetLeft: "0",
     budgetRate: 0,
     recordCount: 0,
     topExpenseCategory: "暂无",
-    largestExpenseAmount: "0", largestExpenseCompact: "0",
+    largestExpenseAmount: "0",
+    largestExpenseCompact: "0",
     familyMood: "本月还没有记录",
     recentRecords: [],
     hasDashboardData: false,
@@ -135,7 +141,6 @@ Page({
 
     try {
       await app.loginWithWechat();
-      await this.loadLedgers();
       await this.loadDashboard();
     } catch (error) {
       console.warn("home bootstrap failed", error);
@@ -144,16 +149,16 @@ Page({
   },
 
   async loadLedgers() {
-    const result = await this.callApi("listLedgers", {});
-    const ledgers = result && result.success && result.data ? (result.data.ledgers || []) : [];
+    const data = await ledgerService.listLedgers();
+    const ledgers = data.ledgers || [];
     this.setData({ ledgers });
     return ledgers;
   },
 
   async loadDashboard(ledgerId) {
-    const dashboard = await this.callApi("getDashboard", ledgerId ? { ledgerId } : {});
-    if (dashboard && dashboard.success && dashboard.data) {
-      if (dashboard.data.noLedger) {
+    const dashboard = await ledgerService.getDashboard(ledgerId);
+    if (dashboard) {
+      if (dashboard.noLedger) {
         this.setData({
           ledgers: [],
           showLedgerInfo: false,
@@ -169,7 +174,7 @@ Page({
         return;
       }
 
-      const normalized = normalizeDashboard(dashboard.data);
+      const normalized = normalizeDashboard(dashboard);
       app.globalData.currentLedger = {
         ...(app.globalData.currentLedger || {}),
         _id: normalized.ledgerId,
@@ -178,7 +183,7 @@ Page({
         readonly: normalized.readonly,
         budgetEnabled: normalized.budgetEnabled,
         monthlyBudget: Number(normalized.budget || 0),
-        monthStartDay: Number(dashboard.data.monthStartDay || 1),
+        monthStartDay: Number(dashboard.monthStartDay || 1),
       };
       app.globalData.readonly = normalized.readonly;
       app.persistAuthState();
@@ -192,28 +197,12 @@ Page({
     this.setPageStatus("error");
   },
 
-  async callApi(action, data) {
-    if (!app.globalData.env) return null;
-    try {
-      const res = await wx.cloud.callFunction({
-        name: "tomatoLedger",
-        data: { action, data },
-      });
-      return res.result;
-    } catch (error) {
-      console.warn("tomatoLedger fallback", action, error);
-      return null;
-    }
-  },
-
   noop() {},
 
   getLedgerRoleTag(item = {}) {
-    const openid = app.globalData.openid;
-    if (item.role === "owner" || item.ownerOpenid === openid) return "拥有者";
-    if (item.role === "readonly" || (item.viewerOpenids || []).includes(openid)) return "访客";
-    if (item.role === "member" || (item.memberOpenids || []).includes(openid)) return "成员";
-    if (item.readonly) return "访客";
+    const role = getLedgerRole(app.globalData.openid, item);
+    if (role === "owner") return "拥有者";
+    if (role === "readonly") return "访客";
     return "成员";
   },
 
@@ -229,7 +218,8 @@ Page({
         typeTag,
         typeClass: item.type === "shared" ? "shared" : "personal",
         roleTag,
-        roleClass: roleTag === "拥有者" ? "owner" : roleTag === "访客" ? "visitor" : "member",
+        roleClass:
+          item.role === "owner" ? "owner" : item.role === "readonly" ? "visitor" : "member",
         canManage: roleTag === "拥有者",
         isCurrent: id === this.data.ledgerId,
       };
@@ -237,16 +227,26 @@ Page({
   },
 
   async switchLedger() {
-    const ledgers = this.data.ledgers.length ? this.data.ledgers : await this.loadLedgers();
-    if (!ledgers.length) {
-      wx.navigateTo({ url: "/pages/ledger-create/index" });
-      return;
-    }
-
+    if (this.data.isLoadingLedgers) return;
     this.setData({
-      ledgers: this.normalizeLedgers(ledgers),
       isLedgerSwitcherVisible: true,
+      isLoadingLedgers: true,
+      ledgerLoadError: false,
     });
+    try {
+      const ledgers = await this.loadLedgers();
+      if (!ledgers.length) {
+        this.setData({ isLedgerSwitcherVisible: false });
+        wx.navigateTo({ url: "/pages/ledger-create/index" });
+        return;
+      }
+      this.setData({ ledgers: this.normalizeLedgers(ledgers) });
+    } catch (error) {
+      console.warn("load ledgers for switcher failed", error);
+      this.setData({ ledgerLoadError: true });
+    } finally {
+      this.setData({ isLoadingLedgers: false });
+    }
   },
 
   closeLedgerSwitcher() {
@@ -255,7 +255,7 @@ Page({
   },
 
   async chooseLedger(event) {
-    const ledgerId = event.currentTarget.dataset.id;
+    const ledgerId = event.detail.ledgerId || event.currentTarget.dataset.id;
     if (!ledgerId || ledgerId === this.data.ledgerId || this.data.isSwitchingLedger) {
       this.closeLedgerSwitcher();
       return;
@@ -265,28 +265,26 @@ Page({
     if (!ledger) return;
 
     this.setData({ isSwitchingLedger: true });
-    wx.showLoading({ title: "切换中" });
     try {
-      const saved = await this.callApi("setCurrentLedger", { ledgerId });
-      if (!saved || !saved.success) {
+      const saved = await ledgerService.setCurrentLedger(ledgerId);
+      if (!saved) {
         wx.showToast({ title: "切换失败", icon: "none" });
         return;
       }
 
-      const nextLedger = saved.data && saved.data.ledger ? saved.data.ledger : ledger;
+      const nextLedger = saved.ledger || ledger;
       app.globalData.currentLedger = nextLedger;
-      app.globalData.readonly = Boolean(nextLedger.readonly || (saved.data && saved.data.role === "readonly"));
+      app.globalData.readonly = Boolean(nextLedger.readonly || saved.role === "readonly");
       if (app.globalData.user) app.globalData.user.currentLedgerId = ledgerId;
       app.persistAuthState();
 
-      this.setData({ isLedgerSwitcherVisible: false });
       this.setPageStatus("loading");
       await this.loadDashboard(ledgerId);
+      this.setData({ isLedgerSwitcherVisible: false });
     } catch (error) {
       console.warn("switch ledger failed", error);
       wx.showToast({ title: "切换失败", icon: "none" });
     } finally {
-      wx.hideLoading();
       this.setData({ isSwitchingLedger: false });
     }
   },
@@ -296,9 +294,11 @@ Page({
   },
 
   goLedgerSettings(event) {
-    const ledgerId = event.currentTarget.dataset.id || "";
+    const ledgerId = event.detail.ledgerId || event.currentTarget.dataset.id || "";
     this.setData({ isLedgerSwitcherVisible: false });
-    wx.navigateTo({ url: `/pages/ledger-detail-settings/index?ledgerId=${encodeURIComponent(ledgerId)}` });
+    wx.navigateTo({
+      url: `/pages/ledger-detail-settings/index?ledgerId=${encodeURIComponent(ledgerId)}`,
+    });
   },
   goCreateLedger() {
     this.setData({ isLedgerSwitcherVisible: false });

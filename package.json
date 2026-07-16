@@ -1,0 +1,20 @@
+{
+  "name": "tomato-ledger-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Engineering quality tooling",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write --ignore-unknown . \u0026\u0026 node scripts/format-wxml.mjs",
+    "format:check": "prettier --check --ignore-unknown . \u0026\u0026 node scripts/format-wxml.mjs --check",
+    "check": "npm run format:check \u0026\u0026 npm run lint",
+    "test": "node --test tests/money.test.js tests/mapper.test.js tests/cloud-route.test.js tests/cloud-env.test.js",
+    "cloud:check": "node scripts/check-cloud.mjs",
+    "verify": "npm run check \u0026\u0026 npm run test \u0026\u0026 npm run cloud:check"
+  },
+  "devDependencies": {
+    "eslint": "^9.30.1",
+    "prettier": "^3.5.3"
+  }
+}

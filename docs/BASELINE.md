@@ -22,13 +22,13 @@
 
 ## 数据集合与访问边界
 
-| 集合 | 用途 | 代码可见的关键字段 | 访问边界 |
-| --- | --- | --- | --- |
-| `users` | 用户与当前账本 | `openid`、`userNo`、`nickName`、`avatarUrl`、`gender`、`currentLedgerId`、时间戳 | 云函数按微信 OpenID 查询和更新 |
-| `ledgers` | 账本、成员、预算、邀请码 | `ownerOpenid`、成员/访客列表、`inviteCode`、`readonlyShareCode`、预算字段 | owner 可管理；member 可写记录；visitor 只读 |
-| `records` | 收支记录 | `ledgerId`、`ownerOpenid`、`type`、`amount`、分类字段、`date`、`account`、`tags`、时间戳 | owner/member 可写；非 owner 的 member 只能修改自己的记录 |
-| `categories` | 分类树 | `ledgerId`、`type`、`level`、`parentId`、`name`、`icon`、`sort`、默认标记 | owner 可编辑和删除；owner/member 可新增 |
-| `ledgerInvites` | 单次领取的邀请令牌 | `token`、`ledgerId`、`mode`、`ownerOpenid`、`claimedOpenid`、时间戳 | 仅 owner 可创建；领取后令牌绑定到一个 OpenID |
+| 集合            | 用途                     | 代码可见的关键字段                                                                       | 访问边界                                                 |
+| --------------- | ------------------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `users`         | 用户与当前账本           | `openid`、`userNo`、`nickName`、`avatarUrl`、`gender`、`currentLedgerId`、时间戳         | 云函数按微信 OpenID 查询和更新                           |
+| `ledgers`       | 账本、成员、预算、邀请码 | `ownerOpenid`、成员/访客列表、`inviteCode`、`readonlyShareCode`、预算字段                | owner 可管理；member 可写记录；visitor 只读              |
+| `records`       | 收支记录                 | `ledgerId`、`ownerOpenid`、`type`、`amount`、分类字段、`date`、`account`、`tags`、时间戳 | owner/member 可写；非 owner 的 member 只能修改自己的记录 |
+| `categories`    | 分类树                   | `ledgerId`、`type`、`level`、`parentId`、`name`、`icon`、`sort`、默认标记                | owner 可编辑和删除；owner/member 可新增                  |
+| `ledgerInvites` | 单次领取的邀请令牌       | `token`、`ledgerId`、`mode`、`ownerOpenid`、`claimedOpenid`、时间戳                      | 仅 owner 可创建；领取后令牌绑定到一个 OpenID             |
 
 云函数实现是字段和权限的唯一事实来源。调整集合名称、字段契约或角色判断前，应先更新本文。
 

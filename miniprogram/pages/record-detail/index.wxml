@@ -1,28 +1,31 @@
 <view class="page plain-page record-detail-page">
-  <custom-navbar title="记录明细" showBack="{{true}}"></custom-navbar>
+  <tl-navbar title="记录明细" showBack="{{true}}">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view wx:if="{{loading}}" class="detail-card card loading-card fade-up">
-        <view class="loading-line wide"></view>
-        <view class="loading-line"></view>
-        <view class="loading-line short"></view>
+        <view class="loading-line wide">
+        </view>
+        <view class="loading-line">
+        </view>
+        <view class="loading-line short">
+        </view>
       </view>
-
       <view wx:elif="{{isError}}" class="detail-card card empty-card fade-up">
-        <empty-state text="记录加载失败"></empty-state>
+        <tl-empty-state text="记录加载失败">
+        </tl-empty-state>
         <view class="primary-action" bindtap="reload">重新加载</view>
       </view>
-
       <block wx:else>
         <view class="detail-hero card fade-up">
           <view class="type-mark {{record.type}}">
-            <ri-icon name="{{record.typeIcon}}" size="42" color="{{record.typeIconColor}}"></ri-icon>
+            <tl-icon name="{{record.typeIcon}}" size="42" color="{{record.typeIconColor}}">
+            </tl-icon>
           </view>
           <view class="category-name">{{record.categoryText}}</view>
           <view class="category-path">{{record.parentCategoryText}} / {{record.typeText}}</view>
           <view class="amount {{record.type}}">{{record.sign}}¥{{record.amountText}}</view>
         </view>
-
         <view class="detail-card card fade-up">
           <view class="detail-row">
             <text class="detail-label">记录时间</text>
@@ -41,12 +44,12 @@
             <text class="detail-value">{{record.accountText}}</text>
           </view>
         </view>
-
         <view class="detail-card card fade-up">
           <view class="member-row">
             <text class="detail-label">记录人</text>
             <view class="member-info">
-              <image class="member-avatar" src="{{record.memberAvatar}}" mode="aspectFill"></image>
+              <image class="member-avatar" src="{{record.memberAvatar}}" mode="aspectFill">
+              </image>
               <text class="member-name">{{record.memberName}}</text>
             </view>
           </view>

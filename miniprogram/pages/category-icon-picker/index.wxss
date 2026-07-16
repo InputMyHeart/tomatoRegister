@@ -1,4 +1,6 @@
-.icon-picker-page { height: 100vh; }
+.icon-picker-page {
+  height: 100vh;
+}
 
 .icon-picker-page .page-content {
   padding: 24rpx 30rpx calc(50rpx + env(safe-area-inset-bottom));
@@ -21,7 +23,9 @@
   font-size: 27rpx;
 }
 
-.icon-group { margin-top: 34rpx; }
+.icon-group {
+  margin-top: 34rpx;
+}
 
 .group-title {
   margin: 0 0 16rpx 4rpx;
@@ -63,7 +67,9 @@
   background: #fff8f4;
 }
 
-.icon-cell.selected text { color: #f0442f; }
+.icon-cell.selected text {
+  color: #f0442f;
+}
 
 .empty-tip {
   padding: 120rpx 0;

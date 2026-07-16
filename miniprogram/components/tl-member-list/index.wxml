@@ -1,0 +1,11 @@
+<view wx:if="{{members.length}}" class="tl-member-list">
+  <text class="tl-member-list__title">账本成员</text>
+  <view wx:for="{{members}}" wx:key="openid" class="tl-member-list__item">
+    <image class="tl-member-list__avatar" src="{{item.avatarUrl || '/images/tabbar/profile-active.png'}}" mode="aspectFill">
+    </image>
+    <view class="tl-member-list__content">
+      <text class="tl-member-list__name">{{item.nickName || item.name || '账本成员'}}</text>
+      <text class="tl-member-list__role">{{item.role === 'admin' ? '管理员' : '成员'}}</text>
+    </view>
+  </view>
+</view>

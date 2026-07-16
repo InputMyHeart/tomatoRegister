@@ -1,0 +1,15 @@
+.tl-budget-progress {
+  width: 100%;
+}
+.tl-budget-progress__track {
+  height: 12rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: rgba(240, 68, 47, 0.12);
+}
+.tl-budget-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #f0442f;
+  transition: width 180ms ease;
+}

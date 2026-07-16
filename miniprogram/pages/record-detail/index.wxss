@@ -19,8 +19,12 @@
   justify-content: center;
 }
 
-.type-mark.expense { background: #fff0ea; }
-.type-mark.income { background: #edf9f2; }
+.type-mark.expense {
+  background: #fff0ea;
+}
+.type-mark.income {
+  background: #edf9f2;
+}
 
 .category-name {
   margin-top: 22rpx;
@@ -42,8 +46,12 @@
   font-weight: 900;
 }
 
-.amount.expense { color: #f0442f; }
-.amount.income { color: #25a66a; }
+.amount.expense {
+  color: #f0442f;
+}
+.amount.income {
+  color: #25a66a;
+}
 
 .detail-card {
   margin-top: 24rpx;

@@ -1,4 +1,5 @@
 const app = getApp();
+const ledgerService = require("../../services/ledger.service");
 
 function decodeOption(value) {
   return value ? decodeURIComponent(value) : "";
@@ -68,14 +69,6 @@ Page({
     this.joinLedger();
   },
 
-  async callApi(action, data = {}) {
-    const res = await wx.cloud.callFunction({
-      name: "tomatoLedger",
-      data: { action, data },
-    });
-    return res.result || {};
-  },
-
   async loginAndJoin() {
     if (this.data.busy) return;
     this.setData({ busy: true, status: "checking", message: "正在登录..." });
@@ -97,26 +90,21 @@ Page({
 
     const hasInviteToken = Boolean(this.data.inviteToken);
     const isReadonly = Boolean(this.data.readonlyShareCode);
-    const action = hasInviteToken ? "joinLedgerByInviteToken" : (isReadonly ? "joinReadonlyLedger" : "joinLedger");
     const payload = hasInviteToken
       ? { inviteToken: this.data.inviteToken }
-      : (isReadonly ? { readonlyShareCode: this.data.readonlyShareCode } : { inviteCode: this.data.inviteCode });
+      : isReadonly
+        ? { readonlyShareCode: this.data.readonlyShareCode }
+        : { inviteCode: this.data.inviteCode };
 
     this.setData({ busy: true, status: "joining", message: "正在加入账本..." });
 
     try {
-      const result = await this.callApi(action, payload);
-      if (!result || !result.success) {
-        const code = result && result.code;
-        const message = (result && result.message) || "加入账本失败，请重试。";
-        if (code === "INVITE_NOT_ALLOWED") {
-          this.setData({ status: "notice", busy: false, message });
-          return;
-        }
-        throw new Error(message);
-      }
+      const data = hasInviteToken
+        ? await ledgerService.joinLedgerByInviteToken(payload.inviteToken)
+        : isReadonly
+          ? await ledgerService.joinReadonlyLedger(payload.readonlyShareCode)
+          : await ledgerService.joinLedger(payload.inviteCode);
 
-      const data = result.data || {};
       const ledgerId = data.ledgerId;
       const ledger = data.ledger;
       const role = data.role || (isReadonly ? "readonly" : "member");
@@ -163,16 +151,16 @@ Page({
 
     this.setData({ activating: true });
     try {
-      const current = await this.callApi("setCurrentLedger", { ledgerId });
-      if (current && current.success && current.data) {
-        const ledger = current.data.ledger || null;
+      const current = await ledgerService.setCurrentLedger(ledgerId);
+      if (current) {
+        const ledger = current.ledger || null;
         app.globalData.currentLedger = ledger || app.globalData.currentLedger;
-        app.globalData.readonly = Boolean(this.data.isReadonly || current.data.role === "readonly");
+        app.globalData.readonly = Boolean(this.data.isReadonly || current.role === "readonly");
         if (app.globalData.user) app.globalData.user.currentLedgerId = ledgerId;
         app.persistAuthState();
       }
       wx.reLaunch({ url: "/pages/index/index" });
-    } catch (error) {
+    } catch (_error) {
       wx.showToast({ title: "切换账本失败", icon: "none" });
       this.setData({ activating: false });
     }

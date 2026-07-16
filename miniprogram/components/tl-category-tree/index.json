@@ -1,0 +1,4 @@
+{
+  "component": true,
+  "usingComponents": { "tl-icon": "/components/tl-icon/index" }
+}

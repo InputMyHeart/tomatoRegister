@@ -1,0 +1,5 @@
+<view wx:if="{{show}}" class="tl-empty-state">
+  <image class="empty-icon" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
+  </image>
+  <view class="empty-text">{{text}}</view>
+</view>

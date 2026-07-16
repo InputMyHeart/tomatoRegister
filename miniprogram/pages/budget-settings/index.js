@@ -1,4 +1,5 @@
 const app = getApp();
+const ledgerService = require("../../services/ledger.service");
 
 function normalizeBudget(value) {
   const numberValue = Math.round(Number(value) * 100) / 100;
@@ -6,9 +7,11 @@ function normalizeBudget(value) {
 }
 
 function isValidBudget(value) {
-  return /^\d+(?:\.\d{1,2})?$/.test(String(value))
-    && normalizeBudget(value) >= 1
-    && normalizeBudget(value) <= 999999;
+  return (
+    /^\d+(?:\.\d{1,2})?$/.test(String(value)) &&
+    normalizeBudget(value) >= 1 &&
+    normalizeBudget(value) <= 999999
+  );
 }
 
 Page({
@@ -36,7 +39,6 @@ Page({
     this.setData({ budgetEnabled: Boolean(event.detail.value) });
   },
 
-
   onBudgetInput(event) {
     this.setData({ monthlyBudget: event.detail.value });
   },
@@ -48,27 +50,18 @@ Page({
     }
     if (this.data.saving) return;
     if (this.data.budgetEnabled && !isValidBudget(this.data.monthlyBudget)) {
-      wx.showToast({ title: '预算金额需为 1-999999，最多两位小数', icon: 'none' });
+      wx.showToast({ title: "预算金额需为 1-999999，最多两位小数", icon: "none" });
       return;
     }
     this.setData({ saving: true });
     wx.showLoading({ title: "保存中" });
     try {
-      const res = await wx.cloud.callFunction({
-        name: "tomatoLedger",
-        data: {
-          action: "updateBudget",
-          data: {
-            ledgerId: this.data.ledgerId,
-            budgetEnabled: this.data.budgetEnabled,
-            monthlyBudget: normalizeBudget(this.data.monthlyBudget),
-          },
-        },
+      const data = await ledgerService.updateBudget({
+        ledgerId: this.data.ledgerId,
+        budgetEnabled: this.data.budgetEnabled,
+        monthlyBudget: normalizeBudget(this.data.monthlyBudget),
       });
-      const result = res.result || {};
-      if (!result.success) throw new Error(result.message || "保存失败");
-
-      const ledger = result.data && result.data.ledger;
+      const ledger = data.ledger;
       if (ledger) {
         app.globalData.currentLedger = {
           ...(app.globalData.currentLedger || {}),

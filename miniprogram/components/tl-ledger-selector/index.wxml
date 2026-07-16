@@ -1,0 +1,19 @@
+<scroll-view class="tl-ledger-selector" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+  <view wx:for="{{ledgers}}" wx:key="id" class="tl-ledger-selector__item {{item.id === currentId ? 'is-current' : ''}}" data-id="{{item.id}}" bindtap="select">
+    <view class="tl-ledger-selector__icon">
+      <tl-icon name="{{item.icon || 'book-2-line'}}" size="34rpx">
+      </tl-icon>
+    </view>
+    <view class="tl-ledger-selector__content">
+      <view class="tl-ledger-selector__title-row">
+        <text class="tl-ledger-selector__name">{{item.displayName || item.name}}</text>
+        <text class="tl-ledger-selector__tag">{{item.typeTag}}</text>
+      </view>
+      <text class="tl-ledger-selector__meta">{{item.roleTag}} · {{item.memberCount || 1}} 人</text>
+    </view>
+    <view class="tl-ledger-selector__manage" data-id="{{item.id}}" catchtap="manage">
+      <tl-icon name="settings-3-line" size="30rpx">
+      </tl-icon>
+    </view>
+  </view>
+</scroll-view>

@@ -1,11 +1,11 @@
 const app = getApp();
+const { formatDisplayMoney } = require("../../utils/money");
+const { formatDateLabel } = require("../../utils/date");
+const { getId } = require("../../utils/mapper");
+const ledgerService = require("../../services/ledger.service");
+const recordService = require("../../services/record.service");
 
 const weekdayMap = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-
-function money(value) {
-  const num = Number(value || 0);
-  return num.toFixed(num % 1 === 0 ? 0 : 2);
-}
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -44,19 +44,13 @@ function getCurrentRange(monthStartDay) {
   return getRange(year, month, monthStartDay);
 }
 
-function formatDateLabel(dateText) {
-  const date = new Date(`${dateText}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateText || "未选择日期";
-  return `${date.getMonth() + 1}月${date.getDate()}日`;
-}
-
 function normalizeRecord(record = {}) {
   const type = record.type === "income" ? "income" : "expense";
   return {
     ...record,
-    id: record.id || record._id || "",
+    id: getId(record),
     type,
-    amountText: money(record.amount),
+    amountText: formatDisplayMoney(record.amount),
     sign: type === "income" ? "+" : "-",
     categoryText: record.categoryName || record.categoryLabel || "其他",
     noteText: record.note || "未填写备注",
@@ -69,7 +63,8 @@ function normalizeRecord(record = {}) {
 }
 
 function buildView(records, activeType) {
-  const visibleRecords = activeType === "all" ? records : records.filter((item) => item.type === activeType);
+  const visibleRecords =
+    activeType === "all" ? records : records.filter((item) => item.type === activeType);
   const groups = [];
   const groupMap = {};
 
@@ -92,17 +87,21 @@ function buildView(records, activeType) {
     group.records.push(record);
   });
 
-  const visibleIncome = visibleRecords.filter((item) => item.type === "income").reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const visibleExpense = visibleRecords.filter((item) => item.type === "expense").reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const visibleIncome = visibleRecords
+    .filter((item) => item.type === "income")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const visibleExpense = visibleRecords
+    .filter((item) => item.type === "expense")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
   return {
     recordGroups: groups.map((group) => ({
       ...group,
-      income: money(group.income),
-      expense: money(group.expense),
+      income: formatDisplayMoney(group.income),
+      expense: formatDisplayMoney(group.expense),
     })),
-    visibleIncome: money(visibleIncome),
-    visibleExpense: money(visibleExpense),
+    visibleIncome: formatDisplayMoney(visibleIncome),
+    visibleExpense: formatDisplayMoney(visibleExpense),
     visibleCount: visibleRecords.length,
     hasRecords: visibleRecords.length > 0,
   };
@@ -117,6 +116,9 @@ Page({
     activeType: "all",
     readonly: false,
     loading: true,
+    loadingMore: false,
+    hasMore: false,
+    nextCursor: null,
     isError: false,
     records: [],
     currentRange: null,
@@ -150,38 +152,44 @@ Page({
     await this.loadRecords(currentRange);
   },
 
-  async callApi(action, data = {}) {
-    if (!app.globalData.env) return null;
-    const res = await wx.cloud.callFunction({
-      name: "tomatoLedger",
-      data: { action, data },
-    });
-    return res.result;
-  },
-
-  async loadRecords(range = this.data.currentRange) {
-    if (!range) return;
-    this.setData({ loading: true, isError: false });
+  async loadRecords(range = this.data.currentRange, append = false) {
+    if (!range || (append && (!this.data.hasMore || this.data.loadingMore))) return;
+    this.setData(
+      append
+        ? { loadingMore: true }
+        : { loading: true, isError: false, records: [], nextCursor: null, hasMore: false }
+    );
     try {
-      const result = await this.callApi("listRecords", {
+      const data = await recordService.listRecords({
         ledgerId: this.data.ledgerId,
         start: range.start,
         end: range.end,
+        pageSize: 30,
+        cursor: append ? this.data.nextCursor : null,
       });
-      if (!result || !result.success || !result.data) {
-        throw new Error((result && result.message) || "明细加载失败");
-      }
-      const records = (result.data.records || []).map(normalizeRecord);
+      const page = (data.records || []).map(normalizeRecord);
+      const records = append ? [...this.data.records, ...page] : page;
       this.setData({
         loading: false,
+        loadingMore: false,
         records,
-        readonly: Boolean(result.data.readonly),
+        nextCursor: data.nextCursor || null,
+        hasMore: Boolean(data.hasMore),
+        readonly: Boolean(data.readonly),
         ...buildView(records, this.data.activeType),
       });
     } catch (error) {
       console.warn("load records failed", error);
-      this.setData({ loading: false, isError: true, ...buildView([], this.data.activeType) });
+      this.setData(
+        append
+          ? { loadingMore: false }
+          : { loading: false, isError: true, ...buildView([], this.data.activeType) }
+      );
     }
+  },
+
+  loadMore() {
+    this.loadRecords(this.data.currentRange, true);
   },
 
   switchType(event) {
@@ -191,22 +199,37 @@ Page({
 
   async switchLedger() {
     try {
-      const result = await this.callApi("listLedgers", {});
-      const ledgerOptions = result && result.success && result.data ? result.data.ledgers || [] : [];
+      const data = await ledgerService.listLedgers();
+      const ledgerOptions = data.ledgers || [];
       this.setData({ ledgerOptions, isLedgerSwitcherVisible: true });
-    } catch (error) { wx.showToast({ title: "账本加载失败", icon: "none" }); }
+    } catch (_error) {
+      wx.showToast({ title: "账本加载失败", icon: "none" });
+    }
   },
 
-  closeLedgerSwitcher() { this.setData({ isLedgerSwitcherVisible: false }); },
+  closeLedgerSwitcher() {
+    this.setData({ isLedgerSwitcherVisible: false });
+  },
   stopLedgerSwitcherTap() {},
 
   chooseViewLedger(event) {
     const ledgerId = event.currentTarget.dataset.id;
     const ledger = this.data.ledgerOptions.find((item) => (item._id || item.id) === ledgerId);
-    if (!ledger || ledgerId === this.data.ledgerId) { this.closeLedgerSwitcher(); return; }
+    if (!ledger || ledgerId === this.data.ledgerId) {
+      this.closeLedgerSwitcher();
+      return;
+    }
     const monthStartDay = Number(ledger.monthStartDay || 1);
     const currentRange = getCurrentRange(monthStartDay);
-    this.setData({ ledgerId, ledgerName: ledger.name || "我的账本", monthStartDay, currentRange, monthLabel: currentRange.label, isLedgerSwitcherVisible: false, activeType: "all" });
+    this.setData({
+      ledgerId,
+      ledgerName: ledger.name || "我的账本",
+      monthStartDay,
+      currentRange,
+      monthLabel: currentRange.label,
+      isLedgerSwitcherVisible: false,
+      activeType: "all",
+    });
     this.loadRecords(currentRange);
   },
 

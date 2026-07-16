@@ -1,5 +1,5 @@
 {
-    "usingComponents":  {
-                            "custom-navbar":  "/components/custom-navbar/index"
-                        }
+  "usingComponents": {
+    "tl-navbar": "/components/tl-navbar/index"
+  }
 }

@@ -71,7 +71,6 @@
   line-height: 1.35;
 }
 
-
 .join-result-main.is-notice {
   padding-left: 30rpx;
   padding-right: 30rpx;
@@ -144,8 +143,7 @@
   border: 2rpx solid #eaded8;
 }
 
-
-.result-icon ri-icon {
+.result-icon tl-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +161,9 @@
 }
 
 @keyframes joinButtonSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .primary-action::after,
 .secondary-action::after {

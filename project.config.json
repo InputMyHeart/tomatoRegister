@@ -75,7 +75,7 @@
   "srcMiniprogramRoot": "miniprogram/",
   "packOptions": {
     "ignore": [
-{
+      {
         "type": "file",
         "value": "miniprogram/images/create_cbr.png"
       },

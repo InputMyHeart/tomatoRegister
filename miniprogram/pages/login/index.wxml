@@ -1,13 +1,16 @@
 <view class="page plain-page login-page">
-  <custom-navbar hideBrand="{{true}}" hideTitle="{{true}}"></custom-navbar>
+  <tl-navbar hideBrand="{{true}}" hideTitle="{{true}}">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content login-content">
-      <image class="login-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+      <image class="login-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
+      </image>
       <view class="login-title fade-up">番茄记一笔</view>
       <view class="login-subtitle fade-up">简单、干净、好用的记账小程序</view>
       <button class="tomato-button login-button fade-up {{loggingIn ? 'is-loading' : ''}}" disabled="{{loggingIn}}" bindtap="login">
         <view class="login-button-inner">
-          <view wx:if="{{loggingIn}}" class="login-spinner"></view>
+          <view wx:if="{{loggingIn}}" class="login-spinner">
+          </view>
           <text>{{loggingIn ? '登录中...' : '微信登录'}}</text>
         </view>
       </button>

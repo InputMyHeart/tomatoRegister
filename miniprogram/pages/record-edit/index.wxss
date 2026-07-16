@@ -1,4 +1,6 @@
-.edit-page { padding-bottom: 230rpx; }
+.edit-page {
+  padding-bottom: 230rpx;
+}
 
 .selected-card,
 .selected-left {
@@ -68,7 +70,6 @@
   text-overflow: ellipsis;
 }
 
-
 .selected-meta {
   max-width: 360rpx;
   margin-top: 6rpx;
@@ -85,49 +86,4 @@
   font-size: 26rpx;
   font-weight: 900;
   flex: 0 0 auto;
-}
-
-.form-card { padding: 30rpx; margin-bottom: 32rpx; }
-.amount-box { display: flex; align-items: center; padding-bottom: 20rpx; border-bottom: 1rpx solid #f2e9e3; }
-.currency { color: #e94b35; font-size: 52rpx; font-weight: 900; }
-.currency.income { color: #25a66a; }
-.amount-input { flex: 1; height: 94rpx; padding-left: 18rpx; color: #2f2926; font-size: 72rpx; font-weight: 900; }
-.amount-result { margin-top: 12rpx; color: #9a8278; font-size: 28rpx; font-weight: 900; text-align: right; }
-.quick-amounts { display: flex; flex-wrap: wrap; gap: 14rpx; margin-top: 20rpx; }
-.quick-chip,
-.note-chip { padding: 14rpx 22rpx; border-radius: 999rpx; color: #8b766d; background: #fff8f4; font-size: 24rpx; font-weight: 700; }
-.field-label { color: #8d7f78; font-size: 26rpx; }
-.field-row { display: flex; align-items: center; justify-content: space-between; min-height: 96rpx; border-bottom: 1rpx solid #f2e9e3; }
-.field-value { color: #2f2926; font-size: 29rpx; font-weight: 800; }
-.note-box,
-.tag-box { padding-top: 26rpx; }
-.note-input,
-.tag-input { margin-top: 14rpx; height: 82rpx; padding: 0 24rpx; border-radius: 24rpx; color: #2f2926; background: #fff8f4; font-size: 28rpx; }
-.note-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
-.tag-box { border-top: 1rpx solid #f2e9e3; margin-top: 24rpx; }
-.tag-input-row { display: flex; align-items: center; gap: 12rpx; }
-.tag-input { flex: 1; min-width: 0; }
-.tag-add { width: 104rpx; height: 72rpx; margin-top: 14rpx; border-radius: 999rpx; background: #fff0ea; color: #f0442f; display: flex; align-items: center; justify-content: center; font-size: 25rpx; font-weight: 900; }
-.tag-list { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
-.tag-chip { padding: 12rpx 20rpx; border-radius: 999rpx; color: #f0442f; background: #fff0ea; font-size: 24rpx; font-weight: 800; }
-
-.save-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 90;
-  padding: 18rpx 32rpx calc(24rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 247, 242, 0.96);
-  box-shadow: 0 -12rpx 34rpx rgba(165, 74, 47, 0.08);
-}
-
-.save-button {
-  margin-top: 0;
-}
-
-.save-button.disabled {
-  background: #d8cbc4;
-  box-shadow: none;
-  color: rgba(255, 255, 255, 0.82);
 }

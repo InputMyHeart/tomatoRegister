@@ -1,0 +1,21 @@
+.tl-empty-state {
+  min-height: 320rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #a88c82;
+}
+
+.empty-icon {
+  width: 92rpx;
+  height: 92rpx;
+  opacity: 0.9;
+  filter: drop-shadow(0 12rpx 20rpx rgba(240, 68, 47, 0.16));
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 27rpx;
+  font-weight: 700;
+}

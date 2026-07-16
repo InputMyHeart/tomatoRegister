@@ -1,63 +1,77 @@
 <view class="page tabbar-page home-page">
-  <custom-navbar title=""></custom-navbar>
+  <tl-navbar title="">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view wx:if="{{isLoading || showLedgerInfo}}" class="hero fade-up">
         <block wx:if="{{isLoading}}">
           <view class="hero-main hero-skeleton-main">
             <view class="ledger-info-skeleton-row">
-              <view class="ledger-title-skeleton"></view>
-              <view class="ledger-tag-skeleton"></view>
-              <view class="ledger-arrow-skeleton"></view>
+              <view class="ledger-title-skeleton">
+              </view>
+              <view class="ledger-tag-skeleton">
+              </view>
+              <view class="ledger-arrow-skeleton">
+              </view>
             </view>
-            <view class="ledger-month-skeleton"></view>
+            <view class="ledger-month-skeleton">
+            </view>
           </view>
-          <view class="ledger-logo-skeleton"></view>
+          <view class="ledger-logo-skeleton">
+          </view>
         </block>
         <block wx:else>
           <view class="hero-main">
             <view class="ledger-switch" bindtap="switchLedger">
               <text class="ledger-title">{{ledgerName}}</text>
               <view class="ledger-type-tag">{{ledgerTypeText}}</view>
-              <ri-icon name="arrow-down-s-line" size="38" color="#f0442f"></ri-icon>
+              <tl-icon name="arrow-down-s-line" size="38" color="#f0442f">
+              </tl-icon>
             </view>
             <view class="month-line">{{monthLabel}}</view>
           </view>
-          <image class="hero-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit"></image>
+          <image class="hero-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
+          </image>
         </block>
       </view>
-
       <view wx:if="{{isLoading}}" class="loading-card card fade-up">
-        <view class="skeleton-title"></view>
-        <view class="skeleton-line wide"></view>
-        <view class="skeleton-grid">
-          <view class="skeleton-block"></view>
-          <view class="skeleton-block"></view>
-          <view class="skeleton-block"></view>
+        <view class="skeleton-title">
         </view>
-        <view class="skeleton-line"></view>
-        <view class="skeleton-line short"></view>
+        <view class="skeleton-line wide">
+        </view>
+        <view class="skeleton-grid">
+          <view class="skeleton-block">
+          </view>
+          <view class="skeleton-block">
+          </view>
+          <view class="skeleton-block">
+          </view>
+        </view>
+        <view class="skeleton-line">
+        </view>
+        <view class="skeleton-line short">
+        </view>
       </view>
-
       <view wx:elif="{{isNoLedger}}" class="state-card card fade-up">
-        <empty-state text="还没有账本"></empty-state>
+        <tl-empty-state text="还没有账本">
+        </tl-empty-state>
         <view class="state-copy">创建自己的第一个账本，开始记录每一笔收入和支出。</view>
         <view class="primary-action" bindtap="goCreateLedger">创建账本</view>
       </view>
-
       <view wx:elif="{{isEmpty}}" class="state-card card fade-up">
-        <empty-state text="本月暂无记账数据"></empty-state>
+        <tl-empty-state text="本月暂无记账数据">
+        </tl-empty-state>
         <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
       </view>
-
       <view wx:elif="{{isError}}" class="state-card card fade-up">
-        <empty-state text="数据加载失败，请稍后重试"></empty-state>
+        <tl-empty-state text="数据加载失败，请稍后重试">
+        </tl-empty-state>
         <view class="primary-action" bindtap="bootstrap">重新加载</view>
       </view>
-
       <block wx:else>
         <view class="summary-card card fade-up">
-          <view class="summary-glow"></view>
+          <view class="summary-glow">
+          </view>
           <view class="summary-head">
             <view>
               <view class="section-kicker">本月概览</view>
@@ -80,25 +94,32 @@
             </view>
           </view>
         </view>
-
         <view class="mini-stats fade-up">
           <view class="mini-stat">
-            <view class="mini-icon"><ri-icon name="file-list-3-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-icon">
+              <tl-icon name="file-list-3-line" size="24" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="mini-value">{{recordCount}}</view>
             <view class="mini-label">本月记录</view>
           </view>
           <view class="mini-stat">
-            <view class="mini-icon"><ri-icon name="restaurant-2-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-icon">
+              <tl-icon name="restaurant-2-line" size="24" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="mini-value">{{topExpenseCategory}}</view>
             <view class="mini-label">支出最多</view>
           </view>
           <view class="mini-stat">
-            <view class="mini-icon"><ri-icon name="funds-line" size="24" color="#f0442f"></ri-icon></view>
+            <view class="mini-icon">
+              <tl-icon name="funds-line" size="24" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="mini-value">¥{{largestExpenseCompact}}</view>
             <view class="mini-label">支出最大</view>
           </view>
         </view>
-
         <view class="budget-card card fade-up">
           <view class="section-head">
             <view>
@@ -107,13 +128,14 @@
               <view class="section-tip" wx:else>未启用月预算</view>
               <view wx:if="{{budgetEnabled}}" class="budget-status {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}">{{budgetRate >= 90 ? '预算预警，请控制支出' : budgetRate >= 70 ? '消费偏快，留意后续支出' : budgetRate >= 50 ? '已使用过半，注意节奏' : '预算充足，保持记录'}}</view>
             </view>
-            <view class="budget-right"><view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view><view class="budget-setting-link" bindtap="goBudgetSettings">设置</view></view>
+            <view class="budget-right">
+              <view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view>
+              <view class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
+            </view>
           </view>
-          <view class="progress-track" wx:if="{{budgetEnabled}}">
-            <view class="progress-fill {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}" style="width: {{budgetRate}}%;"></view>
-          </view>
+          <tl-budget-progress enabled="{{budgetEnabled}}" budget="{{budget}}" expense="{{monthExpense}}">
+          </tl-budget-progress>
         </view>
-
         <view class="records-card card fade-up">
           <view class="section-head">
             <view class="section-title">最近记录</view>
@@ -121,18 +143,18 @@
           </view>
           <view class="record-item" wx:for="{{recentRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="goRecordDetail">
             <view class="category-dot {{item.type}}">
-              <ri-icon name="{{item.typeIcon}}" size="34" color="{{item.typeIconColor}}"></ri-icon>
+              <tl-icon name="{{item.typeIcon}}" size="34" color="{{item.typeIconColor}}">
+              </tl-icon>
             </view>
             <view class="record-main">
               <view class="record-title">{{item.categoryText}}</view>
               <view class="record-meta">{{item.selectedTimeText}}</view>
             </view>
             <view class="record-side">
-              <view class="record-amount {{item.type}}">
-                {{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}
-              </view>
+              <view class="record-amount {{item.type}}">{{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}</view>
               <view class="record-member">
-                <image class="record-avatar" src="{{item.memberAvatar}}" mode="aspectFill"></image>
+                <image class="record-avatar" src="{{item.memberAvatar}}" mode="aspectFill">
+                </image>
                 <text class="record-member-name">{{item.memberName}}</text>
               </view>
             </view>
@@ -142,10 +164,10 @@
       </block>
     </view>
   </scroll-view>
-
   <view wx:if="{{isLedgerSwitcherVisible}}" class="ledger-switcher-mask" catchtap="closeLedgerSwitcher">
     <view class="ledger-switcher-panel" catchtap="noop">
-      <view class="ledger-switcher-handle"></view>
+      <view class="ledger-switcher-handle">
+      </view>
       <view class="ledger-switcher-head">
         <view>
           <view class="ledger-switcher-title">切换账本</view>
@@ -153,26 +175,27 @@
         </view>
         <view class="ledger-switcher-close" bindtap="closeLedgerSwitcher">×</view>
       </view>
-      <scroll-view class="ledger-option-list" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
-        <view wx:for="{{ledgers}}" wx:key="id" class="ledger-option {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" bindtap="chooseLedger">
-          <view class="ledger-option-main">
-            <view class="ledger-option-name-row"><text class="ledger-option-name">{{item.displayName || item.name}}</text><text wx:if="{{item.isCurrent}}" class="ledger-current-mark">当前</text></view>
-            <view class="ledger-option-tags">
-              <text class="ledger-option-tag type-tag {{item.typeClass}}">{{item.typeTag}}</text>
-              <text class="ledger-option-tag role-tag {{item.roleClass}}">{{item.roleTag}}</text>
-            </view>
-          </view>
-          <view class="ledger-option-actions">
-            <view wx:if="{{item.id}}" class="ledger-settings-button {{item.isCurrent ? 'is-current' : ''}}" data-id="{{item.id}}" catchtap="goLedgerSettings">
-              <ri-icon name="settings-3-line" size="22" color="#f0442f"></ri-icon>
-              <text>设置</text>
-            </view>
-          </view>
+      <view wx:if="{{isSwitchingLedger}}" class="ledger-switcher-loading">
+        <view class="ledger-switcher-spinner">
         </view>
-      </scroll-view>
-      <view class="ledger-create-entry" bindtap="goCreateLedger">新建账本</view>
+        <view>正在切换账本...</view>
+      </view>
+      <view wx:elif="{{isLoadingLedgers}}" class="ledger-switcher-loading">
+        <view class="ledger-switcher-spinner">
+        </view>
+        <view>正在加载账本...</view>
+      </view>
+      <view wx:elif="{{ledgerLoadError}}" class="ledger-switcher-error">
+        <view>账本加载失败</view>
+        <view class="ledger-switcher-retry" bindtap="switchLedger">点击重试</view>
+      </view>
+      <block wx:else>
+        <tl-ledger-selector ledgers="{{ledgers}}" current-id="{{ledgerId}}" bind:select="chooseLedger" bind:manage="goLedgerSettings">
+        </tl-ledger-selector>
+        <view class="ledger-create-entry" bindtap="goCreateLedger">新建账本</view>
+      </block>
     </view>
   </view>
-
-  <custom-tabbar active="index" readonly="{{readonly}}" record-disabled-reason="{{isNoLedger ? 'noLedger' : readonly ? 'readonly' : !canRecord ? 'unavailable' : ''}}"></custom-tabbar>
+  <tl-tabbar active="index" readonly="{{readonly}}" record-disabled-reason="{{isNoLedger ? 'noLedger' : readonly ? 'readonly' : !canRecord ? 'unavailable' : ''}}">
+  </tl-tabbar>
 </view>

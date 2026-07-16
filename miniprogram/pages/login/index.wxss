@@ -2,7 +2,7 @@
   position: relative;
 }
 
-.login-page custom-navbar {
+.login-page tl-navbar {
   position: absolute;
   top: 0;
   left: 28rpx;
@@ -72,5 +72,7 @@
 }
 
 @keyframes loginSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

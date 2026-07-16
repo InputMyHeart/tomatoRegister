@@ -1,73 +1,28 @@
 <view class="page plain-page edit-page">
-  <custom-navbar title="{{typeLabel}}明细" showBack="{{true}}"></custom-navbar>
+  <tl-navbar title="{{typeLabel}}明细" showBack="{{true}}">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
-
-  <view class="selected-card card fade-up" bindtap="reselectCategory">
-    <view class="selected-left">
-      <view class="type-badge {{type}}">
-        <ri-icon name="{{typeIcon}}" size="24" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}"></ri-icon>
-        <text>{{typeLabel}}</text>
+      <view class="selected-card card fade-up" bindtap="reselectCategory">
+        <view class="selected-left">
+          <view class="type-badge {{type}}">
+            <tl-icon name="{{typeIcon}}" size="24" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}">
+            </tl-icon>
+            <text>{{typeLabel}}</text>
+          </view>
+          <view class="selected-icon {{type}}">
+            <tl-icon name="{{categoryIcon}}" size="34" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}">
+            </tl-icon>
+          </view>
+          <view class="selected-text">
+            <view class="selected-name">{{categoryLabel}}</view>
+            <view class="selected-meta">{{parentCategory}} / {{categoryName}}</view>
+          </view>
+        </view>
+        <view class="change-link">重选</view>
       </view>
-      <view class="selected-icon {{type}}">
-        <ri-icon name="{{categoryIcon}}" size="34" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}"></ri-icon>
-      </view>
-      <view class="selected-text">
-        <view class="selected-name">{{categoryLabel}}</view>
-        <view class="selected-meta">{{parentCategory}} / {{categoryName}}</view>
-      </view>
-    </view>
-    <view class="change-link">重选</view>
-  </view>
-
-  <view class="form-card card fade-up">
-    <view class="amount-box">
-      <text class="currency {{type}}">¥</text>
-      <input class="amount-input" type="text" placeholder="0.00" value="{{amount}}" bindinput="onAmountInput" focus />
-    </view>
-    <view class="amount-result" wx:if="{{showAmountResult}}">={{amountResult}}</view>
-
-    <view class="quick-amounts">
-      <view class="quick-chip" wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="setQuickAmount">¥{{item}}</view>
-    </view>
-
-    <view class="field-row">
-      <view class="field-label">账本</view>
-      <view class="field-value">{{ledgerName}}</view>
-    </view>
-    <view class="field-row">
-      <view class="field-label">账户</view>
-      <picker mode="selector" range="{{accounts}}" value="{{accountIndex}}" bindchange="onAccountChange">
-        <view class="field-value">{{accounts[accountIndex]}}</view>
-      </picker>
-    </view>
-    <view class="field-row">
-      <view class="field-label">日期</view>
-      <picker mode="date" value="{{date}}" bindchange="onDateChange">
-        <view class="field-value">{{date}}</view>
-      </picker>
-    </view>
-    <view class="note-box">
-      <view class="field-label">备注</view>
-      <input class="note-input" placeholder="比如：周末家庭晚餐" value="{{note}}" bindinput="onNoteInput" />
-    </view>
-
-    <view class="tag-box">
-      <view class="field-label">标签</view>
-      <view class="tag-input-row">
-        <input class="tag-input" placeholder="输入后点完成，可用空格分隔" value="{{tagInput}}" confirm-type="done" bindinput="onTagInput" bindconfirm="addTag" />
-        <view class="tag-add" bindtap="addTag">添加</view>
-      </view>
-      <view class="tag-list" wx:if="{{tags.length}}">
-        <view class="tag-chip" wx:for="{{tags}}" wx:key="*this" data-index="{{index}}" bindtap="removeTag">#{{item}}</view>
-      </view>
-    </view>
-  </view>
-
+      <tl-record-form amount="{{amount}}" amount-result="{{amountResult}}" show-amount-result="{{showAmountResult}}" quick-amounts="{{quickAmounts}}" ledger-name="{{ledgerName}}" accounts="{{accounts}}" account-index="{{accountIndex}}" date="{{date}}" note="{{note}}" tag-input="{{tagInput}}" tags="{{tags}}" can-save="{{canSave}}" saving="{{saving}}" bind:amountinput="onAmountInput" bind:quickamount="setQuickAmount" bind:accountchange="onAccountChange" bind:datechange="onDateChange" bind:noteinput="onNoteInput" bind:taginput="onTagInput" bind:addtag="addTag" bind:removetag="removeTag" bind:submit="saveRecord">
+      </tl-record-form>
     </view>
   </scroll-view>
-
-  <view class="save-bar">
-    <button class="tomato-button save-button {{canSave ? '' : 'disabled'}}" bindtap="saveRecord">保存记录</button>
-  </view>
 </view>

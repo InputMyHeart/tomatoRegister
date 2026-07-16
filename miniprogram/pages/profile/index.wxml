@@ -1,13 +1,16 @@
 <view class="page tabbar-page profile-page">
-  <custom-navbar title="我的"></custom-navbar>
+  <tl-navbar title="我的">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view class="profile-hero-card card fade-up">
         <view class="profile-setting" bindtap="handleIdentityTap">
-          <ri-icon name="settings-3-line" size="30" color="#f0442f"></ri-icon>
+          <tl-icon name="settings-3-line" size="30" color="#f0442f">
+          </tl-icon>
         </view>
         <view class="identity-row" bindtap="handleIdentityTap">
-          <image class="avatar-img" src="{{userAvatar}}" mode="aspectFill"></image>
+          <image class="avatar-img" src="{{userAvatar}}" mode="aspectFill">
+          </image>
           <view class="identity-main">
             <view class="user-name-row">
               <text class="user-name">{{userName}}</text>
@@ -15,7 +18,6 @@
             <view class="user-tip">{{userGender}}</view>
           </view>
         </view>
-
         <view class="stats-grid">
           <view class="stat-item">
             <view class="stat-value">{{usageDays}}</view>
@@ -35,31 +37,52 @@
         <view class="section-title">常用功能</view>
         <view class="tool-grid common-grid">
           <view class="tool-tile" bindtap="ledgerSettings">
-            <view class="tool-icon"><ri-icon name="settings-3-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="settings-3-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">账本管理</view>
           </view>
           <view class="tool-tile" bindtap="manageCategories">
-            <view class="tool-icon"><ri-icon name="price-tag-3-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="price-tag-3-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">分类管理</view>
           </view>
           <view class="tool-tile" bindtap="manageAccounts">
-            <view class="tool-icon"><ri-icon name="bank-card-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="bank-card-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">支付账户</view>
           </view>
           <view class="tool-tile" bindtap="manageQuickAmounts">
-            <view class="tool-icon"><ri-icon name="wallet-3-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="wallet-3-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">快捷金额</view>
           </view>
           <view class="tool-tile" bindtap="manageMonthStartDay">
-            <view class="tool-icon"><ri-icon name="calendar-event-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="calendar-event-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">月度起始</view>
           </view>
           <view class="tool-tile" bindtap="importBill">
-            <view class="tool-icon"><ri-icon name="upload-2-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="upload-2-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">导入账单</view>
           </view>
           <view class="tool-tile" bindtap="exportBill">
-            <view class="tool-icon"><ri-icon name="download-2-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="tool-icon">
+              <tl-icon name="download-2-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="tool-title">导出账单</view>
           </view>
         </view>
@@ -68,34 +91,52 @@
         <view class="section-title">其他</view>
         <view class="function-list">
           <view class="function-row" bindtap="feedback">
-            <view class="function-icon"><ri-icon name="message-3-line" size="30" color="#f0442f"></ri-icon></view>
+            <view class="function-icon">
+              <tl-icon name="message-3-line" size="30" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="function-main">
               <view class="function-title">意见反馈</view>
               <view class="function-tip">告诉我们哪里还可以更好用</view>
             </view>
-            <view class="function-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="function-arrow">
+              <tl-icon name="arrow-right-s-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
           </view>
           <view class="function-row" bindtap="viewChangelog">
-            <view class="function-icon"><ri-icon name="history-line" size="30" color="#f0442f"></ri-icon></view>
+            <view class="function-icon">
+              <tl-icon name="history-line" size="30" color="#f0442f">
+              </tl-icon>
+            </view>
             <view class="function-main">
               <view class="function-title">更新日志</view>
               <view class="function-tip">查看番茄记账最近变化</view>
             </view>
-            <view class="function-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#f0442f"></ri-icon></view>
+            <view class="function-arrow">
+              <tl-icon name="arrow-right-s-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
           </view>
           <view class="function-row last danger-row" bindtap="resetDatabase">
-            <view class="function-icon danger-icon"><ri-icon name="delete-bin-line" size="30" color="#c55249"></ri-icon></view>
+            <view class="function-icon danger-icon">
+              <tl-icon name="delete-bin-line" size="30" color="#c55249">
+              </tl-icon>
+            </view>
             <view class="function-main">
               <view class="function-title danger-title">重置数据</view>
               <view class="function-tip">清空所有账本、分类、记录和邀请数据</view>
             </view>
-            <view class="function-arrow"><ri-icon name="arrow-right-s-line" size="32" color="#c55249"></ri-icon></view>
+            <view class="function-arrow">
+              <tl-icon name="arrow-right-s-line" size="32" color="#c55249">
+              </tl-icon>
+            </view>
           </view>
         </view>
       </view>
       <button class="logout-button fade-up" bindtap="logout">退出账号</button>
     </view>
   </scroll-view>
-
-  <custom-tabbar active="profile" readonly="{{readonly}}"></custom-tabbar>
+  <tl-tabbar active="profile" readonly="{{readonly}}">
+  </tl-tabbar>
 </view>

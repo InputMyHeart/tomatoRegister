@@ -1,0 +1,119 @@
+.tl-record-form {
+  margin-bottom: 32rpx;
+  padding: 30rpx;
+  border: 1rpx solid rgba(240, 68, 47, 0.08);
+  border-radius: 34rpx;
+  background: #fffdfc;
+  box-shadow: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+}
+.tl-record-form__amount {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f2e9e3;
+  color: #e94b35;
+}
+.tl-record-form__amount text {
+  font-size: 52rpx;
+  font-weight: 900;
+}
+.tl-record-form__amount input {
+  flex: 1;
+  height: 94rpx;
+  padding-left: 18rpx;
+  color: #2f2926;
+  font-size: 72rpx;
+  font-weight: 900;
+}
+.tl-record-form__result {
+  margin-top: 12rpx;
+  color: #9a8278;
+  font-size: 28rpx;
+  font-weight: 900;
+  text-align: right;
+}
+.tl-record-form__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  padding: 20rpx 0;
+}
+.tl-record-form__quick view,
+.tl-record-form__tag-list view {
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  color: #8b766d;
+  background: #fff8f4;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.tl-record-form__field,
+.tl-record-form__tags {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-height: 96rpx;
+  border-top: 1rpx solid #f2e9e3;
+  color: #8d7f78;
+  font-size: 26rpx;
+}
+.tl-record-form__field > text,
+.tl-record-form__tags > text {
+  width: 96rpx;
+  flex: 0 0 96rpx;
+}
+.tl-record-form__field picker,
+.tl-record-form__field input,
+.tl-record-form__tags > view {
+  min-width: 0;
+  flex: 1;
+}
+.tl-record-form__value,
+.tl-record-form__field input {
+  color: #2f2926;
+  font-size: 29rpx;
+  font-weight: 800;
+  text-align: right;
+}
+.tl-record-form__tags {
+  align-items: flex-start;
+  padding: 26rpx 0;
+}
+.tl-record-form__tags input {
+  width: 100%;
+  height: 82rpx;
+  padding: 0 24rpx;
+  border-radius: 24rpx;
+  color: #2f2926;
+  background: #fff8f4;
+  font-size: 28rpx;
+}
+.tl-record-form__tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+.tl-record-form__add {
+  padding-top: 22rpx;
+  color: #f0442f;
+  font-size: 25rpx;
+  font-weight: 900;
+}
+.tl-record-form__submit {
+  width: 100%;
+  height: 92rpx;
+  margin-top: 30rpx;
+  border-radius: 46rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #ff7d63 0%, #f0442f 100%);
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 92rpx;
+  box-shadow: 0 14rpx 30rpx rgba(240, 68, 47, 0.28);
+}
+.tl-record-form__submit.is-disabled {
+  color: rgba(255, 255, 255, 0.82);
+  background: #d8cbc4;
+  box-shadow: none;
+}

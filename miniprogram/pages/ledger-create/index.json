@@ -1,6 +1,6 @@
 {
-    "navigationBarTitleText":  "鍒涘缓璐︽湰",
-    "usingComponents":  {
-                            "custom-navbar":  "/components/custom-navbar/index"
-                        }
+  "navigationBarTitleText": "创建账本",
+  "usingComponents": {
+    "tl-navbar": "/components/tl-navbar/index"
+  }
 }

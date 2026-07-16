@@ -1,4 +1,5 @@
 const app = getApp();
+const ledgerService = require("../../services/ledger.service");
 
 const days = Array.from({ length: 28 }, (_, index) => index + 1);
 
@@ -35,20 +36,11 @@ Page({
     this.setData({ saving: true });
     wx.showLoading({ title: "保存中" });
     try {
-      const res = await wx.cloud.callFunction({
-        name: "tomatoLedger",
-        data: {
-          action: "updateMonthStartDay",
-          data: {
-            ledgerId: this.data.ledgerId,
-            monthStartDay: this.data.monthStartDay,
-          },
-        },
+      const data = await ledgerService.updateMonthStartDay({
+        ledgerId: this.data.ledgerId,
+        monthStartDay: this.data.monthStartDay,
       });
-      const result = res.result || {};
-      if (!result.success) throw new Error(result.message || "保存失败");
-
-      const ledger = result.data && result.data.ledger;
+      const ledger = data.ledger;
       if (ledger) {
         app.globalData.currentLedger = {
           ...(app.globalData.currentLedger || {}),

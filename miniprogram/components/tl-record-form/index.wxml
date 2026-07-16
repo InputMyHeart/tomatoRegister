@@ -1,0 +1,41 @@
+<view class="tl-record-form">
+  <view class="tl-record-form__amount">
+    <text>¥</text>
+    <input type="text" value="{{amount}}" bindinput="amountInput" placeholder="0.00" />
+  </view>
+  <view wx:if="{{showAmountResult}}" class="tl-record-form__result">={{amountResult}}</view>
+  <view class="tl-record-form__quick">
+    <view wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="quickAmount">¥{{item}}</view>
+  </view>
+  <view class="tl-record-form__field">
+    <text>账本</text>
+    <text class="tl-record-form__value">{{ledgerName}}</text>
+  </view>
+  <view class="tl-record-form__field">
+    <text>账户</text>
+    <picker mode="selector" range="{{accounts}}" value="{{accountIndex}}" bindchange="accountChange">
+      <view class="tl-record-form__value">{{accounts[accountIndex]}}</view>
+    </picker>
+  </view>
+  <view class="tl-record-form__field">
+    <text>日期</text>
+    <picker mode="date" value="{{date}}" bindchange="dateChange">
+      <view class="tl-record-form__value">{{date}}</view>
+    </picker>
+  </view>
+  <view class="tl-record-form__field">
+    <text>备注</text>
+    <input value="{{note}}" bindinput="noteInput" placeholder="添加备注" />
+  </view>
+  <view class="tl-record-form__tags">
+    <text>标签</text>
+    <view>
+      <input value="{{tagInput}}" bindinput="tagInput" bindconfirm="addTag" placeholder="输入后点击添加" />
+      <view class="tl-record-form__tag-list">
+        <view wx:for="{{tags}}" wx:key="*this" data-index="{{index}}" bindtap="removeTag">#{{item}}</view>
+      </view>
+    </view>
+    <view class="tl-record-form__add" bindtap="addTag">添加</view>
+  </view>
+  <button class="tl-record-form__submit {{canSave ? '' : 'is-disabled'}}" loading="{{saving}}" bindtap="submit">保存记录</button>
+</view>

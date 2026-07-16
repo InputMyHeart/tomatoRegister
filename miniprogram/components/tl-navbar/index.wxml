@@ -1,0 +1,20 @@
+<view class="tl-navbar">
+  <view class="status-space" style="height: {{statusBarHeight}}px;">
+  </view>
+  <view class="nav-row" style="height: {{navHeight}}px;">
+    <view class="nav-brand {{showBack ? 'back-only' : ''}}">
+      <view wx:if="{{showBack}}" class="back-button" bindtap="handleBack">
+        <tl-icon name="arrow-left-s-line" size="42" color="#f0442f">
+        </tl-icon>
+      </view>
+      <block wx:elif="{{!hideBrand}}">
+        <image class="brand-mark" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
+        </image>
+        <text class="brand-name">番茄记一笔</text>
+      </block>
+    </view>
+    <view wx:if="{{!hideTitle}}" class="nav-center">{{title}}</view>
+    <view class="nav-right">
+    </view>
+  </view>
+</view>

@@ -14,7 +14,7 @@
     "pages/ledger-join-result/index",
     "pages/record-category/index",
     "pages/category-manage/index",
-    "pages/categoryOperation/index",
+    "pages/category-operation/index",
     "pages/category-icon-picker/index",
     "pages/record-detail/index",
     "pages/record-edit/index"
@@ -23,7 +23,7 @@
     "backgroundColor": "#FFF7F2",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#FFF7F2",
-    "navigationBarTitleText": "番茄记一笔",
+    "navigationBarTitleText": "Tomato Ledger",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
   },
@@ -31,9 +31,14 @@
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",
   "usingComponents": {
-    "empty-state": "/components/empty-state/index",
-    "custom-navbar": "/components/custom-navbar/index",
-    "ri-icon": "/components/ri-icon/index",
-    "custom-tabbar": "/components/custom-tabbar/index"
+    "tl-empty-state": "/components/tl-empty-state/index",
+    "tl-navbar": "/components/tl-navbar/index",
+    "tl-icon": "/components/tl-icon/index",
+    "tl-tabbar": "/components/tl-tabbar/index",
+    "tl-budget-progress": "/components/tl-budget-progress/index",
+    "tl-category-tree": "/components/tl-category-tree/index",
+    "tl-ledger-selector": "/components/tl-ledger-selector/index",
+    "tl-member-list": "/components/tl-member-list/index",
+    "tl-record-form": "/components/tl-record-form/index"
   }
 }

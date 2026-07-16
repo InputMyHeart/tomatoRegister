@@ -1,44 +1,22 @@
 <view class="page plain-page category-page">
-  <custom-navbar title="{{ledgerName}}" showBack="{{true}}"></custom-navbar>
+  <tl-navbar title="{{ledgerName}}" showBack="{{true}}">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
-
-  <view class="type-switch fade-up">
-    <view class="type-item {{type === 'expense' ? 'active expense' : ''}}" data-type="expense" bindtap="switchType">
-      <ri-icon name="price-tag-3-line" size="30" color="{{type === 'expense' ? '#ffffff' : '#f0442f'}}"></ri-icon>
-      <text>支出</text>
-    </view>
-    <view class="type-item {{type === 'income' ? 'active income' : ''}}" data-type="income" bindtap="switchType">
-      <ri-icon name="funds-line" size="30" color="{{type === 'income' ? '#ffffff' : '#25a66a'}}"></ri-icon>
-      <text>收入</text>
-    </view>
-  </view>
-
-  <view class="group-list fade-up">
-    <view class="group-card card" wx:for="{{groups}}" wx:key="id">
-      <view class="group-head" data-id="{{item.id}}" bindtap="toggleGroup">
-        <view class="group-title-wrap">
-          <view class="group-icon {{type}}">
-            <ri-icon name="{{item.icon}}" size="30" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}"></ri-icon>
-          </view>
-          <view>
-            <view class="group-name">{{item.name}}</view>
-            <view class="group-count">{{item.children.length}} 个二级分类</view>
-          </view>
+      <view class="type-switch fade-up">
+        <view class="type-item {{type === 'expense' ? 'active expense' : ''}}" data-type="expense" bindtap="switchType">
+          <tl-icon name="price-tag-3-line" size="30" color="{{type === 'expense' ? '#ffffff' : '#f0442f'}}">
+          </tl-icon>
+          <text>支出</text>
         </view>
-        <ri-icon name="{{expandedGroupId === item.id ? 'arrow-down-s-line' : 'arrow-right-s-line'}}" size="34" color="#9a8278"></ri-icon>
-      </view>
-
-      <view class="sub-grid" wx:if="{{expandedGroupId === item.id}}">
-        <view class="sub-category" wx:for="{{item.children}}" wx:for-item="child" wx:key="name" data-parent="{{item.name}}" data-parent-icon="{{item.icon}}" data-category="{{child.label}}" data-category-label="{{child.label}}" data-category-icon="{{child.icon}}" bindtap="chooseCategory">
-          <view class="sub-icon {{type}}">
-            <ri-icon name="{{child.icon}}" size="28" color="{{type === 'income' ? '#25a66a' : '#f0442f'}}"></ri-icon>
-          </view>
-          <text class="sub-label">{{child.label}}</text>
+        <view class="type-item {{type === 'income' ? 'active income' : ''}}" data-type="income" bindtap="switchType">
+          <tl-icon name="funds-line" size="30" color="{{type === 'income' ? '#ffffff' : '#25a66a'}}">
+          </tl-icon>
+          <text>收入</text>
         </view>
       </view>
-    </view>
-  </view>
+      <tl-category-tree groups="{{groups}}" expanded-group-id="{{expandedGroupId}}" bind:toggle="toggleGroup" bind:select="chooseCategory">
+      </tl-category-tree>
     </view>
   </scroll-view>
 </view>

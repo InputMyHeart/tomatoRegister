@@ -1,4 +1,5 @@
 const app = getApp();
+const recordService = require("../../services/record.service");
 const accounts = ["微信", "支付宝", "银行卡", "现金"];
 
 function today() {
@@ -7,7 +8,6 @@ function today() {
   const day = `${now.getDate()}`.padStart(2, "0");
   return `${now.getFullYear()}-${month}-${day}`;
 }
-
 
 function quickAmountsFor(type) {
   return type === "income" ? [200, 500, 1000, 5000] : [18, 32, 68, 128];
@@ -26,12 +26,16 @@ function evaluateAmountExpression(rawValue) {
   }
   const parts = expression.match(/[+-]?\d+(\.\d+)?/g) || [];
   const value = parts.reduce((sum, part) => sum + Number(part), 0);
-  return { value: Number(value.toFixed(2)), valid: value > 0, text: Number(value.toFixed(2)).toString() };
+  return {
+    value: Number(value.toFixed(2)),
+    valid: value > 0,
+    text: Number(value.toFixed(2)).toString(),
+  };
 }
 
 function normalizeTags(input) {
   return String(input || "")
-    .split(/[\s,，#]+/)
+    .split(/[\s,，]+/)
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 8);
@@ -53,6 +57,7 @@ Page({
     amountResult: "",
     showAmountResult: false,
     canSave: false,
+    saving: false,
     note: "",
     tagInput: "",
     tags: [],
@@ -71,10 +76,22 @@ Page({
     const fallbackCategory = type === "income" ? "其他收入" : "其他支出";
     const fallbackLabel = type === "income" ? "其他" : "其他";
     const categoryName = options.category ? decodeURIComponent(options.category) : fallbackCategory;
-    const categoryLabel = options.categoryLabel ? decodeURIComponent(options.categoryLabel) : fallbackLabel;
-    const categoryIcon = options.categoryIcon ? decodeURIComponent(options.categoryIcon) : "price-tag-3-line";
-    const parentCategory = options.parentCategory ? decodeURIComponent(options.parentCategory) : (type === "income" ? "其他收入" : "生活");
-    const parentIcon = options.parentIcon ? decodeURIComponent(options.parentIcon) : (type === "income" ? "price-tag-3-line" : "book-2-line");
+    const categoryLabel = options.categoryLabel
+      ? decodeURIComponent(options.categoryLabel)
+      : fallbackLabel;
+    const categoryIcon = options.categoryIcon
+      ? decodeURIComponent(options.categoryIcon)
+      : "price-tag-3-line";
+    const parentCategory = options.parentCategory
+      ? decodeURIComponent(options.parentCategory)
+      : type === "income"
+        ? "其他收入"
+        : "生活";
+    const parentIcon = options.parentIcon
+      ? decodeURIComponent(options.parentIcon)
+      : type === "income"
+        ? "price-tag-3-line"
+        : "book-2-line";
     const currentLedger = app.globalData.currentLedger || {};
     this.setData({
       type,
@@ -95,15 +112,37 @@ Page({
 
   async loadRecord(recordId) {
     try {
-      const res = await wx.cloud.callFunction({ name: "tomatoLedger", data: { action: "getRecord", data: { recordId } } });
-      const result = res.result || {};
-      const record = result.data && result.data.record;
-      if (!result.success || !record) throw new Error(result.message || "记录加载失败");
+      const data = await recordService.getRecord(recordId);
+      const record = data.record;
+      if (!record) throw new Error("记录加载失败");
       const recordType = record.type === "income" ? "income" : "expense";
       const accountIndex = Math.max(0, accounts.indexOf(record.account));
-      this.setData({ recordId, isEditing: true, type: recordType, typeLabel: recordType === "income" ? "收入" : "支出", typeIcon: recordType === "income" ? "funds-line" : "price-tag-3-line", categoryName: record.categoryName || "其他", categoryLabel: record.categoryLabel || record.categoryName || "其他", categoryIcon: record.categoryIcon || "price-tag-3-line", parentCategory: record.parentCategory || "", parentIcon: record.parentIcon || "", amount: String(record.amount || ""), note: record.note || "", tags: Array.isArray(record.tags) ? record.tags : [], date: record.date || today(), ledgerId: record.ledgerId || "", ledgerName: (result.data.ledger && result.data.ledger.name) || "我的账本", accountIndex, quickAmounts: quickAmountsFor(recordType), quickNotes: quickNotesFor(recordType, record.categoryName) });
+      this.setData({
+        recordId,
+        isEditing: true,
+        type: recordType,
+        typeLabel: recordType === "income" ? "收入" : "支出",
+        typeIcon: recordType === "income" ? "funds-line" : "price-tag-3-line",
+        categoryName: record.categoryName || "其他",
+        categoryLabel: record.categoryLabel || record.categoryName || "其他",
+        categoryIcon: record.categoryIcon || "price-tag-3-line",
+        parentCategory: record.parentCategory || "",
+        parentIcon: record.parentIcon || "",
+        amount: String(record.amount || ""),
+        note: record.note || "",
+        tags: Array.isArray(record.tags) ? record.tags : [],
+        date: record.date || today(),
+        ledgerId: record.ledgerId || "",
+        ledgerName: (data.ledger && data.ledger.name) || "我的账本",
+        accountIndex,
+        quickAmounts: quickAmountsFor(recordType),
+        quickNotes: quickNotesFor(recordType, record.categoryName),
+      });
       this.setAmountExpression(String(record.amount || ""));
-    } catch (error) { wx.showToast({ title: error.message || "记录加载失败", icon: "none" }); setTimeout(() => wx.navigateBack(), 500); }
+    } catch (error) {
+      wx.showToast({ title: error.message || "记录加载失败", icon: "none" });
+      setTimeout(() => wx.navigateBack(), 500);
+    }
   },
   applyCategorySelection(selection = {}) {
     const type = selection.type === "income" ? "income" : "expense";
@@ -122,7 +161,7 @@ Page({
   },
 
   setQuickAmount(event) {
-    const amount = String(event.currentTarget.dataset.amount);
+    const amount = String(event.detail.amount || event.currentTarget.dataset.amount);
     this.setAmountExpression(amount);
   },
 
@@ -146,11 +185,21 @@ Page({
     wx.navigateTo({ url: `/pages/record-category/index?${params.join("&")}` });
   },
 
-  onAmountInput(event) { this.setAmountExpression(event.detail.value); },
-  onNoteInput(event) { this.setData({ note: event.detail.value }); },
-  onDateChange(event) { this.setData({ date: event.detail.value }); },
-  onAccountChange(event) { this.setData({ accountIndex: Number(event.detail.value) }); },
-  onTagInput(event) { this.setData({ tagInput: event.detail.value }); },
+  onAmountInput(event) {
+    this.setAmountExpression(event.detail.value);
+  },
+  onNoteInput(event) {
+    this.setData({ note: event.detail.value });
+  },
+  onDateChange(event) {
+    this.setData({ date: event.detail.value });
+  },
+  onAccountChange(event) {
+    this.setData({ accountIndex: Number(event.detail.value) });
+  },
+  onTagInput(event) {
+    this.setData({ tagInput: event.detail.value });
+  },
 
   addTag() {
     const incoming = normalizeTags(this.data.tagInput);
@@ -160,13 +209,18 @@ Page({
   },
 
   removeTag(event) {
-    const index = Number(event.currentTarget.dataset.index);
+    const index = Number(
+      event.detail.index !== undefined ? event.detail.index : event.currentTarget.dataset.index
+    );
     const tags = this.data.tags.filter((_, itemIndex) => itemIndex !== index);
     this.setData({ tags });
   },
 
   async saveRecord() {
-    const finalTags = Array.from(new Set([...this.data.tags, ...normalizeTags(this.data.tagInput)])).slice(0, 8);
+    if (this.data.saving) return;
+    const finalTags = Array.from(
+      new Set([...this.data.tags, ...normalizeTags(this.data.tagInput)])
+    ).slice(0, 8);
     this.setData({ tags: finalTags, tagInput: "" });
     const result = evaluateAmountExpression(this.data.amount);
     if (!result.valid) {
@@ -174,38 +228,32 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "保存中" });
+    this.setData({ saving: true });
     try {
-      const res = await wx.cloud.callFunction({
-        name: "tomatoLedger",
-        data: {
-          action: this.data.isEditing ? "updateRecord" : "createRecord",
-          data: {
-            recordId: this.data.recordId,
-            ledgerId: this.data.ledgerId,
-            type: this.data.type,
-            amount: result.value,
-            note: this.data.note,
-            tags: finalTags,
-            date: this.data.date,
-            categoryName: this.data.categoryName,
-            categoryLabel: this.data.categoryLabel,
-            categoryIcon: this.data.categoryIcon,
-            parentCategory: this.data.parentCategory,
-            parentIcon: this.data.parentIcon,
-            account: this.data.accounts[this.data.accountIndex],
-          },
-        },
-      });
-      const cloudResult = res.result || {};
-      if (cloudResult.success === false) throw new Error(cloudResult.message || "保存失败");
-      wx.hideLoading();
-      wx.showToast({ title: this.data.isEditing ? "已保存修改" : "已记一笔", icon: "success" });
+      const payload = {
+        recordId: this.data.recordId,
+        ledgerId: this.data.ledgerId,
+        type: this.data.type,
+        amount: result.value,
+        note: this.data.note,
+        tags: finalTags,
+        date: this.data.date,
+        categoryName: this.data.categoryName,
+        categoryLabel: this.data.categoryLabel,
+        categoryIcon: this.data.categoryIcon,
+        parentCategory: this.data.parentCategory,
+        parentIcon: this.data.parentIcon,
+        account: this.data.accounts[this.data.accountIndex],
+      };
+      if (this.data.isEditing) await recordService.updateRecord(payload);
+      else await recordService.createRecord(payload);
+      wx.showToast({ title: this.data.isEditing ? "已保存" : "已记账", icon: "success" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {
-      wx.hideLoading();
       console.warn("saveRecord failed", error);
       wx.showToast({ title: error.message || "保存失败", icon: "none" });
+    } finally {
+      this.setData({ saving: false });
     }
   },
 });

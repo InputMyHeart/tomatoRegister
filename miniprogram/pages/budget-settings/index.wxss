@@ -60,7 +60,6 @@
   font-weight: 900;
 }
 
-
 .save-bar {
   position: fixed;
   left: 0;

@@ -51,11 +51,14 @@ Page({
   },
 
   async uploadAvatarIfNeeded(avatarUrl) {
-    if (!avatarUrl || avatarUrl.startsWith("cloud://") || avatarUrl.startsWith("/images/")) return avatarUrl || defaultAvatar;
+    if (!avatarUrl || avatarUrl.startsWith("cloud://") || avatarUrl.startsWith("/images/"))
+      return avatarUrl || defaultAvatar;
 
     let filePath = avatarUrl;
     if (avatarUrl.startsWith("http://127.0.0.1") || avatarUrl.startsWith("https://127.0.0.1")) {
-      const imageInfo = await new Promise((resolve, reject) => wx.getImageInfo({ src: avatarUrl, success: resolve, fail: reject }));
+      const imageInfo = await new Promise((resolve, reject) =>
+        wx.getImageInfo({ src: avatarUrl, success: resolve, fail: reject })
+      );
       filePath = imageInfo.path;
     }
     const cloudPath = `avatars/${app.globalData.openid || Date.now()}-${Date.now()}.png`;

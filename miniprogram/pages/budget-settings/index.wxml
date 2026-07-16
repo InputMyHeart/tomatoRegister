@@ -1,5 +1,6 @@
 <view class="page plain-page budget-settings-page">
-  <custom-navbar title="月预算" showBack="{{true}}"></custom-navbar>
+  <tl-navbar title="月预算" showBack="{{true}}">
+  </tl-navbar>
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view class="setting-card card fade-up">
@@ -8,10 +9,10 @@
             <view class="setting-title">{{ledgerName}}</view>
             <view class="setting-subtitle">设置预算，快速了解当前支出占比</view>
           </view>
-          <switch checked="{{budgetEnabled}}" color="#f0442f" bindchange="onEnableChange"></switch>
+          <switch checked="{{budgetEnabled}}" color="#f0442f" bindchange="onEnableChange">
+          </switch>
         </view>
       </view>
-
       <view class="budget-card card fade-up {{budgetEnabled ? '' : 'is-disabled'}}">
         <view class="amount-label">月预算金额</view>
         <view class="amount-input-row">
@@ -21,7 +22,6 @@
       </view>
     </view>
   </scroll-view>
-
   <view class="save-bar">
     <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" bindtap="saveBudget">保存</button>
   </view>
