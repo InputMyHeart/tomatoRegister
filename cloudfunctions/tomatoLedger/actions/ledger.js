@@ -4,7 +4,8 @@ const list = (context, payload) => execute("listLedgers", context.openid, payloa
 const setCurrent = (context, payload) => execute("setCurrentLedger", context.openid, payload);
 const remove = (context, payload) => execute("deleteLedger", context.openid, payload);
 const dashboard = (context, payload) => execute("getDashboard", context.openid, payload);
+const analysis = (context, payload) => execute("getAnalysis", context.openid, payload);
 const updateBudget = (context, payload) => execute("updateBudget", context.openid, payload);
 const updateMonthStartDay = (context, payload) =>
   execute("updateMonthStartDay", context.openid, payload);
-module.exports = { create, list, setCurrent, remove, dashboard, updateBudget, updateMonthStartDay };
+module.exports = { create, list, setCurrent, remove, dashboard, analysis, updateBudget, updateMonthStartDay };

@@ -247,6 +247,7 @@ Page({
       };
       if (this.data.isEditing) await recordService.updateRecord(payload);
       else await recordService.createRecord(payload);
+      app.globalData.recordsNeedRefresh = true;
       wx.showToast({ title: this.data.isEditing ? "已保存" : "已记账", icon: "success" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {

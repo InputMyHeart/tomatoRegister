@@ -702,6 +702,38 @@ async function getDashboard(openid, data = {}) {
   });
 }
 
+
+function getAnalysisRange(mode, anchor, monthStartDay) { if(mode === "all") return {start:"",end:"",label:"all"}; if(mode === "year"){const y=Number(anchor)||new Date().getFullYear();return {start:String(y)+"-01-01",end:String(y+1)+"-01-01",label:String(y)};} const c=getCurrentMonthRange(monthStartDay),m=/^(\d{4})-(\d{1,2})$/.exec(String(anchor||"")); if(!m)return {...c,label:String(c.year)+"-"+String(c.month)}; const y=Number(m[1]),mo=Number(m[2]),d=Math.min(28,Math.max(1,Number(monthStartDay||1))),n=addMonth(y,mo,1);return {year:y,month:mo,start:makeDateText(y,mo,d),end:makeDateText(n.year,n.month,d),label:String(y)+"-"+String(mo)};}
+async function getAnalysisRecords(query){const rows=[];let offset=0;while(true){const page=((await db.collection("records").where(query).orderBy("date","asc").skip(offset).limit(100).get()).data||[]);rows.push(...page);if(page.length<100)return rows;offset+=page.length;}}
+async function getAnalysis(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  if (!ledger) return ok({ noLedger: true });
+  const role = getLedgerRole(openid, ledger); assertReadable(role);
+  const mode = ["month", "year", "all"].includes(data.mode) ? data.mode : "month";
+  const range = getAnalysisRange(mode, data.anchor, ledger.monthStartDay);
+  const query = { ledgerId: ledger._id };
+  if (range.start) query.date = _.gte(range.start).and(_.lt(range.end));
+  const records = await getAnalysisRecords(query);
+  let previousRecords = [];
+  if (mode === "month") { const prev = addMonth(range.year, range.month, -1), day = Math.min(28, Math.max(1, Number(ledger.monthStartDay || 1))), prevStart = makeDateText(prev.year, prev.month, day); previousRecords = await getAnalysisRecords({ ledgerId: ledger._id, date: _.gte(prevStart).and(_.lt(range.start)) }); }
+  if (mode === "year") { const year = Number(range.start.slice(0, 4)); previousRecords = await getAnalysisRecords({ ledgerId: ledger._id, date: _.gte(String(year - 1) + "-01-01").and(_.lt(range.start)) }); }
+  let income = 0, expense = 0; const trend = {}, categories = {}, members = {}, dailyExpense = {};
+  records.forEach((record) => { const amount = Number(record.amount || 0), isIncome = record.type === "income", key = mode === "month" ? record.date : mode === "year" ? record.date.slice(0, 7) : record.date.slice(0, 4); income += isIncome ? amount : 0; expense += isIncome ? 0 : amount; trend[key] = trend[key] || { label: key, income: 0, expense: 0 }; trend[key][isIncome ? "income" : "expense"] += amount; const name = record.parentCategory || record.categoryName || "Other"; if (!isIncome) { categories[name] = (categories[name] || 0) + amount; members[record.ownerOpenid] = (members[record.ownerOpenid] || 0) + amount; dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount; } });
+  const categoryList = Object.keys(categories).map((name) => ({ name, amount: Number(categories[name].toFixed(2)), rate: expense ? Math.round(categories[name] * 100 / expense) : 0 })).sort((a, b) => b.amount - a.amount);
+  const previousCategory = {}; previousRecords.forEach((record) => { const name = record.parentCategory || record.categoryName || "Other", key = (record.type === "income" ? "income:" : "expense:") + name; previousCategory[key] = (previousCategory[key] || 0) + Number(record.amount || 0); });
+  const currentCategory = {}; records.forEach((record) => { const name = record.parentCategory || record.categoryName || "Other", key = (record.type === "income" ? "income:" : "expense:") + name; currentCategory[key] = (currentCategory[key] || 0) + Number(record.amount || 0); });
+  const money = (value) => Number(value || 0).toFixed(2).replace(/\.00$/, "");
+  const insights = [];
+  const topExpense = categoryList[0];
+  if (topExpense) insights.push("\u652f\u51fa\u6700\u591a\u7684\u662f" + topExpense.name + "\uff0c\u5171 \u00a5" + money(topExpense.amount) + "\uff0c\u5360\u652f\u51fa " + topExpense.rate + "%");
+  if (mode !== "all") { const changes = Object.keys({ ...currentCategory, ...previousCategory }).map((key) => ({ key, current: currentCategory[key] || 0, previous: previousCategory[key] || 0 })).filter((item) => item.current !== item.previous).sort((a, b) => Math.abs(b.current - b.previous) - Math.abs(a.current - a.previous)); const change = changes[0]; if (change) { const label = change.key.slice(change.key.indexOf(":") + 1) + (change.key.startsWith("income:") ? "\u6536\u5165" : "\u652f\u51fa"), delta = change.current - change.previous; if (!change.previous) insights.push(label + "\u672c\u671f\u65b0\u589e \u00a5" + money(change.current)); else insights.push(label + "\u8f83\u4e0a\u671f" + (delta > 0 ? "\u589e\u52a0" : "\u51cf\u5c11") + " \u00a5" + money(Math.abs(delta)) + "\uff0c\u53d8\u5316 " + Math.round(Math.abs(delta) * 100 / change.previous) + "%"); }
+    const recordDelta = records.length - previousRecords.length; if (recordDelta && insights.length < 3) insights.push("\u8fd9\u671f\u8bb0\u4e86 " + records.length + " \u7b14\uff0c\u6bd4\u4e0a\u671f" + (recordDelta > 0 ? "\u591a" : "\u5c11") + " " + Math.abs(recordDelta) + " \u7b14");
+  } else { const peakDate = Object.keys(dailyExpense).sort((a, b) => dailyExpense[b] - dailyExpense[a])[0]; if (peakDate && insights.length < 3) insights.push(peakDate + " \u662f\u7d2f\u8ba1\u652f\u51fa\u6700\u9ad8\u7684\u4e00\u5929\uff0c\u5171 \u00a5" + money(dailyExpense[peakDate])); const incomeByCategory = {}; records.forEach((record) => { if (record.type === "income") { const name = record.parentCategory || record.categoryName || "Other"; incomeByCategory[name] = (incomeByCategory[name] || 0) + Number(record.amount || 0); } }); const topIncome = Object.keys(incomeByCategory).sort((a, b) => incomeByCategory[b] - incomeByCategory[a])[0]; if (topIncome && insights.length < 3) insights.push(topIncome + "\u662f\u6700\u4e3b\u8981\u7684\u6536\u5165\u6765\u6e90\uff0c\u7d2f\u8ba1 \u00a5" + money(incomeByCategory[topIncome])); }
+  if (!insights.length) insights.push("\u8fd9\u6bb5\u65f6\u95f4\u8fd8\u6ca1\u6709\u8db3\u591f\u7684\u8bb0\u5f55\u53ef\u4ee5\u5206\u6790");
+  const users = await getUsersByOpenids(Object.keys(members));
+  return ok({ ledger: { _id: ledger._id, name: ledger.name, type: ledger.type || "personal", monthStartDay: Number(ledger.monthStartDay || 1) }, role, readonly: role === "readonly", mode, range, overview: { income, expense, balance: Number((income - expense).toFixed(2)), recordCount: records.length, saveRate: income ? Math.round((income - expense) * 100 / income) : 0 }, trend: Object.keys(trend).sort().map((key) => trend[key]), categories: categoryList, members: Object.keys(members).map((id) => ({ name: (users[id] || {}).nickName || (id === openid ? "Me" : "Member"), amount: Number(members[id].toFixed(2)), rate: expense ? Math.round(members[id] * 100 / expense) : 0 })).sort((a, b) => b.amount - a.amount), insights });
+}
+
 async function updateBudget(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
@@ -1273,6 +1305,7 @@ async function execute(operation, openid, payload = {}) {
     updateRecord,
     deleteRecord,
     getDashboard,
+    getAnalysis,
     updateBudget,
     updateMonthStartDay,
     createLedgerInviteToken,

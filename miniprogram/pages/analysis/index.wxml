@@ -1,89 +1,32 @@
 <view class="page tabbar-page analysis-page">
-  <tl-navbar title="分析">
-  </tl-navbar>
-  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+  <tl-navbar title="分析"></tl-navbar>
+  <scroll-view class="page-scroll" scroll-y="true" enhanced="true" show-scrollbar="false">
     <view class="page-content">
-      <view class="page-head fade-up">
-        <view class="eyebrow">收支分析</view>
-        <view class="title">本月花得清清楚楚</view>
+      <view class="analysis-hero fade-up">
+        <view class="hero-kicker">收支洞察</view>
+        <view class="ledger-picker" bindtap="switchLedger"><text class="ledger-name">{{ledgerName}}</text><tl-icon class="picker-arrow" name="arrow-down-s-line" size="34" color="#ef604a"></tl-icon></view>
+        <view class="range-control">
+          <view class="range-tab {{mode === 'month' ? 'is-active' : ''}}" data-mode="month" bindtap="switchMode">本月</view>
+          <view class="range-tab {{mode === 'year' ? 'is-active' : ''}}" data-mode="year" bindtap="switchMode">本年</view>
+          <view class="range-tab {{mode === 'all' ? 'is-active' : ''}}" data-mode="all" bindtap="switchMode">全部</view>
+        </view>
+        <view wx:if="{{mode !== 'all'}}" class="period-switcher"><view class="period-arrow" data-delta="-1" bindtap="shift"><tl-icon name="arrow-left-s-line" size="30" color="#ef604a"></tl-icon></view><text class="period-label">{{rangeLabel}}</text><view class="period-arrow" data-delta="1" bindtap="shift"><tl-icon name="arrow-right-s-line" size="30" color="#ef604a"></tl-icon></view></view>
       </view>
-      <view class="compare-card card fade-up">
-        <view class="compare-head">
-          <view>
-            <view class="compare-title">收支结构</view>
-            <view class="compare-tip">储蓄率 {{saveRate}}%</view>
-          </view>
-          <view class="top-tag">{{topCategory}}最多</view>
-        </view>
-        <view class="compare-bars">
-          <view class="bar-row">
-            <view class="bar-label">收入</view>
-            <view class="bar-track">
-              <view class="bar-fill income" style="width: {{incomeRate}}%;">
-              </view>
-            </view>
-            <view class="bar-value">¥{{monthIncome}}</view>
-          </view>
-          <view class="bar-row">
-            <view class="bar-label">支出</view>
-            <view class="bar-track">
-              <view class="bar-fill expense" style="width: {{expenseRate}}%;">
-              </view>
-            </view>
-            <view class="bar-value">¥{{monthExpense}}</view>
-          </view>
-        </view>
-        <view class="insight-text">{{insightText}}</view>
-      </view>
-      <view class="insight-card card fade-up">
-        <view class="insight-title">预算进度</view>
-        <view class="insight-main">
-          <view>
-            <view class="big-number">{{budgetRate}}%</view>
-            <view class="muted">已支出 ¥{{monthExpense}} / ¥{{budget}}</view>
-          </view>
-          <view class="daily-box">
-            <view class="daily-label">日均可用</view>
-            <view class="daily-value">¥{{dailyAvailable}}</view>
-          </view>
-        </view>
-        <view class="progress-track">
-          <view class="progress-fill" style="width: {{budgetRate}}%;">
-          </view>
-        </view>
-      </view>
-      <view class="section fade-up">
-        <view class="section-title">支出分类</view>
-        <view class="category-card card" wx:for="{{categories}}" wx:key="name">
-          <view class="cat-head">
-            <view class="cat-name">
-              <view class="cat-dot {{item.color}}">
-              </view>
-              {{item.name}}
-            </view>
-            <view class="cat-amount">¥{{item.amount}}</view>
-          </view>
-          <view class="thin-track">
-            <view class="thin-fill {{item.color}}" style="width: {{item.rate}}%;">
-            </view>
-          </view>
-        </view>
-      </view>
-      <view class="section fade-up">
-        <view class="section-title">成员支出</view>
-        <view class="member-card card">
-          <view class="member-row" wx:for="{{members}}" wx:key="name">
-            <view class="member-name">{{item.name}}</view>
-            <view class="member-bar">
-              <view class="member-fill" style="width: {{item.rate}}%;">
-              </view>
-            </view>
-            <view class="member-amount">¥{{item.amount}}</view>
-          </view>
-        </view>
-      </view>
+      <view wx:if="{{loading}}" class="card state-card">正在计算账本数据...</view>
+      <view wx:elif="{{error}}" class="card state-card" bindtap="reload">加载失败，点击重试</view>
+      <block wx:else>
+        <view class="overview-card card fade-up">
+          <view class="overview-orb"></view>
+          <view class="overview-top"><view><text class="overview-kicker">{{mode === 'all' ? '历史累计' : '收支结构'}}</text><view class="overview-title">{{mode === 'all' ? '账本成立至今' : rangeLabel}}</view></view><view class="save-badge">储蓄 {{overview.saveRate}}%</view></view>
+          <view class="main-balance"><text class="balance-label">{{mode === 'all' ? '累计结余' : '本期结余'}}</text><text class="balance-value">¥{{overview.balanceText}}</text></view>
+          <view class="money-grid"><view class="money-cell income-cell"><text>收入</text><text>¥{{overview.incomeText}}</text></view><view class="money-cell expense-cell"><text>支出</text><text>¥{{overview.expenseText}}</text></view><view class="money-cell"><text>记录</text><text>{{overview.recordCount}} 笔</text></view></view>
+          <view wx:if="{{insights.length}}" class="insight-list"><view wx:for="{{insights}}" wx:key="*this" class="insight-item"><view class="insight-mark"></view><text>{{item}}</text></view></view></view>
+        <view class="section-head fade-up"><view><text class="section-kicker">数据视觉化</text><view class="section-title">花在哪里</view></view></view>
+        <view class="chart-switcher fade-up"><view class="chart-tab {{activeChart === 'trend' ? 'is-active' : ''}}" data-chart="trend" bindtap="switchChart">收支趋势</view><view class="chart-tab {{activeChart === 'category' ? 'is-active' : ''}}" data-chart="category" bindtap="switchChart">分类占比</view><view wx:if="{{ledgerType === 'shared'}}" class="chart-tab {{activeChart === 'member' ? 'is-active' : ''}}" data-chart="member" bindtap="switchChart">成员支出</view></view>
+        <view wx:if="{{activeChart === 'trend'}}" class="chart-card card fade-up"><view class="chart-legend"><text><text class="legend-dot income-dot"></text>收入</text><text><text class="legend-dot expense-dot"></text>支出</text></view><view wx:for="{{trend}}" wx:key="label" class="trend-row"><view class="trend-label">{{item.label}}</view><view class="trend-bars"><view class="trend-line"><text>收</text><view class="trend-track"><view class="income-bar" style="width:{{item.incomeRate}}%"></view></view><text>?{{item.incomeText}}</text></view><view class="trend-line"><text>支</text><view class="trend-track"><view class="expense-bar" style="width:{{item.expenseRate}}%"></view></view><text>?{{item.expenseText}}</text></view></view></view><view wx:if="{{!trend.length}}" class="empty-copy">这个时段还没有记录</view></view><view wx:elif="{{activeChart === 'category'}}" class="chart-card card fade-up"><view wx:for="{{categories}}" wx:key="name" class="rank-row"><view class="rank-number">{{index + 1}}</view><view class="rank-content"><view class="rank-line"><text>{{item.name}}</text><text>?{{item.amountText}}</text></view><view class="rank-track"><view style="width:{{item.rate}}%"></view></view></view><text class="rank-rate">{{item.rate}}%</text></view><view wx:if="{{!categories.length}}" class="empty-copy">暂无支出分类数据</view></view><view wx:else class="chart-card card fade-up"><view wx:for="{{members}}" wx:key="name" class="rank-row"><view class="member-avatar">{{item.initial}}</view><view class="rank-content"><view class="rank-line"><text>{{item.name}}</text><text>¥{{item.amountText}}</text></view><view class="rank-track member-track"><view style="width:{{item.rate}}%"></view></view></view><text class="rank-rate">{{item.rate}}%</text></view><view wx:if="{{!members.length}}" class="empty-copy">暂无成员支出数据</view></view>
+      </block>
     </view>
   </scroll-view>
-  <tl-tabbar active="analysis" readonly="{{readonly}}">
-  </tl-tabbar>
+  <view wx:if="{{isLedgerSwitcherVisible}}" class="ledger-mask" bindtap="closeLedgerSwitcher"><view class="ledger-sheet" catchtap="stopLedgerSwitcherTap"><view class="sheet-handle"></view><view class="sheet-title">切换分析账本</view><view class="sheet-subtitle">仅查看本页数据，不会切换首页账本</view><view wx:for="{{ledgerOptions}}" wx:key="_id" class="ledger-option {{item._id === ledgerId ? 'is-current' : ''}}" data-id="{{item._id}}" bindtap="chooseViewLedger"><text>{{item.name}}</text><text wx:if="{{item._id === ledgerId}}">查看中</text></view></view></view>
+  <tl-tabbar active="analysis" readonly="{{false}}"></tl-tabbar>
 </view>

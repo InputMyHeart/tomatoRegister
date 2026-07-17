@@ -19,6 +19,7 @@ const routes = {
   "ledger/current/set": ledger.setCurrent,
   "ledger/delete": ledger.remove,
   "ledger/dashboard/get": ledger.dashboard,
+  "ledger/analysis/get": ledger.analysis,
   "ledger/budget/update": ledger.updateBudget,
   "ledger/month-start/update": ledger.updateMonthStartDay,
   "record/create": record.create,

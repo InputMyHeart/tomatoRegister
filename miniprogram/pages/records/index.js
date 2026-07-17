@@ -46,6 +46,7 @@ function getCurrentRange(monthStartDay) {
 
 function normalizeRecord(record = {}) {
   const type = record.type === "income" ? "income" : "expense";
+  const note = String(record.note || "").trim();
   return {
     ...record,
     id: getId(record),
@@ -53,7 +54,8 @@ function normalizeRecord(record = {}) {
     amountText: formatDisplayMoney(record.amount),
     sign: type === "income" ? "+" : "-",
     categoryText: record.categoryName || record.categoryLabel || "其他",
-    noteText: record.note || "未填写备注",
+    noteText: note,
+    hasNote: Boolean(note),
     dateLabel: formatDateLabel(record.date),
     timeText: record.date || "未选择日期",
     memberName: record.memberName || "我",
@@ -128,7 +130,16 @@ Page({
   },
 
   onShow() {
-    this.bootstrap();
+    if (!this.hasBootstrapped) {
+      this.hasBootstrapped = true;
+      this.bootstrap();
+      return;
+    }
+
+    if (app.globalData.recordsNeedRefresh) {
+      app.globalData.recordsNeedRefresh = false;
+      this.bootstrap();
+    }
   },
 
   async bootstrap() {

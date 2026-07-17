@@ -69,15 +69,19 @@
               </tl-icon>
             </view>
             <view class="record-main">
-              <view class="record-topline">
+              <view class="record-line">
                 <view class="record-title">{{record.categoryText}}</view>
                 <view class="record-amount {{record.type}}">{{record.sign}}¥{{record.amountText}}</view>
               </view>
-              <view class="record-meta">
-                <text>{{record.timeText}}</text>
-                <text>{{record.memberName}}</text>
-                <text>{{record.accountText}}</text>
+              <view class="record-line record-subline">
+                <view class="record-meta">{{record.timeText}}</view>
+                <view class="record-member">
+                  <image class="record-avatar" src="{{record.memberAvatar}}" mode="aspectFill">
+                  </image>
+                  <text class="record-member-name">{{record.memberName}}</text>
+                </view>
               </view>
+              <view wx:if="{{record.hasNote}}" class="record-note">{{record.noteText}}</view>
             </view>
           </view>
         </view>

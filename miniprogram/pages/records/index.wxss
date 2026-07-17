@@ -389,3 +389,106 @@
   font-size: 24rpx;
   text-align: center;
 }
+
+/* Keep detail rows visually aligned with the homepage record cards. */
+.record-row {
+  min-height: 132rpx;
+  padding: 24rpx 26rpx;
+}
+
+.record-main {
+  padding: 0 14rpx 0 20rpx;
+}
+
+.record-topline {
+  display: block;
+}
+
+.record-title {
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.record-meta {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.record-note {
+  margin-top: 6rpx;
+  color: #9a8278;
+  font-size: 22rpx;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-side {
+  flex: 0 0 auto;
+  width: 260rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10rpx;
+}
+
+.record-amount {
+  font-size: 28rpx;
+}
+
+.record-member {
+  max-width: 260rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.record-avatar {
+  width: 34rpx;
+  height: 34rpx;
+  flex: 0 0 34rpx;
+  border-radius: 50%;
+  background: #fff0ea;
+}
+
+.record-member-name {
+  min-width: 0;
+  color: #9a8278;
+  font-size: 22rpx;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Align the detail fields by row: category/amount, then date/member. */
+.record-row {
+  align-items: flex-start;
+}
+
+.category-mark {
+  margin-top: 4rpx;
+}
+
+.record-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34rpx;
+  gap: 18rpx;
+}
+
+.record-subline {
+  margin-top: 10rpx;
+}
+
+.record-line .record-meta {
+  margin-top: 0;
+}
+
+.record-line .record-member {
+  flex: 0 0 auto;
+}
