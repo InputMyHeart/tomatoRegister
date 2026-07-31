@@ -69,8 +69,25 @@
               </view>
             </view>
           </view>
+          <view class="field-block">
+            <view class="budget-switch-row">
+              <view>
+                <view class="field-label">快捷金额</view>
+                <view class="budget-switch-tip">开启后可一键填入金额，创建后可在「我的 - 快捷金额」配置</view>
+              </view>
+              <view class="budget-toggle {{quickAmountsEnabled ? 'is-on' : ''}}" bindtap="toggleQuickAmounts">
+                <view class="budget-toggle-knob">
+                </view>
+                <text>{{quickAmountsEnabled ? '已开启' : '已关闭'}}</text>
+              </view>
+            </view>
+          </view>
           <view class="tomato-button create-button {{saving ? 'is-saving' : ''}}" bindtap="createLedger">
-            <text>{{saving ? '创建中...' : '创建账本'}}</text>
+            <view class="button-loading">
+              <view wx:if="{{saving}}" class="button-spinner">
+              </view>
+              <text>{{saving ? '创建中...' : '创建账本'}}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -88,6 +105,7 @@
           <text class="summary-label">月预算</text>
           <text class="summary-value">{{createdLedger.budgetEnabled ? '已开启' : '未开启'}}</text>
         </view>
+        <view wx:if="{{createdLedger.quickAmountsEnabled}}" class="quick-amount-guide">快捷金额已开启，可在「我的 - 快捷金额」修改常用金额</view>
       </view>
       <view class="sheet-actions">
         <view class="tomato-button sheet-action" bindtap="goRecord">记一笔</view>

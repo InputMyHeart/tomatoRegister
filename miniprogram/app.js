@@ -1,4 +1,5 @@
 const profileService = require("./services/profile.service");
+const ledgerStore = require("./services/ledger.store");
 const { resolveEnvironment } = require("./config/cloud-env");
 
 App({
@@ -7,6 +8,7 @@ App({
     openid: "",
     user: null,
     currentLedger: null,
+    ledgers: [],
     stats: null,
     readonly: false,
     loggedIn: false,
@@ -48,6 +50,7 @@ App({
     this.globalData.openid = auth.openid || "";
     this.globalData.user = auth.user;
     this.globalData.currentLedger = auth.currentLedger || null;
+    this.globalData.ledgers = ledgerStore.getCachedLedgers(this);
     this.globalData.stats = auth.stats || null;
     this.globalData.readonly = Boolean(auth.currentLedger && auth.currentLedger.readonly);
     this.globalData.loggedIn = true;
@@ -81,6 +84,7 @@ App({
         this.globalData.openid = auth.openid || "";
         this.globalData.user = auth.user || null;
         this.globalData.currentLedger = auth.currentLedger || null;
+        this.globalData.ledgers = ledgerStore.getCachedLedgers(this);
         this.globalData.stats = auth.stats || null;
         this.globalData.readonly = Boolean(auth.currentLedger && auth.currentLedger.readonly);
         this.globalData.loggedIn = true;
@@ -110,7 +114,9 @@ App({
     this.globalData.openid = "";
     this.globalData.user = null;
     this.globalData.currentLedger = null;
+    this.globalData.ledgers = [];
     this.globalData.stats = null;
+    ledgerStore.clearLedgers();
     this.globalData.readonly = false;
     this.globalData.loggedIn = false;
     this.authVerifiedInSession = false;

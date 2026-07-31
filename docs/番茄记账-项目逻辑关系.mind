@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  番茄记账项目逻辑导图
+  格式：FreeMind/Freeplane XML（扩展名保留为 .mind 以匹配交付需求）。
+  如导图软件未自动识别，可将文件后缀改为 .mm 后使用 FreeMind、Freeplane、XMind 导入。
+-->
+<map version="1.0.1">
+  <node TEXT="番茄记账｜项目逻辑关系" FOLDED="false">
+    <node TEXT="运行架构" POSITION="right">
+      <node TEXT="微信小程序前端（miniprogram）">
+        <node TEXT="页面 + 自定义组件 + services + utils"/>
+        <node TEXT="wx.cloud.callFunction 调用 tomatoLedger"/>
+      </node>
+      <node TEXT="云开发云函数（cloudfunctions/tomatoLedger）">
+        <node TEXT="唯一业务入口：{ route, payload }"/>
+        <node TEXT="统一响应：{ ok, data } / { ok, error }"/>
+        <node TEXT="CloudBase 数据库"/>
+      </node>
+      <node TEXT="环境配置">
+        <node TEXT="config/cloud-env.js 为唯一配置来源"/>
+        <node TEXT="开发版、体验版 → test"/>
+        <node TEXT="正式版 → production"/>
+      </node>
+    </node>
+    <node TEXT="用户主流程" POSITION="right">
+      <node TEXT="1. 启动与登录">
+        <node TEXT="pages/login/index"/>
+        <node TEXT="profile.service.login → auth/login"/>
+        <node TEXT="服务端按 OpenID 获取或创建 users 用户"/>
+        <node TEXT="登录后加载账本列表与当前账本"/>
+      </node>
+      <node TEXT="2. 首页记账与总览">
+        <node TEXT="pages/index/index">
+          <node TEXT="读取当前账本 dashboard"/>
+          <node TEXT="展示收支汇总、预算进度、最近记录、快捷金额"/>
+          <node TEXT="快捷入口：新增记录、分类选择、记录列表、预算、创建账本"/>
+        </node>
+        <node TEXT="ledger/dashboard/get"/>
+      </node>
+      <node TEXT="3. 记录管理">
+        <node TEXT="记录列表 pages/records/index">
+          <node TEXT="分页、日期/类型等筛选"/>
+          <node TEXT="游标：{ date, id }；默认 30、最大 50"/>
+        </node>
+        <node TEXT="新增/编辑 pages/record-edit/index">
+          <node TEXT="复用 tl-record-form"/>
+          <node TEXT="选择分类 → pages/record-category/index"/>
+        </node>
+        <node TEXT="详情 pages/record-detail/index"/>
+        <node TEXT="record/create | get | list | update | delete"/>
+      </node>
+      <node TEXT="4. 分类管理">
+        <node TEXT="分类选择 pages/record-category/index"/>
+        <node TEXT="管理 pages/category-manage/index"/>
+        <node TEXT="新增/编辑 pages/category-operation/index"/>
+        <node TEXT="图标选择 pages/category-icon-picker/index"/>
+        <node TEXT="category/list | save | delete"/>
+      </node>
+      <node TEXT="5. 账本与共享">
+        <node TEXT="创建 pages/ledger-create/index → ledger/create"/>
+        <node TEXT="账本列表/切换：ledger.store + ledger/list + ledger/current/set"/>
+        <node TEXT="账本设置 pages/ledger-settings/index"/>
+        <node TEXT="账本详情/成员/邀请 pages/ledger-detail-settings/index"/>
+        <node TEXT="邀请码或只读分享码 → pages/ledger-join-result/index"/>
+        <node TEXT="invite/create | join-token | join | join-readonly"/>
+        <node TEXT="删除账本 → ledger/delete（可恢复的分批处理）"/>
+      </node>
+      <node TEXT="6. 个人与设置">
+        <node TEXT="我的 pages/profile/index"/>
+        <node TEXT="资料 pages/profile-edit/index → auth/profile/update"/>
+        <node TEXT="预算 pages/budget-settings/index → ledger/budget/update"/>
+        <node TEXT="快捷金额 pages/quick-amount-settings/index → ledger/quick-amounts/update"/>
+      </node>
+      <node TEXT="7. 分析与反馈">
+        <node TEXT="分析 pages/analysis/index → ledger/analysis/get"/>
+        <node TEXT="反馈提交 pages/feedback/index → feedback/create"/>
+        <node TEXT="反馈历史 pages/feedback-history/index → feedback/list"/>
+      </node>
+    </node>
+    <node TEXT="前端分层" POSITION="left">
+      <node TEXT="app.js / app.json / app.wxss">
+        <node TEXT="注册全部页面、全局样式、云能力初始化"/>
+        <node TEXT="custom navigationStyle"/>
+      </node>
+      <node TEXT="页面（pages）">
+        <node TEXT="登录：login"/>
+        <node TEXT="核心 Tab：index（首页）、records（账单）、analysis（分析）、profile（我的）"/>
+        <node TEXT="业务详情：记录、分类、账本、预算、反馈"/>
+      </node>
+      <node TEXT="业务组件（components，tl- 前缀）">
+        <node TEXT="tl-navbar：统一导航与返回首页"/>
+        <node TEXT="tl-tabbar：主导航、快速记账、分类入口"/>
+        <node TEXT="tl-record-form：记录新增/编辑表单"/>
+        <node TEXT="tl-ledger-selector / tl-view-ledger-switcher：账本切换"/>
+        <node TEXT="tl-member-list：成员展示"/>
+        <node TEXT="tl-category-tree：分类层级"/>
+        <node TEXT="tl-budget-progress / tl-empty-state / tl-icon"/>
+      </node>
+      <node TEXT="服务层（services）">
+        <node TEXT="api.js：唯一云函数调用封装、错误规范化"/>
+        <node TEXT="ledger.service：账本、仪表盘、分析、预算、快捷金额、邀请"/>
+        <node TEXT="ledger.store：账本列表本地缓存与刷新"/>
+        <node TEXT="record.service：记录 CRUD 与列表"/>
+        <node TEXT="category.service：分类查询、保存、删除"/>
+        <node TEXT="profile.service：登录、资料更新、仅测试用数据库重置"/>
+        <node TEXT="feedback.service：反馈提交与历史"/>
+      </node>
+      <node TEXT="工具层（utils）">
+        <node TEXT="money：金额格式化/计算"/>
+        <node TEXT="date：日期处理"/>
+        <node TEXT="mapper：前后端展示数据转换"/>
+        <node TEXT="auth：前端登录态辅助"/>
+      </node>
+    </node>
+    <node TEXT="云函数路由与业务" POSITION="right">
+      <node TEXT="入口 index.js">
+        <node TEXT="校验 payload 为对象"/>
+        <node TEXT="从 WX 上下文取得 OpenID，不信任客户端身份"/>
+        <node TEXT="按 route 分发到 actions"/>
+        <node TEXT="统一成功/失败响应；未知路由拒绝"/>
+        <node TEXT="请求日志与错误日志 errorLogs（敏感字段脱敏）"/>
+      </node>
+      <node TEXT="actions">
+        <node TEXT="auth：login、profile/update、database/reset"/>
+        <node TEXT="ledger：create、list、current/set、delete、dashboard/get、analysis/get、budget/update、quick-amounts/update"/>
+        <node TEXT="record：create、get、list、update、delete"/>
+        <node TEXT="category：list、save、delete"/>
+        <node TEXT="invite：create、join-token、join、join-readonly"/>
+        <node TEXT="feedback：create、list（独立实现）"/>
+        <node TEXT="除 feedback 外，当前 actions 适配至 legacy.handlers 的既有业务实现"/>
+      </node>
+      <node TEXT="repositories">
+        <node TEXT="user / ledger / record / category：按 ID 或 OpenID 查询封装"/>
+      </node>
+      <node TEXT="validators + shared">
+        <node TEXT="schemas：请求与字段校验"/>
+        <node TEXT="errors：错误归一化"/>
+        <node TEXT="response：成功与失败响应"/>
+        <node TEXT="constants：共享常量"/>
+      </node>
+    </node>
+    <node TEXT="数据模型" POSITION="left">
+      <node TEXT="users">
+        <node TEXT="openid 唯一；用户资料与 currentLedgerId"/>
+        <node TEXT="登录时创建/读取"/>
+      </node>
+      <node TEXT="ledgers">
+        <node TEXT="ownerOpenid、成员/只读成员、账本类型"/>
+        <node TEXT="预算、快捷金额、邀请码/只读分享码"/>
+        <node TEXT="新建时 schemaVersion: 1"/>
+      </node>
+      <node TEXT="records">
+        <node TEXT="ledgerId、ownerOpenid、amount、type、date、分类信息"/>
+        <node TEXT="amount 为有限数值；type = income | expense；date = YYYY-MM-DD"/>
+        <node TEXT="新建时 schemaVersion: 1"/>
+        <node TEXT="索引：ledgerId ASC, date DESC, _id DESC"/>
+      </node>
+      <node TEXT="categories">
+        <node TEXT="账本维度；支持父/子分类与图标"/>
+        <node TEXT="删除/迁移关联记录需保证一致性"/>
+      </node>
+      <node TEXT="ledgerInvites">
+        <node TEXT="邀请令牌；令牌只能绑定一个 OpenID"/>
+        <node TEXT="以事务/条件更新避免重复领取"/>
+      </node>
+      <node TEXT="feedbacks">
+        <node TEXT="ownerOpenid、content、type、images、status、时间戳"/>
+        <node TEXT="仅查询当前用户；创建状态固定 submitted"/>
+      </node>
+      <node TEXT="ledgerOperations / errorLogs">
+        <node TEXT="前者：跨集合账本删除等可恢复操作状态"/>
+        <node TEXT="后者：失败请求审计日志（敏感内容脱敏）"/>
+      </node>
+    </node>
+    <node TEXT="权限与安全边界" POSITION="right">
+      <node TEXT="角色">
+        <node TEXT="owner：读写、管理账本与全部记录"/>
+        <node TEXT="member：读写；仅编辑/删除自己的记录"/>
+        <node TEXT="readonly：只读，禁止写入、导入、导出"/>
+      </node>
+      <node TEXT="服务端最终裁决">
+        <node TEXT="每次请求重新读取用户、账本、角色"/>
+        <node TEXT="不信任客户端传入的身份与权限"/>
+      </node>
+      <node TEXT="写入安全">
+        <node TEXT="记录参数校验与账本访问校验"/>
+        <node TEXT="邀请领取原子性"/>
+        <node TEXT="删除账本、分类迁移：标记进行中 → 分批处理 → 完成确认；可重试"/>
+        <node TEXT="resetDatabase 仅测试环境，不能向生产用户暴露"/>
+      </node>
+    </node>
+    <node TEXT="验证与维护" POSITION="left">
+      <node TEXT="自动检查">
+        <node TEXT="npm run verify（发布前必跑）"/>
+        <node TEXT="npm run lint / test / cloud:check；按需 format"/>
+        <node TEXT="tests：金额、映射、云路由、云环境"/>
+      </node>
+      <node TEXT="手工回归（docs/REGRESSION.md）">
+        <node TEXT="登录、账本、收支 CRUD、分页筛选"/>
+        <node TEXT="邀请权限、分类迁移、预算"/>
+      </node>
+      <node TEXT="文档">
+        <node TEXT="DATABASE：字段契约与索引"/>
+        <node TEXT="WRITE-SAFETY：写入安全"/>
+        <node TEXT="CLOUD-ENVIRONMENTS：环境与发布"/>
+      </node>
+    </node>
+  </node>
+</map>

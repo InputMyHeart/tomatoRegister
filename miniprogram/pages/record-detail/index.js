@@ -2,6 +2,7 @@ const recordService = require("../../services/record.service");
 const { formatDisplayMoney } = require("../../utils/money");
 const { formatDateTime } = require("../../utils/date");
 const { getId } = require("../../utils/mapper");
+const { resolveAvatarUrls } = require("../../utils/avatar");
 
 function getLedgerTypeText(type) {
   return type === "shared" ? "共享账本" : "个人账本";
@@ -64,10 +65,11 @@ Page({
       const data = await recordService.getRecord(recordId);
       if (!data.record) throw new Error("记录加载失败");
 
+      const [record] = await resolveAvatarUrls([data.record], "memberAvatar");
       this.setData({
         loading: false,
         readonly: Boolean(data.readonly),
-        record: normalizeRecord(data.record, data.ledger),
+        record: normalizeRecord(record, data.ledger),
       });
     } catch (error) {
       console.warn("load record detail failed", error);

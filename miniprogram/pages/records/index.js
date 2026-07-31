@@ -3,7 +3,9 @@ const { formatDisplayMoney } = require("../../utils/money");
 const { formatDateLabel } = require("../../utils/date");
 const { getId } = require("../../utils/mapper");
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 const recordService = require("../../services/record.service");
+const { resolveAvatarUrls } = require("../../utils/avatar");
 
 const weekdayMap = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
@@ -20,28 +22,20 @@ function addMonth(year, month, delta) {
   return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }
 
-function getRange(year, month, monthStartDay) {
-  const startDay = Math.min(28, Math.max(1, Number(monthStartDay || 1)));
+function getRange(year, month) {
   const next = addMonth(year, month, 1);
   return {
     year,
     month,
-    start: makeDateText(year, month, startDay),
-    end: makeDateText(next.year, next.month, startDay),
+    start: makeDateText(year, month, 1),
+    end: makeDateText(next.year, next.month, 1),
     label: `${year}年${month}月`,
   };
 }
 
-function getCurrentRange(monthStartDay) {
+function getCurrentRange() {
   const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth() + 1;
-  if (now.getDate() < Number(monthStartDay || 1)) {
-    const previous = addMonth(year, month, -1);
-    year = previous.year;
-    month = previous.month;
-  }
-  return getRange(year, month, monthStartDay);
+  return getRange(now.getFullYear(), now.getMonth() + 1);
 }
 
 function normalizeRecord(record = {}) {
@@ -114,7 +108,6 @@ Page({
     ledgerName: "我的账本",
     ledgerId: "",
     monthLabel: "",
-    monthStartDay: 1,
     activeType: "all",
     readonly: false,
     loading: true,
@@ -126,9 +119,14 @@ Page({
     currentRange: null,
     ledgerOptions: [],
     isLedgerSwitcherVisible: false,
+    isLoadingLedgers: false,
+    ledgerLoadError: false,
     ...buildView([], "all"),
   },
 
+  onLoad(options = {}) {
+    this.initialMonth = /^\d{4}-\d{2}$/.test(options.month || "") ? options.month : "";
+  },
   onShow() {
     if (!this.hasBootstrapped) {
       this.hasBootstrapped = true;
@@ -150,12 +148,13 @@ Page({
 
     await app.loginWithWechat();
     const ledger = app.globalData.currentLedger || {};
-    const monthStartDay = Number(ledger.monthStartDay || 1);
-    const currentRange = this.data.currentRange || getCurrentRange(monthStartDay);
+    const currentRange = this.initialMonth
+      ? getRange(Number(this.initialMonth.slice(0, 4)), Number(this.initialMonth.slice(5, 7)))
+      : getCurrentRange();
+    this.initialMonth = "";
     this.setData({
       ledgerId: ledger._id || "",
       ledgerName: ledger.name || "我的账本",
-      monthStartDay,
       readonly: Boolean(ledger.readonly),
       currentRange,
       monthLabel: currentRange.label,
@@ -178,7 +177,9 @@ Page({
         pageSize: 30,
         cursor: append ? this.data.nextCursor : null,
       });
-      const page = (data.records || []).map(normalizeRecord);
+      const page = (await resolveAvatarUrls(data.records || [], "memberAvatar")).map(
+        normalizeRecord
+      );
       const records = append ? [...this.data.records, ...page] : page;
       this.setData({
         loading: false,
@@ -209,12 +210,19 @@ Page({
   },
 
   async switchLedger() {
+    if (this.data.isLoadingLedgers) return;
+    this.setData({
+      isLedgerSwitcherVisible: true,
+      isLoadingLedgers: true,
+      ledgerLoadError: false,
+    });
     try {
-      const data = await ledgerService.listLedgers();
-      const ledgerOptions = data.ledgers || [];
-      this.setData({ ledgerOptions, isLedgerSwitcherVisible: true });
+      const data = { ledgers: await ledgerStore.getLedgers() };
+      this.setData({ ledgerOptions: data.ledgers || [] });
     } catch (_error) {
-      wx.showToast({ title: "账本加载失败", icon: "none" });
+      this.setData({ ledgerLoadError: true });
+    } finally {
+      this.setData({ isLoadingLedgers: false });
     }
   },
 
@@ -224,18 +232,19 @@ Page({
   stopLedgerSwitcherTap() {},
 
   chooseViewLedger(event) {
-    const ledgerId = event.currentTarget.dataset.id;
+    const ledgerId = event.detail.ledgerId;
     const ledger = this.data.ledgerOptions.find((item) => (item._id || item.id) === ledgerId);
     if (!ledger || ledgerId === this.data.ledgerId) {
       this.closeLedgerSwitcher();
       return;
     }
-    const monthStartDay = Number(ledger.monthStartDay || 1);
-    const currentRange = getCurrentRange(monthStartDay);
+    const currentRange = this.initialMonth
+      ? getRange(Number(this.initialMonth.slice(0, 4)), Number(this.initialMonth.slice(5, 7)))
+      : getCurrentRange();
+    this.initialMonth = "";
     this.setData({
       ledgerId,
       ledgerName: ledger.name || "我的账本",
-      monthStartDay,
       currentRange,
       monthLabel: currentRange.label,
       isLedgerSwitcherVisible: false,
@@ -247,7 +256,7 @@ Page({
   prevMonth() {
     const range = this.data.currentRange;
     const previous = addMonth(range.year, range.month, -1);
-    const nextRange = getRange(previous.year, previous.month, this.data.monthStartDay);
+    const nextRange = getRange(previous.year, previous.month);
     this.setData({ currentRange: nextRange, monthLabel: nextRange.label });
     this.loadRecords(nextRange);
   },
@@ -255,7 +264,7 @@ Page({
   nextMonth() {
     const range = this.data.currentRange;
     const next = addMonth(range.year, range.month, 1);
-    const nextRange = getRange(next.year, next.month, this.data.monthStartDay);
+    const nextRange = getRange(next.year, next.month);
     this.setData({ currentRange: nextRange, monthLabel: nextRange.label });
     this.loadRecords(nextRange);
   },

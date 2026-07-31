@@ -4,4 +4,6 @@ const get = (context, payload) => execute("getRecord", context.openid, payload);
 const list = (context, payload) => execute("listRecords", context.openid, payload);
 const update = (context, payload) => execute("updateRecord", context.openid, payload);
 const remove = (context, payload) => execute("deleteRecord", context.openid, payload);
-module.exports = { create, get, list, update, remove };
+const importRecords = (context, payload) => execute("importRecords", context.openid, payload);
+const importTemplate = (context, payload) => execute("getImportTemplate", context.openid, payload);
+module.exports = { create, get, list, update, remove, importRecords, importTemplate };

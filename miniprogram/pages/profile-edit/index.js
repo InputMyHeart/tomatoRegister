@@ -1,16 +1,13 @@
 const app = getApp();
 
 const defaultAvatar = "/images/brand/tomato-ledger-logo-256-transparent.png";
-const genderOptions = ["喵星人", "男生", "女生"];
 
 Page({
   data: {
     avatarUrl: defaultAvatar,
     isDefaultAvatar: true,
     nickName: "",
-    gender: "喵星人",
-    genderIndex: 0,
-    genderOptions,
+
     saving: false,
   },
 
@@ -22,13 +19,11 @@ Page({
     }
 
     const avatarUrl = user.avatarUrl || defaultAvatar;
-    const gender = genderOptions.includes(user.gender) ? user.gender : "喵星人";
+
     this.setData({
       avatarUrl,
       isDefaultAvatar: avatarUrl === defaultAvatar,
       nickName: user.nickName || "",
-      gender,
-      genderIndex: Math.max(0, genderOptions.indexOf(gender)),
     });
   },
 
@@ -40,14 +35,6 @@ Page({
 
   onNickNameInput(event) {
     this.setData({ nickName: event.detail.value });
-  },
-
-  onGenderChange(event) {
-    const genderIndex = Number(event.detail.value || 0);
-    this.setData({
-      genderIndex,
-      gender: genderOptions[genderIndex] || "喵星人",
-    });
   },
 
   async uploadAvatarIfNeeded(avatarUrl) {
@@ -75,20 +62,17 @@ Page({
     }
 
     this.setData({ saving: true });
-    wx.showLoading({ title: "保存中" });
     try {
       const avatarUrl = await this.uploadAvatarIfNeeded(this.data.avatarUrl);
       await app.updateProfile({
         avatarUrl,
         nickName,
-        gender: this.data.gender || "喵星人",
       });
       wx.showToast({ title: "已保存", icon: "success" });
       setTimeout(() => wx.navigateBack(), 350);
     } catch (error) {
       wx.showToast({ title: error.message || "保存失败", icon: "none" });
     } finally {
-      wx.hideLoading();
       this.setData({ saving: false });
     }
   },

@@ -1,5 +1,6 @@
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 const ledgerTypes = [
   {
     key: "personal",
@@ -34,6 +35,7 @@ Page({
     remark: "",
     budgetEnabled: false,
     monthlyBudget: "",
+    quickAmountsEnabled: false,
     saving: false,
     createdLedger: null,
     createdLedgerId: "",
@@ -55,6 +57,9 @@ Page({
   },
   toggleBudget() {
     this.setData({ budgetEnabled: !this.data.budgetEnabled });
+  },
+  toggleQuickAmounts() {
+    this.setData({ quickAmountsEnabled: !this.data.quickAmountsEnabled });
   },
   onBudgetInput(event) {
     this.setData({ monthlyBudget: normalizeBudgetInput(event.detail.value) });
@@ -83,12 +88,14 @@ Page({
         remark,
         budgetEnabled: this.data.budgetEnabled,
         monthlyBudget: this.data.budgetEnabled ? monthlyBudget : 0,
+        quickAmountsEnabled: this.data.quickAmountsEnabled,
       });
       const ledger = payload.ledger || {};
       app.globalData.currentLedger = ledger;
       if (app.globalData.user)
         app.globalData.user.currentLedgerId = payload.ledgerId || ledger._id || "";
       app.persistAuthState();
+      await ledgerStore.refreshLedgers();
       this.setData({
         createdLedger: ledger,
         createdLedgerId: payload.ledgerId || ledger._id || "",

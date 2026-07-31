@@ -9,13 +9,12 @@ Component({
     "enabled, budget, expense": function updateProgress(enabled, budget, expense) {
       const safeBudget = Number(budget) || 0;
       const safeExpense = Number(expense) || 0;
+      const rate = safeBudget > 0 ? Math.min(100, (safeExpense / safeBudget) * 100) : 0;
+      const displayRate = Number(rate.toFixed(2));
       this.setData({
-        rate: safeBudget > 0 ? Math.min(100, Math.round((safeExpense / safeBudget) * 100)) : 0,
+        rate: displayRate,
         left: safeBudget - safeExpense,
-        barStyle:
-          "width: " +
-          (safeBudget > 0 ? Math.min(100, Math.round((safeExpense / safeBudget) * 100)) : 0) +
-          "%",
+        barStyle: `width: ${displayRate}%`,
       });
     },
   },

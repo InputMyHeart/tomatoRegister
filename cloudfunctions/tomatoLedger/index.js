@@ -7,8 +7,10 @@ const ledger = require("./actions/ledger");
 const record = require("./actions/record");
 const category = require("./actions/category");
 const invite = require("./actions/invite");
+const feedback = require("./actions/feedback");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+const db = cloud.database();
 
 const routes = {
   "auth/login": auth.login,
@@ -17,16 +19,20 @@ const routes = {
   "ledger/create": ledger.create,
   "ledger/list": ledger.list,
   "ledger/current/set": ledger.setCurrent,
+  "ledger/members/get": ledger.members,
+  "ledger/members/remove": ledger.removeMember,
   "ledger/delete": ledger.remove,
   "ledger/dashboard/get": ledger.dashboard,
   "ledger/analysis/get": ledger.analysis,
   "ledger/budget/update": ledger.updateBudget,
-  "ledger/month-start/update": ledger.updateMonthStartDay,
+  "ledger/quick-amounts/update": ledger.updateQuickAmounts,
   "record/create": record.create,
   "record/get": record.get,
   "record/list": record.list,
   "record/update": record.update,
   "record/delete": record.remove,
+  "record/import": record.importRecords,
+  "record/import/template": record.importTemplate,
   "category/list": category.list,
   "category/save": category.save,
   "category/delete": category.remove,
@@ -34,10 +40,41 @@ const routes = {
   "invite/join-token": invite.joinByToken,
   "invite/join": invite.join,
   "invite/join-readonly": invite.joinReadonly,
+  "feedback/create": feedback.create,
+  "feedback/list": feedback.list,
 };
 
 function logRequest(fields) {
   console.info(JSON.stringify({ type: "tomatoLedger", ...fields }));
+}
+
+const sensitiveFieldPattern = /password|token|secret|credential|authorization|cookie|session|code/i;
+
+function sanitizePayload(value, depth = 0) {
+  if (typeof value === "string") return value.slice(0, 1000);
+  if (value === null || typeof value !== "object") return value;
+  if (depth >= 3) return "[TRUNCATED]";
+  if (Array.isArray(value)) {
+    return value.slice(0, 20).map((item) => sanitizePayload(item, depth + 1));
+  }
+  return Object.keys(value)
+    .slice(0, 30)
+    .reduce((result, key) => {
+      result[key] = sensitiveFieldPattern.test(key)
+        ? "[REDACTED]"
+        : sanitizePayload(value[key], depth + 1);
+      return result;
+    }, {});
+}
+
+async function writeErrorLog(fields) {
+  try {
+    await db.collection("errorLogs").add({
+      data: { type: "tomatoLedgerError", occurredAt: new Date(), status: "failure", ...fields },
+    });
+  } catch (error) {
+    console.warn("Failed to write tomatoLedger error log", error);
+  }
 }
 
 exports.main = async (event = {}) => {
@@ -49,6 +86,7 @@ exports.main = async (event = {}) => {
   const payload = event.payload || {};
   const handler = routes[route];
   const ledgerId = String(payload.ledgerId || "");
+  let openid;
   if (!handler) {
     logRequest({
       requestId,
@@ -58,11 +96,26 @@ exports.main = async (event = {}) => {
       code: "ROUTE_NOT_FOUND",
       durationMs: Date.now() - startedAt,
     });
+    try {
+      ({ OPENID: openid } = cloud.getWXContext());
+    } catch (error) {
+      console.warn("Failed to get OpenID for tomatoLedger error log", error);
+    }
+    await writeErrorLog({
+      requestId,
+      route,
+      openid,
+      ledgerId,
+      code: "ROUTE_NOT_FOUND",
+      message: "Unknown route",
+      durationMs: Date.now() - startedAt,
+      payload: sanitizePayload(payload),
+    });
     return failure("ROUTE_NOT_FOUND", "Unknown route");
   }
   try {
     assertObject(payload);
-    const { OPENID: openid } = cloud.getWXContext();
+    ({ OPENID: openid } = cloud.getWXContext());
     const result = await handler({ openid, route, requestId }, payload);
     if (!result || !result.success) {
       const code = (result && result.code) || "REQUEST_FAILED";
@@ -75,7 +128,18 @@ exports.main = async (event = {}) => {
         code,
         durationMs: Date.now() - startedAt,
       });
-      return failure(code, (result && result.message) || "Request failed");
+      const message = (result && result.message) || "Request failed";
+      await writeErrorLog({
+        requestId,
+        route,
+        openid,
+        ledgerId,
+        code,
+        message,
+        durationMs: Date.now() - startedAt,
+        payload: sanitizePayload(payload),
+      });
+      return failure(code, message);
     }
     logRequest({
       requestId,
@@ -100,6 +164,24 @@ exports.main = async (event = {}) => {
         stack: error.stack,
       })
     );
+    if (!openid) {
+      try {
+        ({ OPENID: openid } = cloud.getWXContext());
+      } catch (contextError) {
+        console.warn("Failed to get OpenID for tomatoLedger error log", contextError);
+      }
+    }
+    await writeErrorLog({
+      requestId,
+      route,
+      openid,
+      ledgerId,
+      code: normalized.code,
+      message: normalized.message,
+      durationMs: Date.now() - startedAt,
+      payload: sanitizePayload(payload),
+      ...(typeof error.stack === "string" ? { stack: error.stack.slice(0, 4000) } : {}),
+    });
     return failure(normalized.code, normalized.message);
   }
 };

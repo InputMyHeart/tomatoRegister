@@ -47,6 +47,11 @@
   white-space: nowrap;
 }
 .tl-ledger-selector__tag {
+  display: flex;
+  align-items: center;
+  height: 34rpx;
+  box-sizing: border-box;
+  align-self: center;
   flex: 0 0 auto;
   padding: 6rpx 14rpx;
   border-radius: 999rpx;
@@ -59,8 +64,4 @@
   margin-top: 8rpx;
   color: #9a8278;
   font-size: 22rpx;
-}
-.tl-ledger-selector__manage {
-  padding: 10rpx;
-  color: #8d7b74;
 }

@@ -58,11 +58,29 @@
         <view class="state-copy">创建自己的第一个账本，开始记录每一笔收入和支出。</view>
         <view class="primary-action" bindtap="goCreateLedger">创建账本</view>
       </view>
-      <view wx:elif="{{isEmpty}}" class="state-card card fade-up">
-        <tl-empty-state text="本月暂无记账数据">
-        </tl-empty-state>
-        <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
-      </view>
+      <block wx:elif="{{isEmpty}}">
+        <view class="state-card card fade-up">
+          <tl-empty-state text="本月暂无记账数据">
+          </tl-empty-state>
+          <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
+        </view>
+        <view wx:if="{{showBudget}}" class="budget-card card fade-up">
+          <view class="section-head">
+            <view>
+              <view class="section-title">月预算</view>
+              <view class="section-tip" wx:if="{{budgetEnabled}}">预算 ¥{{budget}}，已使用 {{budgetRateText}}%</view>
+              <view class="section-tip" wx:else>未启用月预算</view>
+              <view wx:if="{{budgetEnabled}}" class="budget-status {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}">{{budgetRate >= 90 ? '预算预警，请控制支出' : budgetRate >= 70 ? '消费偏快，留意后续支出' : budgetRate >= 50 ? '已使用过半，注意节奏' : '预算充足，保持记录'}}</view>
+            </view>
+            <view class="budget-right">
+              <view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view>
+              <view wx:if="{{canManageBudget}}" class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
+            </view>
+          </view>
+          <tl-budget-progress enabled="{{budgetEnabled}}" budget="{{budget}}" expense="{{monthExpense}}">
+          </tl-budget-progress>
+        </view>
+      </block>
       <view wx:elif="{{isError}}" class="state-card card fade-up">
         <tl-empty-state text="数据加载失败，请稍后重试">
         </tl-empty-state>
@@ -120,17 +138,17 @@
             <view class="mini-label">支出最大</view>
           </view>
         </view>
-        <view class="budget-card card fade-up">
+        <view wx:if="{{showBudget}}" class="budget-card card fade-up">
           <view class="section-head">
             <view>
               <view class="section-title">月预算</view>
-              <view class="section-tip" wx:if="{{budgetEnabled}}">预算 ¥{{budget}}，已使用 {{budgetRate}}%</view>
+              <view class="section-tip" wx:if="{{budgetEnabled}}">预算 ¥{{budget}}，已使用 {{budgetRateText}}%</view>
               <view class="section-tip" wx:else>未启用月预算</view>
               <view wx:if="{{budgetEnabled}}" class="budget-status {{budgetRate >= 90 ? 'danger' : budgetRate >= 70 ? 'warning' : budgetRate >= 50 ? 'attention' : 'safe'}}">{{budgetRate >= 90 ? '预算预警，请控制支出' : budgetRate >= 70 ? '消费偏快，留意后续支出' : budgetRate >= 50 ? '已使用过半，注意节奏' : '预算充足，保持记录'}}</view>
             </view>
             <view class="budget-right">
               <view class="budget-left" wx:if="{{budgetEnabled}}">剩 ¥{{budgetLeft}}</view>
-              <view class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
+              <view wx:if="{{canManageBudget}}" class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
             </view>
           </view>
           <tl-budget-progress enabled="{{budgetEnabled}}" budget="{{budget}}" expense="{{monthExpense}}">
@@ -147,16 +165,19 @@
               </tl-icon>
             </view>
             <view class="record-main">
-              <view class="record-title">{{item.categoryText}}</view>
-              <view class="record-meta">{{item.selectedTimeText}}</view>
-            </view>
-            <view class="record-side">
-              <view class="record-amount {{item.type}}">{{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}</view>
-              <view class="record-member">
-                <image class="record-avatar" src="{{item.memberAvatar}}" mode="aspectFill">
-                </image>
-                <text class="record-member-name">{{item.memberName}}</text>
+              <view class="record-line">
+                <view class="record-title">{{item.categoryText}}</view>
+                <view class="record-amount {{item.type}}">{{item.type === 'income' ? '+' : '-'}}¥{{item.amountText}}</view>
               </view>
+              <view class="record-line record-subline">
+                <view class="record-meta">{{item.selectedTimeText}}</view>
+                <view class="record-member">
+                  <image class="record-avatar" src="{{item.memberAvatar}}" mode="aspectFill">
+                  </image>
+                  <text class="record-member-name">{{item.memberName}}</text>
+                </view>
+              </view>
+              <view wx:if="{{item.hasNote}}" class="record-note">{{item.noteText}}</view>
             </view>
           </view>
           <view class="record-limit-tip">—仅展示当月最近10笔—</view>
@@ -173,6 +194,7 @@
           <view class="ledger-switcher-title">切换账本</view>
           <view class="ledger-switcher-subtitle">点击账本即可切换</view>
         </view>
+        <view class="ledger-switcher-settings" bindtap="goLedgerSettings">账本设置</view>
         <view class="ledger-switcher-close" bindtap="closeLedgerSwitcher">×</view>
       </view>
       <view wx:if="{{isSwitchingLedger}}" class="ledger-switcher-loading">
@@ -190,7 +212,7 @@
         <view class="ledger-switcher-retry" bindtap="switchLedger">点击重试</view>
       </view>
       <block wx:else>
-        <tl-ledger-selector ledgers="{{ledgers}}" current-id="{{ledgerId}}" bind:select="chooseLedger" bind:manage="goLedgerSettings">
+        <tl-ledger-selector ledgers="{{ledgers}}" current-id="{{ledgerId}}" bind:select="chooseLedger">
         </tl-ledger-selector>
         <view class="ledger-create-entry" bindtap="goCreateLedger">新建账本</view>
       </block>

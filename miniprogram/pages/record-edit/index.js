@@ -9,8 +9,10 @@ function today() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-function quickAmountsFor(type) {
-  return type === "income" ? [200, 500, 1000, 5000] : [18, 32, 68, 128];
+function quickAmountsFor(ledger) {
+  return ledger && ledger.quickAmountsEnabled && Array.isArray(ledger.quickAmounts)
+    ? ledger.quickAmounts
+    : [];
 }
 
 function quickNotesFor(type, category) {
@@ -18,19 +20,38 @@ function quickNotesFor(type, category) {
   return [category, "早餐", "午餐", "晚餐", "通勤", "买菜"].filter(Boolean);
 }
 
+function limitAmountPrecision(rawValue) {
+  return String(rawValue || "").replace(/(\.\d{2})\d+/g, "$1");
+}
+
+function amountPartToCents(part) {
+  const negative = part.startsWith("-");
+  const source = part.replace(/^[+-]/, "");
+  const [whole, fraction = ""] = source.split(".");
+  const cents = Number(whole) * 100 + Number((fraction + "00").slice(0, 2));
+  return negative ? -cents : cents;
+}
+
+function centsToText(cents) {
+  const absolute = Math.abs(cents);
+  const whole = Math.floor(absolute / 100);
+  const fraction = String(absolute % 100)
+    .padStart(2, "0")
+    .replace(/0+$/, "");
+  return `${cents < 0 ? "-" : ""}${whole}${fraction ? `.${fraction}` : ""}`;
+}
+
 function evaluateAmountExpression(rawValue) {
-  const expression = String(rawValue || "").replace(/\s/g, "");
+  const expression = limitAmountPrecision(rawValue).replace(/\s/g, "");
   if (!expression) return { value: 0, valid: false, text: "" };
-  if (!/^\d+(\.\d+)?([+-]\d+(\.\d+)?)*$/.test(expression)) {
+  if (!/^\d+(\.\d{1,2})?([+-]\d+(\.\d{1,2})?)*$/.test(expression)) {
     return { value: 0, valid: false, text: "" };
   }
-  const parts = expression.match(/[+-]?\d+(\.\d+)?/g) || [];
-  const value = parts.reduce((sum, part) => sum + Number(part), 0);
-  return {
-    value: Number(value.toFixed(2)),
-    valid: value > 0,
-    text: Number(value.toFixed(2)).toString(),
-  };
+  const cents = (expression.match(/[+-]?\d+(\.\d{1,2})?/g) || []).reduce(
+    (sum, part) => sum + amountPartToCents(part),
+    0
+  );
+  return { value: cents / 100, valid: cents > 0, text: centsToText(cents) };
 }
 
 function normalizeTags(input) {
@@ -67,7 +88,7 @@ Page({
     ledgerId: "",
     accountIndex: 0,
     accounts,
-    quickAmounts: quickAmountsFor("expense"),
+    quickAmounts: [],
     quickNotes: quickNotesFor("expense", "其他支出"),
   },
 
@@ -104,7 +125,7 @@ Page({
       parentIcon,
       ledgerName: currentLedger.name || "我家账本",
       ledgerId: options.ledgerId || currentLedger._id || "",
-      quickAmounts: quickAmountsFor(type),
+      quickAmounts: quickAmountsFor(currentLedger),
       quickNotes: quickNotesFor(type, categoryName),
     });
     if (options.id) this.loadRecord(decodeURIComponent(options.id));
@@ -135,7 +156,7 @@ Page({
         ledgerId: record.ledgerId || "",
         ledgerName: (data.ledger && data.ledger.name) || "我的账本",
         accountIndex,
-        quickAmounts: quickAmountsFor(recordType),
+        quickAmounts: quickAmountsFor(data.ledger),
         quickNotes: quickNotesFor(recordType, record.categoryName),
       });
       this.setAmountExpression(String(record.amount || ""));
@@ -155,7 +176,6 @@ Page({
       categoryIcon: selection.categoryIcon || this.data.categoryIcon,
       parentCategory: selection.parentCategory || this.data.parentCategory,
       parentIcon: selection.parentIcon || this.data.parentIcon,
-      quickAmounts: quickAmountsFor(type),
       quickNotes: quickNotesFor(type, selection.categoryName || this.data.categoryName),
     });
   },
@@ -189,7 +209,7 @@ Page({
     this.setAmountExpression(event.detail.value);
   },
   onNoteInput(event) {
-    this.setData({ note: event.detail.value });
+    this.setData({ note: String(event.detail.value || "").slice(0, 100) });
   },
   onDateChange(event) {
     this.setData({ date: event.detail.value });
@@ -216,6 +236,34 @@ Page({
     this.setData({ tags });
   },
 
+  async deleteRecord() {
+    if (!this.data.isEditing || !this.data.recordId || this.data.saving || this.data.deleting)
+      return;
+    const confirmed = await new Promise((resolve) => {
+      wx.showModal({
+        title: "删除记录",
+        content: "删除后无法恢复，确定删除这条记录吗？",
+        confirmText: "删除",
+        confirmColor: "#f0442f",
+        success: (result) => resolve(Boolean(result.confirm)),
+        fail: () => resolve(false),
+      });
+    });
+    if (!confirmed) return;
+
+    this.setData({ deleting: true });
+    try {
+      await recordService.deleteRecord(this.data.recordId);
+      app.globalData.recordsNeedRefresh = true;
+      wx.showToast({ title: "已删除", icon: "success" });
+      setTimeout(() => wx.navigateBack(), 650);
+    } catch (error) {
+      console.warn("deleteRecord failed", error);
+      wx.showToast({ title: error.message || "删除失败", icon: "none" });
+    } finally {
+      this.setData({ deleting: false });
+    }
+  },
   async saveRecord() {
     if (this.data.saving) return;
     const finalTags = Array.from(

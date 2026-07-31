@@ -1,5 +1,6 @@
 .tl-budget-progress {
   width: 100%;
+  margin-top: 16rpx;
 }
 .tl-budget-progress__track {
   height: 12rpx;

@@ -19,18 +19,34 @@
         <view wx:for="{{ledgers}}" wx:key="id" class="ledger-card card">
           <view class="ledger-card-head">
             <view class="ledger-name">{{item.displayName}}</view>
-            <view class="ledger-settings-button" data-id="{{item.id}}" bindtap="openLedgerSettings">
-              <tl-icon name="settings-3-line" size="34" color="#75645d">
-              </tl-icon>
-            </view>
           </view>
           <view class="ledger-tags">
             <text class="ledger-tag type-tag {{item.typeClass}}">{{item.typeText}}</text>
             <text class="ledger-tag role-tag {{item.roleClass}}">{{item.roleText}}</text>
           </view>
-          <view class="ledger-meta">
-            <text>成员 {{item.memberCount}}</text>
-            <text>访客 {{item.visitorCount}}</text>
+          <view wx:if="{{item.hasRemark}}" class="ledger-remark">{{item.remarkText}}</view>
+          <view class="ledger-members">
+            <view class="member-stack">
+              <block wx:if="{{item.memberAvatars.length}}">
+                <image wx:for="{{item.memberAvatars}}" wx:key="openid" wx:for-item="avatar" class="member-avatar" src="{{avatar.avatarUrl}}" mode="aspectFill">
+                </image>
+              </block>
+              <text wx:elif="{{item.memberLoadFailed}}" class="member-avatar-status error">成员头像加载失败</text>
+              <text wx:else class="member-avatar-status">暂无成员头像</text>
+            </view>
+            <text class="member-summary">{{item.memberCount}} 位成员 · {{item.visitorCount}} 位访客</text>
+          </view>
+          <view wx:if="{{item.isOwner}}" class="ledger-card-actions">
+            <view class="ledger-action edit" data-id="{{item.id}}" bindtap="editLedger">
+              <tl-icon name="edit-line" size="30rpx">
+              </tl-icon>
+              <text>编辑账本</text>
+            </view>
+            <view class="ledger-action danger" data-id="{{item.id}}" data-name="{{item.displayName}}" bindtap="deleteLedger">
+              <tl-icon name="delete-bin-line" size="30rpx">
+              </tl-icon>
+              <text>删除账本</text>
+            </view>
           </view>
         </view>
       </view>

@@ -6,6 +6,7 @@ const db = cloud.database();
 const _ = db.command;
 const defaultAvatarUrl = "/images/brand/tomato-ledger-logo-256-transparent.png";
 const SCHEMA_VERSION = 1;
+const defaultQuickAmounts = [18, 32, 68, 128];
 
 const defaultExpenseCategories = [
   ["餐饮", "#E94B35"],
@@ -137,11 +138,6 @@ async function normalizeUserProfile(user) {
     changed = true;
   }
 
-  if (!nextUser.gender) {
-    nextUser.gender = "喵星人";
-    changed = true;
-  }
-
   if (changed && nextUser._id) {
     await db
       .collection("users")
@@ -151,7 +147,7 @@ async function normalizeUserProfile(user) {
           userNo: nextUser.userNo,
           nickName: nextUser.nickName,
           avatarUrl: nextUser.avatarUrl,
-          gender: nextUser.gender,
+
           updatedAt: now(),
         },
       });
@@ -216,7 +212,7 @@ async function login(openid) {
     userNo,
     nickName: makeUserName(userNo),
     avatarUrl: defaultAvatarUrl,
-    gender: "喵星人",
+
     currentLedgerId: "",
     createdAt: now(),
     updatedAt: now(),
@@ -254,15 +250,11 @@ async function updateProfile(openid, data = {}) {
     return fail("头像尚未上传至云端，请重新选择后保存", "AVATAR_NOT_PERSISTED");
   }
 
-  const gender = data.gender || "喵星人";
-  const allowedGenders = ["喵星人", "男生", "女生"];
-  if (!allowedGenders.includes(gender)) return fail("请选择正确的性别", "INVALID_GENDER");
-
   const nextUser = {
     ...user,
     nickName,
     avatarUrl: requestedAvatarUrl || user.avatarUrl || defaultAvatarUrl,
-    gender,
+
     updatedAt: now(),
   };
 
@@ -273,7 +265,7 @@ async function updateProfile(openid, data = {}) {
       data: {
         nickName: nextUser.nickName,
         avatarUrl: nextUser.avatarUrl,
-        gender: nextUser.gender,
+
         updatedAt: now(),
       },
     });
@@ -316,6 +308,7 @@ async function createLedger(openid, data = {}) {
 
   const name = String(data.name || "").trim() || "我家账本";
   const budgetEnabled = Boolean(data.budgetEnabled);
+  const quickAmountsEnabled = Boolean(data.quickAmountsEnabled);
   const requestedBudget = Number(data.monthlyBudget);
   const monthlyBudget =
     budgetEnabled && Number.isFinite(requestedBudget)
@@ -348,7 +341,8 @@ async function createLedger(openid, data = {}) {
     readonlyShareCode,
     budgetEnabled,
     monthlyBudget,
-    monthStartDay: 1,
+    quickAmountsEnabled,
+    quickAmounts: quickAmountsEnabled ? defaultQuickAmounts : [],
     accounts: data.accounts || ["微信", "支付宝", "银行卡", "现金"],
     schemaVersion: SCHEMA_VERSION,
     createdAt: now(),
@@ -403,7 +397,12 @@ function assertWritable(role) {
 
 function assertRecordPayload(data = {}) {
   const amount = Number(data.amount);
-  if (!Number.isFinite(amount) || amount <= 0 || amount > 99999999)
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    amount > 99999999 ||
+    Math.abs(amount * 100 - Math.round(amount * 100)) > Number.EPSILON * 100
+  )
     throw new Error("INVALID_RECORD_AMOUNT");
   if (!["income", "expense"].includes(data.type)) throw new Error("INVALID_RECORD_TYPE");
   if (data.date && !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) throw new Error("INVALID_RECORD_DATE");
@@ -435,6 +434,36 @@ async function getUsersByOpenids(openids = []) {
   }, {});
 }
 
+async function resolveUsersAvatarUrls(users = {}) {
+  const fileIds = Array.from(
+    new Set(
+      Object.values(users)
+        .map((user) => user && user.avatarUrl)
+        .filter((avatarUrl) => typeof avatarUrl === "string" && avatarUrl.startsWith("cloud://"))
+    )
+  );
+  if (!fileIds.length) return users;
+
+  try {
+    const result = await cloud.getTempFileURL({ fileList: fileIds });
+    const urlMap = (result.fileList || []).reduce((map, item) => {
+      if (item.fileID && item.tempFileURL) map[item.fileID] = item.tempFileURL;
+      return map;
+    }, {});
+    return Object.keys(users).reduce((map, openid) => {
+      const user = users[openid];
+      map[openid] = {
+        ...user,
+        avatarUrl: urlMap[user.avatarUrl] || defaultAvatarUrl,
+      };
+      return map;
+    }, {});
+  } catch (error) {
+    console.warn("resolve users avatar URLs failed", error);
+    return users;
+  }
+}
+
 function attachRecordOwner(record = {}, ownerMap = {}, currentOpenid = "") {
   const owner = ownerMap[record.ownerOpenid] || {};
   return {
@@ -450,6 +479,81 @@ async function listLedgers(openid) {
   return ok({ ledgers });
 }
 
+function toUniqueOpenids(values = []) {
+  return Array.from(new Set(values.map((value) => String(value || "")).filter(Boolean)));
+}
+
+async function getLedgerMembers(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  assertReadable(role);
+
+  const memberOpenids = toUniqueOpenids([
+    ledger.ownerOpenid,
+    ...(ledger.memberOpenids || []),
+    ...(ledger.members || []).map((item) => item.openid),
+  ]);
+  const viewerOpenids = toUniqueOpenids(ledger.viewerOpenids || []).filter(
+    (item) => !memberOpenids.includes(item)
+  );
+  const users = await resolveUsersAvatarUrls(
+    await getUsersByOpenids([...memberOpenids, ...viewerOpenids])
+  );
+  const memberRows = memberOpenids.map((memberOpenid) => {
+    const user = users[memberOpenid] || {};
+    const isOwner = memberOpenid === ledger.ownerOpenid;
+    return {
+      openid: memberOpenid,
+      nickName: user.nickName || (isOwner ? "账本拥有者" : "账本成员"),
+      avatarUrl: user.avatarUrl || defaultAvatarUrl,
+      role: isOwner ? "owner" : "member",
+    };
+  });
+  const visitorRows = viewerOpenids.map((viewerOpenid) => {
+    const user = users[viewerOpenid] || {};
+    return {
+      openid: viewerOpenid,
+      nickName: user.nickName || "账本访客",
+      avatarUrl: user.avatarUrl || defaultAvatarUrl,
+      role: "visitor",
+    };
+  });
+  return ok({
+    ledger: { id: ledger._id, name: ledger.name, type: ledger.type || "personal" },
+    role,
+    canManage: role === "owner",
+    members: [...memberRows, ...visitorRows],
+  });
+}
+
+async function removeLedgerMember(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  if (role !== "owner") throw new Error("ONLY_OWNER_CAN_MANAGE_MEMBERS");
+  const targetOpenid = String(data.targetOpenid || "");
+  if (!targetOpenid || targetOpenid === ledger.ownerOpenid)
+    throw new Error("OWNER_CANNOT_BE_REMOVED");
+
+  const memberOpenids = toUniqueOpenids(ledger.memberOpenids || []).filter(
+    (item) => item !== targetOpenid
+  );
+  const viewerOpenids = toUniqueOpenids(ledger.viewerOpenids || []).filter(
+    (item) => item !== targetOpenid
+  );
+  await db
+    .collection("ledgers")
+    .doc(ledger._id)
+    .update({
+      data: {
+        members: (ledger.members || []).filter((item) => item.openid !== targetOpenid),
+        memberOpenids,
+        viewers: (ledger.viewers || []).filter((item) => item.openid !== targetOpenid),
+        viewerOpenids,
+        updatedAt: now(),
+      },
+    });
+  return ok();
+}
 async function setCurrentLedger(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
@@ -494,6 +598,159 @@ async function createRecord(openid, data = {}) {
   return ok({ recordId: res._id, record });
 }
 
+function importCell(row, names) {
+  for (const name of names)
+    if (row[name] !== undefined && row[name] !== null && row[name] !== "") return row[name];
+  return "";
+}
+
+function importDate(value, xlsx) {
+  if (value instanceof Date && !Number.isNaN(value.getTime()))
+    return value.toISOString().slice(0, 10);
+  if (typeof value === "number" && xlsx && xlsx.SSF) {
+    const parsed = xlsx.SSF.parse_date_code(value);
+    if (parsed)
+      return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+  }
+  const matched = String(value || "").match(/(\d{4})[-/.年](\d{1,2})[-/.月](\d{1,2})/);
+  return matched
+    ? `${matched[1]}-${String(matched[2]).padStart(2, "0")}-${String(matched[3]).padStart(2, "0")}`
+    : "";
+}
+
+function parseHtmlImportRows(buffer) {
+  const html = buffer.toString("utf8");
+  const clean = (value) =>
+    String(value || "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .trim();
+  const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
+  for (const table of tables) {
+    const rows = (table.match(/<tr[\s\S]*?<\/tr>/gi) || []).map((row) =>
+      (row.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) || []).map(clean)
+    );
+    const headerIndex = rows.findIndex(
+      (row) => row.includes("日期") && row.some((cell) => cell.includes("收支类型"))
+    );
+    if (headerIndex < 0) continue;
+    const headers = rows[headerIndex];
+    return rows
+      .slice(headerIndex + 1)
+      .filter((row) => row.length)
+      .map((row) =>
+        headers.reduce((item, header, index) => ({ ...item, [header]: row[index] || "" }), {})
+      );
+  }
+  return [];
+}
+
+async function getImportTemplate(openid) {
+  if (!openid) throw new Error("LOGIN_REQUIRED");
+  const xlsx = require("xlsx");
+  const workbook = xlsx.utils.book_new();
+  const sheet = xlsx.utils.aoa_to_sheet([
+    ["日期*", "收支类型*", "金额*", "一级分类", "二级分类", "账户", "备注", "标签"],
+    ["2026-06-01", "支出", 38.5, "餐饮", "午餐", "微信", "工作日午餐", "日常,餐饮"],
+    ["2026-06-02", "收入", 5000, "工资", "工资", "银行卡", "六月工资", "固定收入"],
+  ]);
+  sheet["!cols"] = [14, 14, 12, 16, 16, 14, 28, 20].map((wch) => ({ wch }));
+  xlsx.utils.book_append_sheet(workbook, sheet, "导入模板");
+  const fileContent = xlsx.write(workbook, { bookType: "xlsx", type: "buffer" });
+  const uploaded = await cloud.uploadFile({
+    cloudPath: "templates/tomato-ledger-import-template.xlsx",
+    fileContent,
+  });
+  const temporary = await cloud.getTempFileURL({ fileList: [uploaded.fileID] });
+  const file = (temporary.fileList || [])[0] || {};
+  if (!file.tempFileURL) throw new Error("IMPORT_TEMPLATE_UNAVAILABLE");
+  return ok({ fileId: uploaded.fileID, url: file.tempFileURL });
+}
+
+async function importRecords(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  assertWritable(role);
+  const fileId = String(data.fileId || "");
+  if (!fileId.startsWith("cloud://")) throw new Error("IMPORT_FILE_REQUIRED");
+  const download = await cloud.downloadFile({ fileID: fileId });
+  let rows = parseHtmlImportRows(download.fileContent);
+  let xlsx;
+  if (!rows.length) {
+    xlsx = require("xlsx");
+    const workbook = xlsx.read(download.fileContent, { type: "buffer", cellDates: true });
+    for (const name of workbook.SheetNames) {
+      const parsed = xlsx.utils.sheet_to_json(workbook.Sheets[name], { defval: "" });
+      if (parsed.some((row) => importCell(row, ["日期", "日期*"]))) {
+        rows = parsed;
+        break;
+      }
+    }
+  }
+  if (!rows.length) throw new Error("IMPORT_FORMAT_UNSUPPORTED");
+  if (rows.length > 200) throw new Error("IMPORT_RECORD_LIMIT_EXCEEDED");
+  const records = [];
+  const errors = [];
+  rows.forEach((row, index) => {
+    const date = importDate(importCell(row, ["日期", "日期*"]), xlsx);
+    const rawType = String(importCell(row, ["收支类型", "收支类型*"])).trim();
+    const type = ["收入", "income"].includes(rawType.toLowerCase())
+      ? "income"
+      : ["支出", "expense"].includes(rawType.toLowerCase())
+        ? "expense"
+        : "";
+    const amount = Number(importCell(row, ["金额", "金额*", "收入金额", "支出金额"]));
+    if (!date || !type || !Number.isFinite(amount) || amount <= 0) {
+      errors.push(`第 ${index + 2} 行：日期、收支类型或金额无效`);
+      return;
+    }
+    const parentCategory = String(importCell(row, ["类别", "一级分类"]) || "其他").trim();
+    const categoryName = String(
+      importCell(row, ["子类", "二级分类"]) || parentCategory || "其他"
+    ).trim();
+    const tags = String(importCell(row, ["标签"]) || "")
+      .split(/[\s,，]+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    records.push({
+      ledgerId: ledger._id,
+      ownerOpenid: openid,
+      type,
+      amount,
+      categoryId: "",
+      categoryName,
+      categoryLabel: categoryName,
+      categoryIcon: "price-tag-3-line",
+      parentCategory,
+      parentIcon: "more-2-line",
+      note: String(importCell(row, ["备注"]) || "").slice(0, 100),
+      tags,
+      account: String(importCell(row, ["账户"]) || data.defaultAccount || "微信"),
+      date,
+      time: "",
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: now(),
+      updatedAt: now(),
+    });
+  });
+  for (let index = 0; index < records.length; index += 20)
+    await Promise.all(
+      records
+        .slice(index, index + 20)
+        .map((record) => db.collection("records").add({ data: record }))
+    );
+  const dates = records.map((record) => record.date).sort();
+  return ok({
+    imported: records.length,
+    skipped: errors.length,
+    errors: errors.slice(0, 20),
+    startDate: dates[0] || "",
+    endDate: dates[dates.length - 1] || "",
+  });
+}
+
 async function listRecords(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
@@ -519,7 +776,9 @@ async function listRecords(openid, data = {}) {
   const rows = result.data || [];
   const hasMore = rows.length > pageSize;
   const page = hasMore ? rows.slice(0, pageSize) : rows;
-  const ownerMap = await getUsersByOpenids(page.map((item) => item.ownerOpenid));
+  const ownerMap = await resolveUsersAvatarUrls(
+    await getUsersByOpenids(page.map((item) => item.ownerOpenid))
+  );
   const last = page[page.length - 1];
   return ok({
     records: page.map((item) => attachRecordOwner(item, ownerMap, openid)),
@@ -531,7 +790,6 @@ async function listRecords(openid, data = {}) {
       type: ledger.type || "personal",
       budgetEnabled: Boolean(ledger.budgetEnabled),
       monthlyBudget: Number(ledger.monthlyBudget || 0),
-      monthStartDay: Number(ledger.monthStartDay || 1),
     },
     role,
     roleText: getRoleText(role),
@@ -548,7 +806,7 @@ async function getRecord(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, record.ledgerId);
   const role = getLedgerRole(openid, ledger);
   assertReadable(role);
-  const ownerMap = await getUsersByOpenids([record.ownerOpenid]);
+  const ownerMap = await resolveUsersAvatarUrls(await getUsersByOpenids([record.ownerOpenid]));
   return ok({
     record: attachRecordOwner(record, ownerMap, openid),
     ledger: {
@@ -618,21 +876,17 @@ function addMonth(year, month, delta) {
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
 }
 
-function getCurrentMonthRange(monthStartDay = 1) {
-  const startDay = Math.min(28, Math.max(1, Number(monthStartDay || 1)));
+function getCurrentMonthRange() {
   const nowDate = new Date(Date.now() + 8 * 60 * 60 * 1000);
-  let year = nowDate.getUTCFullYear();
-  let month = nowDate.getUTCMonth() + 1;
-  const day = nowDate.getUTCDate();
-  if (day < startDay) {
-    const previous = addMonth(year, month, -1);
-    year = previous.year;
-    month = previous.month;
-  }
+  const year = nowDate.getUTCFullYear();
+  const month = nowDate.getUTCMonth() + 1;
   const next = addMonth(year, month, 1);
-  const start = makeDateText(year, month, startDay);
-  const end = makeDateText(next.year, next.month, startDay);
-  return { year, month, start, end };
+  return {
+    year,
+    month,
+    start: makeDateText(year, month, 1),
+    end: makeDateText(next.year, next.month, 1),
+  };
 }
 
 async function getDashboard(openid, data = {}) {
@@ -641,8 +895,7 @@ async function getDashboard(openid, data = {}) {
   const role = getLedgerRole(openid, ledger);
   assertReadable(role);
 
-  const monthStartDay = Number(ledger.monthStartDay || 1);
-  const monthRange = getCurrentMonthRange(monthStartDay);
+  const monthRange = getCurrentMonthRange();
   const query = { ledgerId: ledger._id, date: _.gte(monthRange.start).and(_.lt(monthRange.end)) };
   const records = await db
     .collection("records")
@@ -653,7 +906,9 @@ async function getDashboard(openid, data = {}) {
   const monthRecords = (records.data || []).sort(
     (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
   );
-  const ownerMap = await getUsersByOpenids(monthRecords.map((item) => item.ownerOpenid));
+  const ownerMap = await resolveUsersAvatarUrls(
+    await getUsersByOpenids(monthRecords.map((item) => item.ownerOpenid))
+  );
   const monthIncome = monthRecords
     .filter((item) => item.type === "income")
     .reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -662,8 +917,7 @@ async function getDashboard(openid, data = {}) {
     .reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const budgetEnabled = Boolean(ledger.budgetEnabled);
   const budget = budgetEnabled ? Number(ledger.monthlyBudget || 0) : 0;
-  const budgetRate =
-    budgetEnabled && budget ? Math.min(100, Math.round((monthExpense / budget) * 100)) : 0;
+  const budgetRate = budgetEnabled && budget ? (monthExpense / budget) * 100 : 0;
   const expenseMap = {};
   monthRecords.forEach((item) => {
     if (item.type !== "expense") return;
@@ -688,9 +942,10 @@ async function getDashboard(openid, data = {}) {
     balance: Number((monthIncome - monthExpense).toFixed(2)),
     budget,
     budgetEnabled,
+    quickAmountsEnabled: Boolean(ledger.quickAmountsEnabled),
+    quickAmounts: Array.isArray(ledger.quickAmounts) ? ledger.quickAmounts : [],
     budgetLeft: budgetEnabled ? Number((budget - monthExpense).toFixed(2)) : 0,
     budgetRate,
-    monthStartDay,
     recordCount: monthRecords.length,
     topExpenseCategory,
     largestExpenseAmount,
@@ -702,36 +957,232 @@ async function getDashboard(openid, data = {}) {
   });
 }
 
-
-function getAnalysisRange(mode, anchor, monthStartDay) { if(mode === "all") return {start:"",end:"",label:"all"}; if(mode === "year"){const y=Number(anchor)||new Date().getFullYear();return {start:String(y)+"-01-01",end:String(y+1)+"-01-01",label:String(y)};} const c=getCurrentMonthRange(monthStartDay),m=/^(\d{4})-(\d{1,2})$/.exec(String(anchor||"")); if(!m)return {...c,label:String(c.year)+"-"+String(c.month)}; const y=Number(m[1]),mo=Number(m[2]),d=Math.min(28,Math.max(1,Number(monthStartDay||1))),n=addMonth(y,mo,1);return {year:y,month:mo,start:makeDateText(y,mo,d),end:makeDateText(n.year,n.month,d),label:String(y)+"-"+String(mo)};}
-async function getAnalysisRecords(query){const rows=[];let offset=0;while(true){const page=((await db.collection("records").where(query).orderBy("date","asc").skip(offset).limit(100).get()).data||[]);rows.push(...page);if(page.length<100)return rows;offset+=page.length;}}
+function getAnalysisRange(mode, anchor) {
+  if (mode === "all") return { start: "", end: "", label: "all" };
+  if (mode === "year") {
+    const y = Number(anchor) || new Date().getFullYear();
+    return { start: String(y) + "-01-01", end: String(y + 1) + "-01-01", label: String(y) };
+  }
+  const c = getCurrentMonthRange(),
+    m = /^(\d{4})-(\d{1,2})$/.exec(String(anchor || ""));
+  if (!m) return { ...c, label: String(c.year) + "-" + String(c.month) };
+  const y = Number(m[1]),
+    mo = Number(m[2]),
+    n = addMonth(y, mo, 1);
+  return {
+    year: y,
+    month: mo,
+    start: makeDateText(y, mo, 1),
+    end: makeDateText(n.year, n.month, 1),
+    label: String(y) + "-" + String(mo),
+  };
+}
+async function getAnalysisRecords(query) {
+  const rows = [];
+  let offset = 0;
+  while (true) {
+    const page =
+      (
+        await db
+          .collection("records")
+          .where(query)
+          .orderBy("date", "asc")
+          .skip(offset)
+          .limit(100)
+          .get()
+      ).data || [];
+    rows.push(...page);
+    if (page.length < 100) return rows;
+    offset += page.length;
+  }
+}
 async function getAnalysis(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   if (!ledger) return ok({ noLedger: true });
-  const role = getLedgerRole(openid, ledger); assertReadable(role);
+  const role = getLedgerRole(openid, ledger);
+  assertReadable(role);
   const mode = ["month", "year", "all"].includes(data.mode) ? data.mode : "month";
-  const range = getAnalysisRange(mode, data.anchor, ledger.monthStartDay);
+  const range = getAnalysisRange(mode, data.anchor);
   const query = { ledgerId: ledger._id };
   if (range.start) query.date = _.gte(range.start).and(_.lt(range.end));
   const records = await getAnalysisRecords(query);
   let previousRecords = [];
-  if (mode === "month") { const prev = addMonth(range.year, range.month, -1), day = Math.min(28, Math.max(1, Number(ledger.monthStartDay || 1))), prevStart = makeDateText(prev.year, prev.month, day); previousRecords = await getAnalysisRecords({ ledgerId: ledger._id, date: _.gte(prevStart).and(_.lt(range.start)) }); }
-  if (mode === "year") { const year = Number(range.start.slice(0, 4)); previousRecords = await getAnalysisRecords({ ledgerId: ledger._id, date: _.gte(String(year - 1) + "-01-01").and(_.lt(range.start)) }); }
-  let income = 0, expense = 0; const trend = {}, categories = {}, members = {}, dailyExpense = {};
-  records.forEach((record) => { const amount = Number(record.amount || 0), isIncome = record.type === "income", key = mode === "month" ? record.date : mode === "year" ? record.date.slice(0, 7) : record.date.slice(0, 4); income += isIncome ? amount : 0; expense += isIncome ? 0 : amount; trend[key] = trend[key] || { label: key, income: 0, expense: 0 }; trend[key][isIncome ? "income" : "expense"] += amount; const name = record.parentCategory || record.categoryName || "Other"; if (!isIncome) { categories[name] = (categories[name] || 0) + amount; members[record.ownerOpenid] = (members[record.ownerOpenid] || 0) + amount; dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount; } });
-  const categoryList = Object.keys(categories).map((name) => ({ name, amount: Number(categories[name].toFixed(2)), rate: expense ? Math.round(categories[name] * 100 / expense) : 0 })).sort((a, b) => b.amount - a.amount);
-  const previousCategory = {}; previousRecords.forEach((record) => { const name = record.parentCategory || record.categoryName || "Other", key = (record.type === "income" ? "income:" : "expense:") + name; previousCategory[key] = (previousCategory[key] || 0) + Number(record.amount || 0); });
-  const currentCategory = {}; records.forEach((record) => { const name = record.parentCategory || record.categoryName || "Other", key = (record.type === "income" ? "income:" : "expense:") + name; currentCategory[key] = (currentCategory[key] || 0) + Number(record.amount || 0); });
-  const money = (value) => Number(value || 0).toFixed(2).replace(/\.00$/, "");
+  if (mode === "month") {
+    const prev = addMonth(range.year, range.month, -1),
+      prevStart = makeDateText(prev.year, prev.month, 1);
+    previousRecords = await getAnalysisRecords({
+      ledgerId: ledger._id,
+      date: _.gte(prevStart).and(_.lt(range.start)),
+    });
+  }
+  if (mode === "year") {
+    const year = Number(range.start.slice(0, 4));
+    previousRecords = await getAnalysisRecords({
+      ledgerId: ledger._id,
+      date: _.gte(String(year - 1) + "-01-01").and(_.lt(range.start)),
+    });
+  }
+  let income = 0,
+    expense = 0;
+  const trend = {},
+    categories = {},
+    members = {},
+    dailyExpense = {};
+  records.forEach((record) => {
+    const amount = Number(record.amount || 0),
+      isIncome = record.type === "income",
+      key =
+        mode === "month"
+          ? record.date
+          : mode === "year"
+            ? record.date.slice(0, 7)
+            : record.date.slice(0, 4);
+    income += isIncome ? amount : 0;
+    expense += isIncome ? 0 : amount;
+    trend[key] = trend[key] || { label: key, income: 0, expense: 0 };
+    trend[key][isIncome ? "income" : "expense"] += amount;
+    const name = record.parentCategory || record.categoryName || "Other";
+    if (!isIncome) {
+      categories[name] = (categories[name] || 0) + amount;
+      members[record.ownerOpenid] = (members[record.ownerOpenid] || 0) + amount;
+      dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount;
+    }
+  });
+  const categoryList = Object.keys(categories)
+    .map((name) => ({
+      name,
+      amount: Number(categories[name].toFixed(2)),
+      rate: expense ? Math.round((categories[name] * 100) / expense) : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+  const previousCategory = {};
+  previousRecords.forEach((record) => {
+    const name = record.parentCategory || record.categoryName || "Other",
+      key = (record.type === "income" ? "income:" : "expense:") + name;
+    previousCategory[key] = (previousCategory[key] || 0) + Number(record.amount || 0);
+  });
+  const currentCategory = {};
+  records.forEach((record) => {
+    const name = record.parentCategory || record.categoryName || "Other",
+      key = (record.type === "income" ? "income:" : "expense:") + name;
+    currentCategory[key] = (currentCategory[key] || 0) + Number(record.amount || 0);
+  });
+  const money = (value) =>
+    Number(value || 0)
+      .toFixed(2)
+      .replace(/\.00$/, "");
   const insights = [];
   const topExpense = categoryList[0];
-  if (topExpense) insights.push("\u652f\u51fa\u6700\u591a\u7684\u662f" + topExpense.name + "\uff0c\u5171 \u00a5" + money(topExpense.amount) + "\uff0c\u5360\u652f\u51fa " + topExpense.rate + "%");
-  if (mode !== "all") { const changes = Object.keys({ ...currentCategory, ...previousCategory }).map((key) => ({ key, current: currentCategory[key] || 0, previous: previousCategory[key] || 0 })).filter((item) => item.current !== item.previous).sort((a, b) => Math.abs(b.current - b.previous) - Math.abs(a.current - a.previous)); const change = changes[0]; if (change) { const label = change.key.slice(change.key.indexOf(":") + 1) + (change.key.startsWith("income:") ? "\u6536\u5165" : "\u652f\u51fa"), delta = change.current - change.previous; if (!change.previous) insights.push(label + "\u672c\u671f\u65b0\u589e \u00a5" + money(change.current)); else insights.push(label + "\u8f83\u4e0a\u671f" + (delta > 0 ? "\u589e\u52a0" : "\u51cf\u5c11") + " \u00a5" + money(Math.abs(delta)) + "\uff0c\u53d8\u5316 " + Math.round(Math.abs(delta) * 100 / change.previous) + "%"); }
-    const recordDelta = records.length - previousRecords.length; if (recordDelta && insights.length < 3) insights.push("\u8fd9\u671f\u8bb0\u4e86 " + records.length + " \u7b14\uff0c\u6bd4\u4e0a\u671f" + (recordDelta > 0 ? "\u591a" : "\u5c11") + " " + Math.abs(recordDelta) + " \u7b14");
-  } else { const peakDate = Object.keys(dailyExpense).sort((a, b) => dailyExpense[b] - dailyExpense[a])[0]; if (peakDate && insights.length < 3) insights.push(peakDate + " \u662f\u7d2f\u8ba1\u652f\u51fa\u6700\u9ad8\u7684\u4e00\u5929\uff0c\u5171 \u00a5" + money(dailyExpense[peakDate])); const incomeByCategory = {}; records.forEach((record) => { if (record.type === "income") { const name = record.parentCategory || record.categoryName || "Other"; incomeByCategory[name] = (incomeByCategory[name] || 0) + Number(record.amount || 0); } }); const topIncome = Object.keys(incomeByCategory).sort((a, b) => incomeByCategory[b] - incomeByCategory[a])[0]; if (topIncome && insights.length < 3) insights.push(topIncome + "\u662f\u6700\u4e3b\u8981\u7684\u6536\u5165\u6765\u6e90\uff0c\u7d2f\u8ba1 \u00a5" + money(incomeByCategory[topIncome])); }
-  if (!insights.length) insights.push("\u8fd9\u6bb5\u65f6\u95f4\u8fd8\u6ca1\u6709\u8db3\u591f\u7684\u8bb0\u5f55\u53ef\u4ee5\u5206\u6790");
+  if (topExpense)
+    insights.push(
+      "\u652f\u51fa\u6700\u591a\u7684\u662f" +
+        topExpense.name +
+        "\uff0c\u5171 \u00a5" +
+        money(topExpense.amount) +
+        "\uff0c\u5360\u652f\u51fa " +
+        topExpense.rate +
+        "%"
+    );
+  if (mode !== "all") {
+    const changes = Object.keys({ ...currentCategory, ...previousCategory })
+      .map((key) => ({
+        key,
+        current: currentCategory[key] || 0,
+        previous: previousCategory[key] || 0,
+      }))
+      .filter((item) => item.current !== item.previous)
+      .sort((a, b) => Math.abs(b.current - b.previous) - Math.abs(a.current - a.previous));
+    const change = changes[0];
+    if (change) {
+      const label =
+          change.key.slice(change.key.indexOf(":") + 1) +
+          (change.key.startsWith("income:") ? "\u6536\u5165" : "\u652f\u51fa"),
+        delta = change.current - change.previous;
+      if (!change.previous)
+        insights.push(label + "\u672c\u671f\u65b0\u589e \u00a5" + money(change.current));
+      else
+        insights.push(
+          label +
+            "\u8f83\u4e0a\u671f" +
+            (delta > 0 ? "\u589e\u52a0" : "\u51cf\u5c11") +
+            " \u00a5" +
+            money(Math.abs(delta)) +
+            "\uff0c\u53d8\u5316 " +
+            Math.round((Math.abs(delta) * 100) / change.previous) +
+            "%"
+        );
+    }
+    const recordDelta = records.length - previousRecords.length;
+    if (recordDelta && insights.length < 3)
+      insights.push(
+        "\u8fd9\u671f\u8bb0\u4e86 " +
+          records.length +
+          " \u7b14\uff0c\u6bd4\u4e0a\u671f" +
+          (recordDelta > 0 ? "\u591a" : "\u5c11") +
+          " " +
+          Math.abs(recordDelta) +
+          " \u7b14"
+      );
+  } else {
+    const peakDate = Object.keys(dailyExpense).sort((a, b) => dailyExpense[b] - dailyExpense[a])[0];
+    if (peakDate && insights.length < 3)
+      insights.push(
+        peakDate +
+          " \u662f\u7d2f\u8ba1\u652f\u51fa\u6700\u9ad8\u7684\u4e00\u5929\uff0c\u5171 \u00a5" +
+          money(dailyExpense[peakDate])
+      );
+    const incomeByCategory = {};
+    records.forEach((record) => {
+      if (record.type === "income") {
+        const name = record.parentCategory || record.categoryName || "Other";
+        incomeByCategory[name] = (incomeByCategory[name] || 0) + Number(record.amount || 0);
+      }
+    });
+    const topIncome = Object.keys(incomeByCategory).sort(
+      (a, b) => incomeByCategory[b] - incomeByCategory[a]
+    )[0];
+    if (topIncome && insights.length < 3)
+      insights.push(
+        topIncome +
+          "\u662f\u6700\u4e3b\u8981\u7684\u6536\u5165\u6765\u6e90\uff0c\u7d2f\u8ba1 \u00a5" +
+          money(incomeByCategory[topIncome])
+      );
+  }
+  if (!insights.length)
+    insights.push(
+      "\u8fd9\u6bb5\u65f6\u95f4\u8fd8\u6ca1\u6709\u8db3\u591f\u7684\u8bb0\u5f55\u53ef\u4ee5\u5206\u6790"
+    );
   const users = await getUsersByOpenids(Object.keys(members));
-  return ok({ ledger: { _id: ledger._id, name: ledger.name, type: ledger.type || "personal", monthStartDay: Number(ledger.monthStartDay || 1) }, role, readonly: role === "readonly", mode, range, overview: { income, expense, balance: Number((income - expense).toFixed(2)), recordCount: records.length, saveRate: income ? Math.round((income - expense) * 100 / income) : 0 }, trend: Object.keys(trend).sort().map((key) => trend[key]), categories: categoryList, members: Object.keys(members).map((id) => ({ name: (users[id] || {}).nickName || (id === openid ? "Me" : "Member"), amount: Number(members[id].toFixed(2)), rate: expense ? Math.round(members[id] * 100 / expense) : 0 })).sort((a, b) => b.amount - a.amount), insights });
+  return ok({
+    ledger: {
+      _id: ledger._id,
+      name: ledger.name,
+      type: ledger.type || "personal",
+    },
+    role,
+    readonly: role === "readonly",
+    mode,
+    range,
+    overview: {
+      income,
+      expense,
+      balance: Number((income - expense).toFixed(2)),
+      recordCount: records.length,
+      saveRate: income ? Math.round(((income - expense) * 100) / income) : 0,
+    },
+    trend: Object.keys(trend)
+      .sort()
+      .map((key) => trend[key]),
+    categories: categoryList,
+    members: Object.keys(members)
+      .map((id) => ({
+        name: (users[id] || {}).nickName || (id === openid ? "Me" : "Member"),
+        amount: Number(members[id].toFixed(2)),
+        rate: expense ? Math.round((members[id] * 100) / expense) : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount),
+    insights,
+  });
 }
 
 async function updateBudget(openid, data = {}) {
@@ -757,26 +1208,33 @@ async function updateBudget(openid, data = {}) {
   return ok({ ledger: { ...ledger, budgetEnabled, monthlyBudget } });
 }
 
-async function updateMonthStartDay(openid, data = {}) {
+function normalizeQuickAmounts(values) {
+  if (!Array.isArray(values) || values.length < 1 || values.length > 5) return null;
+  const normalized = values.map((value) => Math.round(Number(value) * 100) / 100);
+  if (normalized.some((value) => !Number.isFinite(value) || value <= 0 || value > 999999))
+    return null;
+  return normalized;
+}
+
+async function updateQuickAmounts(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
-  if (role !== "owner") throw new Error("ONLY_OWNER_CAN_UPDATE_MONTH_START_DAY");
-  const monthStartDay = Math.min(28, Math.max(1, Number(data.monthStartDay || 1)));
+  if (role === "readonly") throw new Error("READONLY_LEDGER");
+  const quickAmountsEnabled = Boolean(data.quickAmountsEnabled);
+  const quickAmounts = quickAmountsEnabled ? normalizeQuickAmounts(data.quickAmounts) : [];
+  if (quickAmountsEnabled && !quickAmounts)
+    return fail("快捷金额需设置 1-5 个有效金额", "INVALID_QUICK_AMOUNTS");
   await db
     .collection("ledgers")
     .doc(ledger._id)
-    .update({ data: { monthStartDay, updatedAt: now() } });
-  return ok({ ledger: { ...ledger, monthStartDay } });
+    .update({ data: { quickAmountsEnabled, quickAmounts, updatedAt: now() } });
+  return ok({ ledger: { ...ledger, quickAmountsEnabled, quickAmounts } });
 }
-
 async function createLedgerInviteToken(openid, data = {}) {
-  if (!openid) return fail("请先登录", "LOGIN_REQUIRED");
-  const ledger = await getLedgerById(data.ledgerId);
-  if (!ledger) return fail("账本不存在", "LEDGER_NOT_FOUND");
-  if (ledger.ownerOpenid !== openid) return fail("仅拥有者可邀请", "ONLY_OWNER_CAN_INVITE");
-
-  const mode =
-    ledger.type === "personal" ? "visitor" : data.mode === "member" ? "member" : "visitor";
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  if (role !== "owner") throw new Error("ONLY_OWNER_CAN_INVITE");
+  const mode = ledger.type === "shared" && data.mode === "member" ? "member" : "visitor";
   const token = await generateUniqueInviteToken();
   await db.collection("ledgerInvites").add({
     data: {
@@ -793,55 +1251,60 @@ async function createLedgerInviteToken(openid, data = {}) {
 }
 
 async function joinLedgerByInviteToken(openid, data = {}) {
-  if (!openid) return fail("LOGIN_REQUIRED", "LOGIN_REQUIRED");
   const token = String(data.inviteToken || "").trim();
-  if (!token) return fail("INVALID_INVITE_TOKEN", "INVALID_INVITE_TOKEN");
+  if (!token) return fail("邀请链接无效", "INVALID_INVITE_TOKEN");
   const found = await db.collection("ledgerInvites").where({ token }).limit(1).get();
   const invite = found.data[0];
-  if (!invite) return fail("INVITE_NOT_FOUND", "INVITE_NOT_FOUND");
+  if (!invite) return fail("邀请链接无效", "INVALID_INVITE_TOKEN");
+
   const joined = await db.runTransaction(async (transaction) => {
     const currentInvite = (await transaction.collection("ledgerInvites").doc(invite._id).get())
       .data;
-    if (!currentInvite || (currentInvite.claimedOpenid && currentInvite.claimedOpenid !== openid))
-      throw new Error("INVITE_NOT_ALLOWED");
+    if (!currentInvite) throw new Error("INVITE_NOT_FOUND");
+    if (currentInvite.claimedOpenid && currentInvite.claimedOpenid !== openid)
+      throw new Error("INVITE_ALREADY_CLAIMED");
     const ledger = (await transaction.collection("ledgers").doc(currentInvite.ledgerId).get()).data;
     if (!ledger) throw new Error("LEDGER_NOT_FOUND");
-    const role = getLedgerRole(openid, ledger);
-    if (role !== "none") {
-      if (!currentInvite.claimedOpenid)
+
+    const currentRole = getLedgerRole(openid, ledger);
+    if (currentRole === "none") {
+      const nextRole =
+        currentInvite.mode === "member" && ledger.type === "shared" ? "member" : "readonly";
+      if (nextRole === "member") {
         await transaction
-          .collection("ledgerInvites")
-          .doc(currentInvite._id)
-          .update({ data: { claimedOpenid: openid, updatedAt: now() } });
-      return { ledger, role, already: true };
+          .collection("ledgers")
+          .doc(ledger._id)
+          .update({
+            data: {
+              members: [...(ledger.members || []), { openid, role: "member", joinedAt: now() }],
+              memberOpenids: toUniqueOpenids([...(ledger.memberOpenids || []), openid]),
+              updatedAt: now(),
+            },
+          });
+      } else {
+        await transaction
+          .collection("ledgers")
+          .doc(ledger._id)
+          .update({
+            data: {
+              viewers: [...(ledger.viewers || []), { openid, joinedAt: now() }],
+              viewerOpenids: toUniqueOpenids([...(ledger.viewerOpenids || []), openid]),
+              updatedAt: now(),
+            },
+          });
+      }
     }
-    const nextRole =
-      currentInvite.mode === "member" && ledger.type === "shared" ? "member" : "readonly";
-    const ledgerPatch =
-      nextRole === "member"
-        ? {
-            members: _.push([{ openid, role: "member", joinedAt: new Date() }]),
-            memberOpenids: _.push([openid]),
-            updatedAt: now(),
-          }
-        : {
-            viewers: _.push([{ openid, joinedAt: new Date() }]),
-            viewerOpenids: _.push([openid]),
-            updatedAt: now(),
-          };
-    await transaction.collection("ledgers").doc(ledger._id).update({ data: ledgerPatch });
-    await transaction
-      .collection("ledgerInvites")
-      .doc(currentInvite._id)
-      .update({ data: { claimedOpenid: openid, updatedAt: now() } });
-    return { ledger, role: nextRole, already: false };
+    if (!currentInvite.claimedOpenid) {
+      await transaction
+        .collection("ledgerInvites")
+        .doc(currentInvite._id)
+        .update({
+          data: { claimedOpenid: openid, updatedAt: now() },
+        });
+    }
+    return ledger;
   });
-  return ok({
-    ledgerId: joined.ledger._id,
-    ledger: joined.ledger,
-    role: joined.role,
-    already: joined.already,
-  });
+  return ok({ ledgerId: joined._id, ledger: joined });
 }
 async function joinLedger(openid, data = {}) {
   const found = await db
@@ -966,19 +1429,19 @@ async function deleteByQuery(collectionName, query) {
     const result = await db.collection(collectionName).where(query).limit(100).get();
     const rows = result.data || [];
     if (!rows.length) break;
-    await Promise.all(rows.map((item) => db.collection(collectionName).doc(item._id).remove()));
-    deleted += rows.length;
-  }
-  return deleted;
-}
-
-async function clearCollection(collectionName) {
-  let deleted = 0;
-  while (true) {
-    const result = await db.collection(collectionName).where({}).remove();
-    const removed = (result.stats && result.stats.removed) || result.deleted || 0;
-    deleted += removed;
-    if (!removed) break;
+    const removals = await Promise.all(
+      rows.map(async (item) => {
+        try {
+          await db.collection(collectionName).doc(item._id).remove();
+          return true;
+        } catch (error) {
+          const message = String((error && (error.errMsg || error.message)) || "");
+          if (message.includes("does not exist")) return false;
+          throw error;
+        }
+      })
+    );
+    deleted += removals.filter(Boolean).length;
   }
   return deleted;
 }
@@ -993,14 +1456,42 @@ async function resetDatabase(openid, data = {}) {
     return fail("\u7f3a\u5c11\u6570\u636e\u5e93\u91cd\u7f6e\u786e\u8ba4", "RESET_CONFIRM_REQUIRED");
   }
 
-  const collections = ["records", "categories", "ledgers", "ledgerInvites"];
-  const entries = await Promise.all(
-    collections.map(async (name) => [name, await clearCollection(name)])
-  );
-  const deleted = entries.reduce((result, [name, count]) => {
-    result[name] = count;
-    return result;
-  }, {});
+  // Shared ledgers and their categories belong to all participants, so resetting one
+  // user must never delete them. Only personal ledgers owned by the caller are removed.
+  const personalLedgers =
+    (await db.collection("ledgers").where({ ownerOpenid: openid, type: "personal" }).get()).data ||
+    [];
+  const deleted = {
+    records: await deleteByQuery("records", { ownerOpenid: openid }),
+    categories: 0,
+    ledgers: 0,
+    ledgerInvites: 0,
+    ledgerOperations: await deleteByQuery("ledgerOperations", { ownerOpenid: openid }),
+  };
+
+  for (const ledger of personalLedgers) {
+    deleted.categories += await deleteByQuery("categories", { ledgerId: ledger._id });
+    deleted.ledgerInvites += await deleteByQuery("ledgerInvites", { ledgerId: ledger._id });
+    try {
+      await db.collection("ledgers").doc(ledger._id).remove();
+      deleted.ledgers += 1;
+    } catch (error) {
+      const message = String((error && (error.errMsg || error.message)) || "");
+      if (!message.includes("does not exist")) throw error;
+    }
+  }
+
+  const user = await getUser(openid);
+  if (user && user._id) {
+    const remainingLedgers = await listLedgersForUser(openid);
+    const currentLedger = remainingLedgers[0] || null;
+    await db
+      .collection("users")
+      .doc(user._id)
+      .update({
+        data: { currentLedgerId: currentLedger ? currentLedger._id : "", updatedAt: now() },
+      });
+  }
   return ok({ deleted });
 }
 const categoryTreeDefaults = {
@@ -1298,8 +1789,12 @@ async function execute(operation, openid, payload = {}) {
     saveCategory,
     removeCategory,
     setCurrentLedger,
+    getLedgerMembers,
+    removeLedgerMember,
     deleteLedger,
     createRecord,
+    importRecords,
+    getImportTemplate,
     getRecord,
     listRecords,
     updateRecord,
@@ -1307,7 +1802,7 @@ async function execute(operation, openid, payload = {}) {
     getDashboard,
     getAnalysis,
     updateBudget,
-    updateMonthStartDay,
+    updateQuickAmounts,
     createLedgerInviteToken,
     joinLedgerByInviteToken,
     joinLedger,

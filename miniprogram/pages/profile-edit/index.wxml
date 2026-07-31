@@ -17,18 +17,14 @@
           <view class="form-label">昵称</view>
           <input class="profile-input" type="nickname" value="{{nickName}}" placeholder="请输入昵称" bindinput="onNickNameInput" />
         </view>
-        <view class="form-group">
-          <view class="form-label">性别</view>
-          <picker class="form-picker" mode="selector" range="{{genderOptions}}" value="{{genderIndex}}" bindchange="onGenderChange">
-            <view class="picker-value">
-              <text>{{gender}}</text>
-              <tl-icon name="arrow-right-s-line" size="32" color="#f0442f">
-              </tl-icon>
-            </view>
-          </picker>
-        </view>
       </view>
-      <button class="save-button fade-up" loading="{{saving}}" bindtap="saveProfile">保存资料</button>
+      <button class="save-button fade-up {{saving ? 'is-saving' : ''}}" disabled="{{saving}}" bindtap="saveProfile">
+        <view class="save-button-inner">
+          <view wx:if="{{saving}}" class="save-spinner">
+          </view>
+          <text>{{saving ? '保存中...' : '保存资料'}}</text>
+        </view>
+      </button>
     </view>
   </scroll-view>
 </view>

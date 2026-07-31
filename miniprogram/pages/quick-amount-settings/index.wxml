@@ -1,0 +1,42 @@
+<view class="page plain-page quick-settings-page">
+  <tl-navbar title="快捷金额" showBack="{{true}}">
+  </tl-navbar>
+  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="page-content">
+      <view class="setting-card card fade-up">
+        <view>
+          <view class="setting-title">{{ledgerName}}</view>
+          <view class="setting-subtitle">按账本设置，记一笔时可快速填入金额</view>
+        </view>
+        <switch checked="{{quickAmountsEnabled}}" color="#f0442f" bindchange="onEnableChange" />
+      </view>
+      <view class="amount-card card {{quickAmountsEnabled ? '' : 'is-disabled'}}">
+        <view class="amount-head">
+          <text>常用金额</text>
+          <text>{{amounts.length}} / 5</text>
+        </view>
+        <view class="amount-list">
+          <view wx:for="{{amounts}}" wx:key="index" class="amount-pill">
+            ¥{{item}}
+            <text data-index="{{index}}" bindtap="removeAmount">×</text>
+          </view>
+        </view>
+        <view class="amount-add">
+          <text>¥</text>
+          <input type="digit" value="{{inputAmount}}" placeholder="输入金额" disabled="{{!quickAmountsEnabled || amounts.length >= 5}}" bindinput="onAmountInput" />
+          <view class="add-button" bindtap="addAmount">添加</view>
+        </view>
+        <view wx:if="{{!amounts.length}}" class="default-link" bindtap="useDefaults">使用推荐金额：18、32、68、128</view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="save-bar">
+    <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="save">
+      <view class="save-button-inner">
+        <view wx:if="{{saving}}" class="save-spinner">
+        </view>
+        <text>{{saving ? '保存中...' : '保存'}}</text>
+      </view>
+    </button>
+  </view>
+</view>

@@ -1,7 +1,9 @@
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 const { formatDisplayMoney } = require("../../utils/money");
 const { getId, getLedgerRole } = require("../../utils/mapper");
+const { resolveAvatarUrls } = require("../../utils/avatar");
 
 function getMonthLabel() {
   const now = new Date();
@@ -22,6 +24,17 @@ function getRoleText(role) {
   if (role === "owner") return "拥有者";
   if (role === "member") return "成员";
   return "访客";
+}
+
+function getBudgetRate(expense, budget) {
+  const safeExpense = Number(expense) || 0;
+  const safeBudget = Number(budget) || 0;
+  return safeExpense > 0 && safeBudget > 0 ? (safeExpense / safeBudget) * 100 : 0;
+}
+
+function formatBudgetRate(rate) {
+  if (rate > 0 && rate < 0.01) return "<0.01";
+  return (Math.floor((rate + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 
 function getStatusFlags(status) {
@@ -48,6 +61,7 @@ function normalizeRecord(item = {}) {
     typeIconColor: type === "income" ? "#25a66a" : "#f0442f",
     amountText: formatDisplayMoney(item.amount),
     noteText: item.note || "未填写备注",
+    hasNote: Boolean(String(item.note || "").trim()),
     categoryText,
     selectedTimeText,
     memberName: item.memberName || item.ownerName || "我",
@@ -60,6 +74,7 @@ function normalizeDashboard(data = {}) {
     ? data.recentRecords.map(normalizeRecord)
     : [];
   const recordCount = Number(data.recordCount || recentRecords.length || 0);
+  const budgetRate = getBudgetRate(data.monthExpense, data.budget);
   return {
     ledgerId: data.ledgerId || "",
     ledgerName: data.ledgerName || "我的账本",
@@ -68,6 +83,8 @@ function normalizeDashboard(data = {}) {
     monthLabel: getMonthLabel(),
     roleText: data.roleText || getRoleText(data.role),
     readonly: Boolean(data.readonly),
+    showBudget: data.role !== "readonly",
+    canManageBudget: data.role === "owner",
     monthIncome: formatDisplayMoney(data.monthIncome),
     monthIncomeCompact: compactMoney(data.monthIncome),
     monthExpense: formatDisplayMoney(data.monthExpense),
@@ -78,6 +95,7 @@ function normalizeDashboard(data = {}) {
     budgetEnabled: Boolean(data.budgetEnabled),
     budgetLeft: formatDisplayMoney(data.budgetLeft),
     budgetRate: Number(data.budgetRate || 0),
+    budgetRateText: Number(data.budgetRate || 0).toFixed(2),
     recordCount,
     topExpenseCategory: data.topExpenseCategory || "暂无",
     largestExpenseAmount: formatDisplayMoney(data.largestExpenseAmount),
@@ -104,6 +122,8 @@ Page({
     monthLabel: getMonthLabel(),
     roleText: "",
     readonly: false,
+    showBudget: false,
+    canManageBudget: false,
     monthIncome: "0",
     monthIncomeCompact: "0",
     monthExpense: "0",
@@ -149,7 +169,7 @@ Page({
   },
 
   async loadLedgers() {
-    const data = await ledgerService.listLedgers();
+    const data = { ledgers: await ledgerStore.getLedgers() };
     const ledgers = data.ledgers || [];
     this.setData({ ledgers });
     return ledgers;
@@ -174,7 +194,10 @@ Page({
         return;
       }
 
-      const normalized = normalizeDashboard(dashboard);
+      const normalized = normalizeDashboard({
+        ...dashboard,
+        recentRecords: await resolveAvatarUrls(dashboard.recentRecords || [], "memberAvatar"),
+      });
       app.globalData.currentLedger = {
         ...(app.globalData.currentLedger || {}),
         _id: normalized.ledgerId,
@@ -183,7 +206,8 @@ Page({
         readonly: normalized.readonly,
         budgetEnabled: normalized.budgetEnabled,
         monthlyBudget: Number(normalized.budget || 0),
-        monthStartDay: Number(dashboard.monthStartDay || 1),
+        quickAmountsEnabled: Boolean(dashboard.quickAmountsEnabled),
+        quickAmounts: Array.isArray(dashboard.quickAmounts) ? dashboard.quickAmounts : [],
       };
       app.globalData.readonly = normalized.readonly;
       app.persistAuthState();
@@ -210,6 +234,7 @@ Page({
     return ledgers.map((item) => {
       const id = item._id || item.id || "";
       const typeTag = getLedgerTypeText(item.type);
+      const role = getLedgerRole(app.globalData.openid, item);
       const roleTag = this.getLedgerRoleTag(item);
       return {
         ...item,
@@ -218,9 +243,8 @@ Page({
         typeTag,
         typeClass: item.type === "shared" ? "shared" : "personal",
         roleTag,
-        roleClass:
-          item.role === "owner" ? "owner" : item.role === "readonly" ? "visitor" : "member",
-        canManage: roleTag === "拥有者",
+        roleClass: role === "owner" ? "owner" : role === "readonly" ? "visitor" : "member",
+        canManage: role === "owner",
         isCurrent: id === this.data.ledgerId,
       };
     });
@@ -290,15 +314,13 @@ Page({
   },
 
   goBudgetSettings() {
+    if (!this.data.canManageBudget) return;
     wx.navigateTo({ url: "/pages/budget-settings/index" });
   },
 
-  goLedgerSettings(event) {
-    const ledgerId = event.detail.ledgerId || event.currentTarget.dataset.id || "";
+  goLedgerSettings() {
     this.setData({ isLedgerSwitcherVisible: false });
-    wx.navigateTo({
-      url: `/pages/ledger-detail-settings/index?ledgerId=${encodeURIComponent(ledgerId)}`,
-    });
+    wx.navigateTo({ url: "/pages/ledger-settings/index" });
   },
   goCreateLedger() {
     this.setData({ isLedgerSwitcherVisible: false });

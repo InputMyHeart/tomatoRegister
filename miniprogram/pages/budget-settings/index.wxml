@@ -23,6 +23,12 @@
     </view>
   </scroll-view>
   <view class="save-bar">
-    <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" bindtap="saveBudget">保存</button>
+    <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="saveBudget">
+      <view class="save-button-inner">
+        <view wx:if="{{saving}}" class="save-spinner">
+        </view>
+        <text>{{saving ? '保存中...' : '保存'}}</text>
+      </view>
+    </button>
   </view>
 </view>

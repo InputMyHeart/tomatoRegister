@@ -1,0 +1,145 @@
+.member-manage-page .page-content {
+  padding-bottom: 56rpx;
+}
+.page-head {
+  margin: 18rpx 2rpx 22rpx;
+}
+.ledger-name {
+  color: #312522;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+.ledger-tip {
+  margin-top: 8rpx;
+  color: #9a8278;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.member-card {
+  overflow: hidden;
+  padding: 0 26rpx;
+}
+.member-row {
+  display: flex;
+  min-height: 118rpx;
+  align-items: center;
+  border-bottom: 1rpx solid #f5e9e3;
+}
+.member-row:last-child {
+  border-bottom: 0;
+}
+.member-avatar {
+  width: 68rpx;
+  height: 68rpx;
+  flex: 0 0 68rpx;
+  border-radius: 50%;
+  background: #fff0ea;
+}
+.member-info {
+  min-width: 0;
+  flex: 1;
+  margin-left: 18rpx;
+}
+.member-name {
+  overflow: hidden;
+  color: #312522;
+  font-size: 28rpx;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.member-role {
+  display: inline-flex;
+  margin-top: 7rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 800;
+}
+.member-role.owner {
+  color: #b24332;
+  background: #ffe9e4;
+}
+.member-role.member {
+  color: #2f7163;
+  background: #e9f6f2;
+}
+.member-role.visitor {
+  color: #7a6a90;
+  background: #f1edf7;
+}
+.member-remove {
+  padding: 12rpx 18rpx;
+  color: #f0442f;
+  font-size: 24rpx;
+  font-weight: 900;
+}
+.invite-entry {
+  display: flex;
+  height: 92rpx;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 24rpx;
+  border-radius: 46rpx;
+  background: linear-gradient(135deg, #ff725f, #f0442f);
+  box-shadow: 0 14rpx 28rpx rgba(240, 68, 47, 0.2);
+  color: #fff;
+  font-size: 29rpx;
+  font-weight: 900;
+}
+.readonly-tip,
+.state-card {
+  padding: 36rpx 24rpx;
+  color: #9a8278;
+  font-size: 25rpx;
+  font-weight: 700;
+  text-align: center;
+}
+.sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(49, 37, 34, 0.34);
+}
+.share-sheet {
+  width: 100%;
+  padding: 34rpx 30rpx calc(42rpx + env(safe-area-inset-bottom));
+  border-radius: 34rpx 34rpx 0 0;
+  background: #fffaf7;
+}
+.sheet-title {
+  margin-bottom: 22rpx;
+  color: #312522;
+  font-size: 32rpx;
+  font-weight: 900;
+}
+.share-option {
+  width: 100%;
+  min-height: 110rpx;
+  margin: 12rpx 0;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 18rpx 20rpx;
+  box-sizing: border-box;
+  border: 1rpx solid #f1e5df;
+  border-radius: 18rpx;
+  background: #fff;
+  color: #312522;
+  text-align: left;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+.share-option::after {
+  border: 0;
+}
+.share-option text {
+  display: block;
+  margin-top: 6rpx;
+  color: #8f7f78;
+  font-size: 22rpx;
+  font-weight: 700;
+}

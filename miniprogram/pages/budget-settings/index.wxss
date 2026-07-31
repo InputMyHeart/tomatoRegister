@@ -74,3 +74,34 @@
 .save-button {
   width: 100%;
 }
+
+.save-button[disabled],
+.save-button.is-saving {
+  color: #ffffff;
+  opacity: 0.92;
+}
+
+.save-button-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  color: #ffffff;
+}
+
+.save-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  box-sizing: border-box;
+  border: 4rpx solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: saveButtonSpin 760ms linear infinite;
+}
+
+@keyframes saveButtonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

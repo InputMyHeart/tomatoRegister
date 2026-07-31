@@ -19,3 +19,8 @@
 ## 一致性边界
 
 云函数始终重新判定用户、账本和角色；删除账本、领取邀请、分类迁移等跨集合操作必须先在测试环境演练。
+
+## 意见反馈
+
+- feedbacks: ownerOpenid ASC, createdAt DESC（用户反馈历史）
+- feedbacks 字段：ownerOpenid、content（必填，最多 200 字）、type（feature/bug/improvement/other，可空）、images（最多 9 张 cloud:// 文件）、status（submitted/processing/resolved）和时间戳。云函数仅按当前 OpenID 查询，创建时状态固定为 submitted。

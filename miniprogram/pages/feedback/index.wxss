@@ -1,0 +1,140 @@
+.history-entry {
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6rpx;
+  color: #f0442f;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+.feedback-card {
+  padding: 30rpx;
+}
+.field-label {
+  margin-top: 30rpx;
+  color: #312522;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+.field-label:first-child {
+  margin-top: 0;
+}
+.required::before {
+  content: "*";
+  margin-right: 6rpx;
+  color: #f0442f;
+}
+.content-input {
+  width: 100%;
+  min-height: 220rpx;
+  margin-top: 20rpx;
+  color: #312522;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+.input-placeholder {
+  color: #b7a29a;
+}
+.counter {
+  margin-top: 8rpx;
+  color: #a58d83;
+  font-size: 22rpx;
+  text-align: right;
+}
+.type-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.type-option {
+  padding: 16rpx 24rpx;
+  border-radius: 999rpx;
+  color: #806b63;
+  background: #fff2ed;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+.type-option.selected {
+  color: #ffffff;
+  background: #f0442f;
+}
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.image-item,
+.add-image {
+  position: relative;
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.image-item image {
+  width: 100%;
+  height: 100%;
+}
+.add-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  color: #a58d83;
+  background: #fff0ea;
+  font-size: 21rpx;
+  font-weight: 800;
+}
+.remove-image {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  width: 38rpx;
+  height: 38rpx;
+  border-radius: 50%;
+  background: rgba(49, 37, 34, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hint {
+  margin: 24rpx 8rpx;
+  color: #9d867c;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+.submit-button {
+  width: 100%;
+  margin-bottom: 28rpx;
+}
+.disabled {
+  opacity: 0.92;
+}
+
+.submit-button-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  color: #fff;
+}
+
+.submit-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: submit-spin 760ms linear infinite;
+}
+
+@keyframes submit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

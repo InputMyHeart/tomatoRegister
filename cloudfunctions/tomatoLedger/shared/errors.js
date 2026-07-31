@@ -1,4 +1,5 @@
 function toFailure(error) {
-  return { code: error.code || error.message || "INTERNAL_ERROR", message: "Request failed" };
+  const message = (error && (error.message || error.errMsg)) || "Request failed";
+  return { code: (error && error.code) || "INTERNAL_ERROR", message };
 }
 module.exports = { toFailure };

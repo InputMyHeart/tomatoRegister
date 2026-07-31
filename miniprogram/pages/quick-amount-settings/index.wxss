@@ -1,0 +1,125 @@
+.setting-card,
+.amount-card {
+  padding: 32rpx;
+}
+.setting-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+.setting-title {
+  color: #312522;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+.setting-subtitle {
+  margin-top: 10rpx;
+  color: #9a8278;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+.amount-card {
+  margin-top: 24rpx;
+}
+.amount-card.is-disabled {
+  opacity: 0.58;
+}
+.amount-head {
+  display: flex;
+  justify-content: space-between;
+  color: #8d7f78;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+.amount-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin: 26rpx 0;
+}
+.amount-pill {
+  padding: 14rpx 18rpx 14rpx 22rpx;
+  border-radius: 999rpx;
+  color: #f0442f;
+  background: #fff0ea;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+.amount-pill text {
+  margin-left: 16rpx;
+  color: #b78b80;
+}
+.amount-add {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  height: 88rpx;
+  padding: 0 14rpx 0 24rpx;
+  border: 1rpx solid #f1ddd5;
+  border-radius: 22rpx;
+  color: #f0442f;
+  background: #fffaf7;
+  font-size: 32rpx;
+  font-weight: 900;
+}
+.amount-add input {
+  flex: 1;
+  min-width: 0;
+  color: #312522;
+  font-size: 28rpx;
+}
+.add-button {
+  padding: 12rpx 22rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  background: #f0442f;
+  font-size: 24rpx;
+}
+.default-link {
+  margin-top: 22rpx;
+  color: #e66a53;
+  font-size: 24rpx;
+}
+.save-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 247, 242, 0.94);
+}
+.save-button {
+  width: 100%;
+}
+
+.save-button[disabled],
+.save-button.is-saving {
+  color: #ffffff;
+  opacity: 0.92;
+}
+
+.save-button-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  color: #ffffff;
+}
+
+.save-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  box-sizing: border-box;
+  border: 4rpx solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: saveButtonSpin 760ms linear infinite;
+}
+
+@keyframes saveButtonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

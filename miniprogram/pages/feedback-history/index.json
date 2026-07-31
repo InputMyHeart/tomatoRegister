@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "tl-navbar": "/components/tl-navbar/index",
+    "tl-empty-state": "/components/tl-empty-state/index"
+  }
+}

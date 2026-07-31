@@ -13,10 +13,14 @@ Component({
     tags: { type: Array, value: [] },
     canSave: { type: Boolean, value: false },
     saving: { type: Boolean, value: false },
+    isEditing: { type: Boolean, value: false },
+    deleting: { type: Boolean, value: false },
   },
   methods: {
     amountInput(event) {
-      this.triggerEvent("amountinput", event.detail);
+      const value = String(event.detail.value || "").replace(/(\.\d{2})\d+/g, "$1");
+      this.setData({ amount: value });
+      this.triggerEvent("amountinput", { ...event.detail, value });
     },
     quickAmount(event) {
       this.triggerEvent("quickamount", { amount: event.currentTarget.dataset.amount });
@@ -38,6 +42,9 @@ Component({
     },
     removeTag(event) {
       this.triggerEvent("removetag", { index: event.currentTarget.dataset.index });
+    },
+    deleteRecord() {
+      this.triggerEvent("delete");
     },
     submit() {
       this.triggerEvent("submit");

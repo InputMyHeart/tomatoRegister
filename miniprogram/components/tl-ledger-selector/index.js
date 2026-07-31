@@ -13,8 +13,5 @@ Component({
     select(event) {
       this.triggerEvent("select", { ledgerId: event.currentTarget.dataset.id });
     },
-    manage(event) {
-      this.triggerEvent("manage", { ledgerId: event.currentTarget.dataset.id });
-    },
   },
 });

@@ -1,0 +1,35 @@
+<view wx:if="{{visible}}" class="tl-view-ledger-switcher" catchtap="close">
+  <view class="tl-view-ledger-switcher__panel" catchtap="stopTap">
+    <view class="tl-view-ledger-switcher__handle">
+    </view>
+    <view class="tl-view-ledger-switcher__head">
+      <view>
+        <view class="tl-view-ledger-switcher__title">{{title}}</view>
+        <view class="tl-view-ledger-switcher__subtitle">仅切换数据，不会激活账本</view>
+      </view>
+      <view class="tl-view-ledger-switcher__close" bindtap="close">×</view>
+    </view>
+    <view wx:if="{{loading}}" class="tl-view-ledger-switcher__state">
+      <view class="tl-view-ledger-switcher__spinner">
+      </view>
+      <view>正在加载账本...</view>
+    </view>
+    <view wx:elif="{{error}}" class="tl-view-ledger-switcher__state">
+      <view>账本加载失败</view>
+      <view class="tl-view-ledger-switcher__retry" bindtap="retry">点击重试</view>
+    </view>
+    <scroll-view wx:else class="tl-view-ledger-switcher__list" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view wx:for="{{ledgers}}" wx:key="_id" class="tl-view-ledger-switcher__item {{item._id === viewingId ? 'is-viewing' : ''}}" data-id="{{item._id}}" bindtap="select">
+        <view class="tl-view-ledger-switcher__icon">
+          <tl-icon name="book-2-line" size="34" color="#f0442f">
+          </tl-icon>
+        </view>
+        <view class="tl-view-ledger-switcher__content">
+          <text class="tl-view-ledger-switcher__name">{{item.name || item.displayName}}</text>
+          <text class="tl-view-ledger-switcher__meta">{{item.type === 'shared' ? '共享账本' : '个人账本'}}</text>
+        </view>
+        <text wx:if="{{item._id === viewingId}}" class="tl-view-ledger-switcher__current">查看中</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

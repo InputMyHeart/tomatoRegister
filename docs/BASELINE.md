@@ -24,7 +24,7 @@
 
 | 集合            | 用途                     | 代码可见的关键字段                                                                       | 访问边界                                                 |
 | --------------- | ------------------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `users`         | 用户与当前账本           | `openid`、`userNo`、`nickName`、`avatarUrl`、`gender`、`currentLedgerId`、时间戳         | 云函数按微信 OpenID 查询和更新                           |
+| `users`         | 用户与当前账本           | `openid`、`userNo`、`nickName`、`avatarUrl`、`currentLedgerId`、时间戳                   | 云函数按微信 OpenID 查询和更新                           |
 | `ledgers`       | 账本、成员、预算、邀请码 | `ownerOpenid`、成员/访客列表、`inviteCode`、`readonlyShareCode`、预算字段                | owner 可管理；member 可写记录；visitor 只读              |
 | `records`       | 收支记录                 | `ledgerId`、`ownerOpenid`、`type`、`amount`、分类字段、`date`、`account`、`tags`、时间戳 | owner/member 可写；非 owner 的 member 只能修改自己的记录 |
 | `categories`    | 分类树                   | `ledgerId`、`type`、`level`、`parentId`、`name`、`icon`、`sort`、默认标记                | owner 可编辑和删除；owner/member 可新增                  |
@@ -37,10 +37,10 @@
 - [ ] 登录：首次登录创建用户；重新进入后恢复用户和当前账本。
 - [ ] 账本：创建个人和共享账本；切换账本；owner 删除账本后当前账本状态正确。
 - [ ] 记账：新增收入和支出；查看、编辑、删除；确认列表和首页统计同步更新。
-- [ ] 预算：owner 可修改预算和记账周期起始日；非 owner 不可修改。
+- [ ] 预算：owner 可修改预算；非 owner 不可修改。
 - [ ] 邀请：owner 创建邀请；member 加入后可记账；visitor 加入后仅可查看。
 - [ ] 分类：默认分类正常加载；新增、编辑、删除分类；删除分类后相关记录迁移到“其他”。
-- [ ] 个人资料：修改昵称、头像和性别；重新进入后数据仍可读取。
+- [ ] 个人资料：修改昵称、头像；重新进入后数据仍可读取。
 
 ## 已知边界与风险
 

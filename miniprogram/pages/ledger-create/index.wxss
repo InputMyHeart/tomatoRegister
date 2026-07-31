@@ -224,6 +224,11 @@
   color: #ffffff;
 }
 
+.create-button.is-saving {
+  opacity: 0.92;
+  pointer-events: none;
+}
+
 .button-loading {
   display: flex;
   align-items: center;
@@ -457,4 +462,16 @@
   color: #312522;
   font-size: 28rpx;
   font-weight: 700;
+}
+
+.quick-amount-guide {
+  grid-column: 1 / -1;
+  margin-top: 18rpx;
+  padding: 18rpx 22rpx;
+  border-radius: 18rpx;
+  color: #d95843;
+  background: #fff0ea;
+  font-size: 23rpx;
+  font-weight: 800;
+  line-height: 1.5;
 }

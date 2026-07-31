@@ -1,5 +1,6 @@
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 
 function decodeOption(value) {
   return value ? decodeURIComponent(value) : "";
@@ -108,7 +109,8 @@ Page({
       const ledgerId = data.ledgerId;
       const ledger = data.ledger;
       const role = data.role || (isReadonly ? "readonly" : "member");
-      await app.loginWithWechat();
+      await app.loginWithWechat({ force: true });
+      await ledgerStore.refreshLedgers();
 
       if (data.already) {
         this.setData({
@@ -152,6 +154,7 @@ Page({
     this.setData({ activating: true });
     try {
       const current = await ledgerService.setCurrentLedger(ledgerId);
+      await ledgerStore.refreshLedgers();
       if (current) {
         const ledger = current.ledger || null;
         app.globalData.currentLedger = ledger || app.globalData.currentLedger;

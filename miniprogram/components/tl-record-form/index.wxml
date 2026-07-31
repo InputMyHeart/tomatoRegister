@@ -4,9 +4,11 @@
     <input type="text" value="{{amount}}" bindinput="amountInput" placeholder="0.00" />
   </view>
   <view wx:if="{{showAmountResult}}" class="tl-record-form__result">={{amountResult}}</view>
-  <view class="tl-record-form__quick">
-    <view wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="quickAmount">¥{{item}}</view>
-  </view>
+  <scroll-view wx:if="{{quickAmounts.length}}" class="tl-record-form__quick" scroll-x="{{true}}" show-scrollbar="{{false}}" enhanced="{{true}}">
+    <view class="tl-record-form__quick-list">
+      <view wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="quickAmount">¥{{item}}</view>
+    </view>
+  </scroll-view>
   <view class="tl-record-form__field">
     <text>账本</text>
     <text class="tl-record-form__value">{{ledgerName}}</text>
@@ -23,19 +25,28 @@
       <view class="tl-record-form__value">{{date}}</view>
     </picker>
   </view>
-  <view class="tl-record-form__field">
+  <view class="tl-record-form__field tl-record-form__field--note">
     <text>备注</text>
-    <input value="{{note}}" bindinput="noteInput" placeholder="添加备注" />
+    <textarea class="tl-record-form__note" value="{{note}}" auto-height="{{false}}" bindinput="noteInput" placeholder="100字以内" />
   </view>
   <view class="tl-record-form__tags">
     <text>标签</text>
-    <view>
-      <input value="{{tagInput}}" bindinput="tagInput" bindconfirm="addTag" placeholder="输入后点击添加" />
+    <view class="tl-record-form__tag-content">
+      <view class="tl-record-form__tag-composer">
+        <input value="{{tagInput}}" bindinput="tagInput" bindconfirm="addTag" placeholder="输入标签" />
+        <view class="tl-record-form__add" bindtap="addTag">添加</view>
+      </view>
       <view class="tl-record-form__tag-list">
         <view wx:for="{{tags}}" wx:key="*this" data-index="{{index}}" bindtap="removeTag">#{{item}}</view>
       </view>
     </view>
-    <view class="tl-record-form__add" bindtap="addTag">添加</view>
   </view>
-  <button class="tl-record-form__submit {{canSave ? '' : 'is-disabled'}}" loading="{{saving}}" bindtap="submit">保存记录</button>
+  <button wx:if="{{isEditing}}" class="tl-record-form__delete" disabled="{{saving || deleting}}" bindtap="deleteRecord">{{deleting ? '删除中...' : '删除记录'}}</button>
+  <button class="tl-record-form__submit {{canSave ? '' : 'is-disabled'}}" disabled="{{saving || deleting}}" bindtap="submit">
+    <view class="tl-record-form__submit-inner">
+      <view wx:if="{{saving}}" class="tl-record-form__spinner">
+      </view>
+      <text>{{saving ? '保存中...' : '保存记录'}}</text>
+    </view>
+  </button>
 </view>

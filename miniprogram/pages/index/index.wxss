@@ -544,6 +544,9 @@
 }
 
 .ledger-switcher-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 56rpx;
   height: 56rpx;
   flex: 0 0 56rpx;
@@ -551,8 +554,7 @@
   color: #8d7b74;
   background: #f3e8e3;
   font-size: 42rpx;
-  line-height: 50rpx;
-  text-align: center;
+  line-height: 1;
 }
 
 .ledger-create-entry {
@@ -669,4 +671,55 @@
   to {
     transform: rotate(360deg);
   }
+}
+/* Match the records-page row layout and surface optional record notes. */
+.records-card .record-item {
+  align-items: flex-start;
+  min-height: 132rpx;
+  padding: 24rpx 0;
+}
+
+.records-card .category-dot {
+  margin-top: 4rpx;
+}
+
+.records-card .record-main {
+  padding-right: 0;
+}
+
+.records-card .record-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34rpx;
+  gap: 18rpx;
+}
+
+.records-card .record-subline {
+  margin-top: 10rpx;
+}
+
+.records-card .record-subline .record-meta {
+  margin-top: 0;
+}
+
+.records-card .record-member {
+  flex: 0 0 auto;
+}
+
+.records-card .record-note {
+  margin-top: 6rpx;
+  overflow: hidden;
+  color: #9a8278;
+  font-size: 22rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ledger-switcher-settings {
+  margin-left: auto;
+  padding: 10rpx 16rpx;
+  color: #f0442f;
+  font-size: 24rpx;
+  font-weight: 900;
 }

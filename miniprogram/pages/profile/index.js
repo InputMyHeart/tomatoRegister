@@ -1,5 +1,6 @@
 const app = getApp();
 const profileService = require("../../services/profile.service");
+const ledgerStore = require("../../services/ledger.store");
 const { getId } = require("../../utils/mapper");
 
 function normalizeCreatedAt(value) {
@@ -28,11 +29,10 @@ Page({
   data: {
     userName: "番茄用户",
     userAvatar: "/images/brand/tomato-ledger-logo-256-transparent.png",
-    userGender: "喵星人",
+
     usageDays: 1,
     recordCount: 0,
     ledgerCount: 0,
-    monthStartDay: 1,
     readonly: false,
     currentLedger: {
       id: "",
@@ -57,11 +57,10 @@ Page({
     this.setData({
       userName: user.nickName || "番茄用户",
       userAvatar: user.avatarUrl || "/images/brand/tomato-ledger-logo-256-transparent.png",
-      userGender: user.gender || "喵星人",
+
       usageDays: getUsageDays(user),
       recordCount: Number((stats && stats.recordCount) || 0),
       ledgerCount: Number((stats && stats.ledgerCount) || 0),
-      monthStartDay: Number((currentLedger && currentLedger.monthStartDay) || 1),
       readonly: Boolean(currentLedger && currentLedger.readonly),
       currentLedger: {
         id: getId(currentLedger || {}) || user.currentLedgerId || "",
@@ -85,7 +84,7 @@ Page({
     if (this.refreshingHero || !app.globalData.loggedIn) return;
     this.refreshingHero = true;
     try {
-      await app.loginWithWechat();
+      await app.loginWithWechat({ force: true });
       this.syncAuthState();
     } catch (error) {
       console.error("refresh profile hero failed", error);
@@ -133,12 +132,16 @@ Page({
     wx.navigateTo({ url: "/pages/ledger-settings/index" });
   },
 
+  manageMembers() {
+    wx.navigateTo({ url: "/pages/member-manage/index" });
+  },
+
   manageCategories() {
     wx.navigateTo({ url: "/pages/category-manage/index" });
   },
 
   manageQuickAmounts() {
-    wx.showToast({ title: "快捷金额入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/quick-amount-settings/index" });
   },
 
   manageAccounts() {
@@ -149,12 +152,12 @@ Page({
     wx.navigateTo({ url: "/pages/budget-settings/index" });
   },
 
-  manageMonthStartDay() {
-    wx.navigateTo({ url: "/pages/month-start-settings/index" });
-  },
-
   importBill() {
-    wx.showToast({ title: "导入账单入口已预留", icon: "none" });
+    if (this.data.readonly) {
+      wx.showToast({ title: "访客不能导入账单", icon: "none" });
+      return;
+    }
+    wx.navigateTo({ url: "/pages/record-import/index" });
   },
 
   exportBill() {
@@ -162,13 +165,14 @@ Page({
   },
 
   feedback() {
-    wx.showToast({ title: "意见反馈入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/feedback/index" });
   },
 
   resetDatabase() {
     wx.showModal({
       title: "重置数据库",
-      content: "此操作会清空所有账本、分类、记录和邀请数据，用户信息会保留。确定继续吗？",
+      content:
+        "此操作会删除你创建的个人账本及其分类，并清空你自己创建的记录；共享账本和其他成员的数据不会受到影响。确定继续吗？",
       confirmText: "清空",
       confirmColor: "#c55249",
       success: (res) => {
@@ -182,10 +186,8 @@ Page({
     wx.showLoading({ title: "清空中" });
     try {
       await profileService.resetDatabase();
-      app.globalData.currentLedger = null;
-      app.globalData.stats = null;
-      if (app.globalData.user) app.globalData.user.currentLedgerId = "";
-      app.persistAuthState();
+      await app.loginWithWechat({ force: true });
+      await ledgerStore.refreshLedgers();
       wx.reLaunch({ url: "/pages/index/index" });
       wx.showToast({ title: "已清空", icon: "success" });
     } catch (error) {

@@ -1,5 +1,6 @@
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 
 function normalizeBudget(value) {
   const numberValue = Math.round(Number(value) * 100) / 100;
@@ -54,7 +55,6 @@ Page({
       return;
     }
     this.setData({ saving: true });
-    wx.showLoading({ title: "保存中" });
     try {
       const data = await ledgerService.updateBudget({
         ledgerId: this.data.ledgerId,
@@ -68,6 +68,7 @@ Page({
           ...ledger,
         };
         app.persistAuthState();
+        await ledgerStore.refreshLedgers();
         const pages = getCurrentPages();
         const previousPage = pages[pages.length - 2];
         if (previousPage && typeof previousPage.loadDashboard === "function") {
@@ -79,7 +80,6 @@ Page({
     } catch (error) {
       wx.showToast({ title: error.message || "保存失败", icon: "none" });
     } finally {
-      wx.hideLoading();
       this.setData({ saving: false });
     }
   },

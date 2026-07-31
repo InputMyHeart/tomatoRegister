@@ -1,5 +1,6 @@
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
+const ledgerStore = require("../../services/ledger.store");
 
 function hasCachedAuth() {
   const auth = wx.getStorageSync("tomatoLedgerAuth");
@@ -29,9 +30,19 @@ Page({
 
   async enterIndexIfAuthenticated() {
     if (this.data.loggingIn) return;
-
+    let restoredFromCache = false;
     if (!app.globalData.loggedIn && hasCachedAuth()) {
       app.restoreAuthState();
+      restoredFromCache = app.globalData.loggedIn;
+    }
+
+    if (restoredFromCache) {
+      try {
+        await app.loginWithWechat({ force: true });
+      } catch (error) {
+        wx.showToast({ title: error.message || "登录状态已失效", icon: "none" });
+        return;
+      }
     }
 
     if (app.globalData.loggedIn) {
@@ -54,7 +65,8 @@ Page({
     if (ledgerId) {
       await ledgerService.setCurrentLedger(ledgerId);
     }
-    await app.loginWithWechat();
+    await app.loginWithWechat({ force: true });
+    await ledgerStore.refreshLedgers();
     this.setData({ inviteCode: "", readonlyShareCode: "" });
   },
 
@@ -64,7 +76,7 @@ Page({
     this.setData({ loggingIn: true });
 
     try {
-      await app.loginWithWechat();
+      await app.loginWithWechat({ force: true });
       if (this.data.inviteCode || this.data.readonlyShareCode) {
         await this.joinSharedLedger();
       }

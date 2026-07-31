@@ -15,7 +15,6 @@
             <view class="user-name-row">
               <text class="user-name">{{userName}}</text>
             </view>
-            <view class="user-tip">{{userGender}}</view>
           </view>
         </view>
         <view class="stats-grid">
@@ -34,7 +33,7 @@
         </view>
       </view>
       <view class="tools-panel card fade-up">
-        <view class="section-title">常用功能</view>
+        <view class="section-title">账本设置</view>
         <view class="tool-grid common-grid">
           <view class="tool-tile" bindtap="ledgerSettings">
             <view class="tool-icon">
@@ -42,6 +41,13 @@
               </tl-icon>
             </view>
             <view class="tool-title">账本管理</view>
+          </view>
+          <view class="tool-tile" bindtap="manageMembers">
+            <view class="tool-icon">
+              <tl-icon name="team-line" size="32" color="#f0442f">
+              </tl-icon>
+            </view>
+            <view class="tool-title">成员管理</view>
           </view>
           <view class="tool-tile" bindtap="manageCategories">
             <view class="tool-icon">
@@ -63,13 +69,6 @@
               </tl-icon>
             </view>
             <view class="tool-title">快捷金额</view>
-          </view>
-          <view class="tool-tile" bindtap="manageMonthStartDay">
-            <view class="tool-icon">
-              <tl-icon name="calendar-event-line" size="32" color="#f0442f">
-              </tl-icon>
-            </view>
-            <view class="tool-title">月度起始</view>
           </view>
           <view class="tool-tile" bindtap="importBill">
             <view class="tool-icon">
