@@ -1,6 +1,10 @@
 const app = getApp();
 const recordService = require("../../services/record.service");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
+const {
+  evaluateAmountExpression,
+  getAmountValidationMessage,
+} = require("../../utils/amount-expression");
 
 function today() {
   const now = new Date();
@@ -18,40 +22,6 @@ function quickAmountsFor(ledger) {
 function quickNotesFor(type, category) {
   if (type === "income") return [category, "工资", "奖金", "报销", "红包"].filter(Boolean);
   return [category, "早餐", "午餐", "晚餐", "通勤", "买菜"].filter(Boolean);
-}
-
-function limitAmountPrecision(rawValue) {
-  return String(rawValue || "").replace(/(\.\d{2})\d+/g, "$1");
-}
-
-function amountPartToCents(part) {
-  const negative = part.startsWith("-");
-  const source = part.replace(/^[+-]/, "");
-  const [whole, fraction = ""] = source.split(".");
-  const cents = Number(whole) * 100 + Number((fraction + "00").slice(0, 2));
-  return negative ? -cents : cents;
-}
-
-function centsToText(cents) {
-  const absolute = Math.abs(cents);
-  const whole = Math.floor(absolute / 100);
-  const fraction = String(absolute % 100)
-    .padStart(2, "0")
-    .replace(/0+$/, "");
-  return `${cents < 0 ? "-" : ""}${whole}${fraction ? `.${fraction}` : ""}`;
-}
-
-function evaluateAmountExpression(rawValue) {
-  const expression = limitAmountPrecision(rawValue).replace(/\s/g, "");
-  if (!expression) return { value: 0, valid: false, text: "" };
-  if (!/^\d+(\.\d{1,2})?([+-]\d+(\.\d{1,2})?)*$/.test(expression)) {
-    return { value: 0, valid: false, text: "" };
-  }
-  const cents = (expression.match(/[+-]?\d+(\.\d{1,2})?/g) || []).reduce(
-    (sum, part) => sum + amountPartToCents(part),
-    0
-  );
-  return { value: cents / 100, valid: cents > 0, text: centsToText(cents) };
 }
 
 function normalizeTags(input) {
@@ -276,7 +246,10 @@ Page({
     this.setData({ tags: finalTags, tagInput: "" });
     const result = evaluateAmountExpression(this.data.amount);
     if (!result.valid) {
-      wx.showToast({ title: "请输入有效金额", icon: "none" });
+      wx.showToast({
+        title: getAmountValidationMessage(this.data.type, result),
+        icon: "none",
+      });
       return;
     }
 

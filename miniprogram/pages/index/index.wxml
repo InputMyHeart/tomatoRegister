@@ -87,11 +87,6 @@
         <view class="primary-action" bindtap="bootstrap">重新加载</view>
       </view>
       <block wx:else>
-        <view wx:if="{{!hasMonthRecords}}" class="state-card card fade-up">
-          <tl-empty-state text="本月暂无记账数据">
-          </tl-empty-state>
-          <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
-        </view>
         <view class="summary-card card fade-up">
           <view class="summary-glow">
           </view>

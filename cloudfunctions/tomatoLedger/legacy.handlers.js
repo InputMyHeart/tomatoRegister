@@ -403,7 +403,7 @@ function assertRecordPayload(data = {}) {
     !Number.isFinite(amount) ||
     amount <= 0 ||
     amount > 99999999 ||
-    Math.abs(amount * 100 - Math.round(amount * 100)) > Number.EPSILON * 100
+    Math.abs(amount * 100 - Math.round(amount * 100)) > 0.000001
   )
     throw new Error("INVALID_RECORD_AMOUNT");
   if (!["income", "expense"].includes(data.type)) throw new Error("INVALID_RECORD_TYPE");

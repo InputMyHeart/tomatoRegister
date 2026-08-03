@@ -1,14 +1,39 @@
 <view class="tl-record-form">
-  <view class="tl-record-form__amount">
+  <view class="tl-record-form__amount" bindtap="openKeypad">
     <text>¥</text>
-    <input type="text" value="{{amount}}" bindinput="amountInput" placeholder="0.00" />
+    <text class="tl-record-form__amount-value {{amount ? '' : 'is-placeholder'}}">{{amount || '0.00'}}</text>
   </view>
-  <view wx:if="{{showAmountResult}}" class="tl-record-form__result">={{amountResult}}</view>
   <scroll-view wx:if="{{quickAmounts.length}}" class="tl-record-form__quick" scroll-x="{{true}}" show-scrollbar="{{false}}" enhanced="{{true}}">
     <view class="tl-record-form__quick-list">
       <view wx:for="{{quickAmounts}}" wx:key="*this" data-amount="{{item}}" bindtap="quickAmount">¥{{item}}</view>
     </view>
   </scroll-view>
+  <view wx:if="{{showKeypad}}" class="tl-record-form__keypad-mask" bindtap="closeKeypad">
+  </view>
+  <view wx:if="{{showKeypad}}" class="tl-record-form__keypad {{isEditing ? 'is-editing' : ''}}">
+    <view class="tl-record-form__keypad-header">
+      <text>番茄记一笔</text>
+      <view class="tl-record-form__keypad-close" bindtap="closeKeypad">关闭</view>
+    </view>
+    <view class="tl-record-form__keypad-grid">
+      <view class="keypad-key" data-digit="1" bindtap="pressNumber">1</view>
+      <view class="keypad-key" data-digit="2" bindtap="pressNumber">2</view>
+      <view class="keypad-key" data-digit="3" bindtap="pressNumber">3</view>
+      <view class="keypad-key keypad-key--operator" data-operator="+" bindtap="pressOperator">+</view>
+      <view class="keypad-key" data-digit="4" bindtap="pressNumber">4</view>
+      <view class="keypad-key" data-digit="5" bindtap="pressNumber">5</view>
+      <view class="keypad-key" data-digit="6" bindtap="pressNumber">6</view>
+      <view class="keypad-key keypad-key--operator" data-operator="-" bindtap="pressOperator">−</view>
+      <view class="keypad-key" data-digit="7" bindtap="pressNumber">7</view>
+      <view class="keypad-key" data-digit="8" bindtap="pressNumber">8</view>
+      <view class="keypad-key" data-digit="9" bindtap="pressNumber">9</view>
+      <view class="keypad-key keypad-key--clear" bindtap="clearAmount">清空</view>
+      <view class="keypad-key" bindtap="pressDecimal">.</view>
+      <view class="keypad-key" data-digit="0" bindtap="pressNumber">0</view>
+      <view class="keypad-key keypad-key--clear" bindtap="backspace">⌫</view>
+      <view class="keypad-key keypad-key--equal" bindtap="calculate">=</view>
+    </view>
+  </view>
   <view class="tl-record-form__field">
     <text>账本</text>
     <text class="tl-record-form__value">{{ledgerName}}</text>

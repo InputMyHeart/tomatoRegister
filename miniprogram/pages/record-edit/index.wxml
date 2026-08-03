@@ -21,7 +21,7 @@
         </view>
         <view class="change-link">重选</view>
       </view>
-      <tl-record-form amount="{{amount}}" amount-result="{{amountResult}}" show-amount-result="{{showAmountResult}}" quick-amounts="{{quickAmounts}}" ledger-name="{{ledgerName}}" accounts="{{accounts}}" account-index="{{accountIndex}}" date="{{date}}" note="{{note}}" tag-input="{{tagInput}}" tags="{{tags}}" can-save="{{canSave}}" saving="{{saving}}" is-editing="{{isEditing}}" deleting="{{deleting}}" bind:amountinput="onAmountInput" bind:quickamount="setQuickAmount" bind:accountchange="onAccountChange" bind:datechange="onDateChange" bind:noteinput="onNoteInput" bind:taginput="onTagInput" bind:addtag="addTag" bind:removetag="removeTag" bind:delete="deleteRecord" bind:submit="saveRecord">
+      <tl-record-form type="{{type}}" amount="{{amount}}" amount-result="{{amountResult}}" show-amount-result="{{showAmountResult}}" quick-amounts="{{quickAmounts}}" ledger-name="{{ledgerName}}" accounts="{{accounts}}" account-index="{{accountIndex}}" date="{{date}}" note="{{note}}" tag-input="{{tagInput}}" tags="{{tags}}" can-save="{{canSave}}" saving="{{saving}}" is-editing="{{isEditing}}" deleting="{{deleting}}" bind:amountinput="onAmountInput" bind:quickamount="setQuickAmount" bind:accountchange="onAccountChange" bind:datechange="onDateChange" bind:noteinput="onNoteInput" bind:taginput="onTagInput" bind:addtag="addTag" bind:removetag="removeTag" bind:delete="deleteRecord" bind:submit="saveRecord">
       </tl-record-form>
     </view>
   </scroll-view>
