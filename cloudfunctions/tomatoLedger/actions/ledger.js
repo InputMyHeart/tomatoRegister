@@ -10,6 +10,7 @@ const analysis = (context, payload) => execute("getAnalysis", context.openid, pa
 const updateBudget = (context, payload) => execute("updateBudget", context.openid, payload);
 const updateQuickAmounts = (context, payload) =>
   execute("updateQuickAmounts", context.openid, payload);
+const updateAccounts = (context, payload) => execute("updateAccounts", context.openid, payload);
 module.exports = {
   create,
   list,
@@ -21,4 +22,5 @@ module.exports = {
   analysis,
   updateBudget,
   updateQuickAmounts,
+  updateAccounts,
 };

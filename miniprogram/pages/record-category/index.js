@@ -31,6 +31,8 @@ Page({
         ? decodeURIComponent(options.ledgerName)
         : ledger.name || "选择分类",
     });
+  },
+  onShow() {
     this.loadCategories();
   },
   async loadCategories() {
@@ -45,6 +47,14 @@ Page({
   toggleGroup(event) {
     const id = event.detail.id || event.currentTarget.dataset.id;
     this.setData({ expandedGroupId: this.data.expandedGroupId === id ? "" : id });
+  },
+  openCategoryManager() {
+    const params = [
+      `ledgerId=${encodeURIComponent(this.data.ledgerId)}`,
+      `type=${this.data.type}`,
+      `ledgerName=${encodeURIComponent(this.data.ledgerName)}`,
+    ];
+    wx.navigateTo({ url: `/pages/category-manage/index?${params.join("&")}` });
   },
   chooseCategory(event) {
     const { category, categoryLabel, categoryIcon, parent, parentIcon } = event.detail.category

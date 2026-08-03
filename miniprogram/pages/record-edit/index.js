@@ -1,6 +1,6 @@
 const app = getApp();
 const recordService = require("../../services/record.service");
-const accounts = ["微信", "支付宝", "银行卡", "现金"];
+const { getPaymentAccounts } = require("../../services/payment-account.service");
 
 function today() {
   const now = new Date();
@@ -87,7 +87,7 @@ Page({
     ledgerName: "我家账本",
     ledgerId: "",
     accountIndex: 0,
-    accounts,
+    accounts: getPaymentAccounts(),
     quickAmounts: [],
     quickNotes: quickNotesFor("expense", "其他支出"),
   },
@@ -125,6 +125,7 @@ Page({
       parentIcon,
       ledgerName: currentLedger.name || "我家账本",
       ledgerId: options.ledgerId || currentLedger._id || "",
+      accounts: getPaymentAccounts(currentLedger),
       quickAmounts: quickAmountsFor(currentLedger),
       quickNotes: quickNotesFor(type, categoryName),
     });
@@ -137,7 +138,10 @@ Page({
       const record = data.record;
       if (!record) throw new Error("记录加载失败");
       const recordType = record.type === "income" ? "income" : "expense";
-      const accountIndex = Math.max(0, accounts.indexOf(record.account));
+      const recordAccounts = Array.from(
+        new Set([...getPaymentAccounts(data.ledger), record.account].filter(Boolean))
+      );
+      const accountIndex = Math.max(0, recordAccounts.indexOf(record.account));
       this.setData({
         recordId,
         isEditing: true,

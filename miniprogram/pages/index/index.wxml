@@ -60,7 +60,7 @@
       </view>
       <block wx:elif="{{isEmpty}}">
         <view class="state-card card fade-up">
-          <tl-empty-state text="本月暂无记账数据">
+          <tl-empty-state text="暂无数据">
           </tl-empty-state>
           <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
         </view>
@@ -87,6 +87,11 @@
         <view class="primary-action" bindtap="bootstrap">重新加载</view>
       </view>
       <block wx:else>
+        <view wx:if="{{!hasMonthRecords}}" class="state-card card fade-up">
+          <tl-empty-state text="本月暂无记账数据">
+          </tl-empty-state>
+          <view class="primary-action" bindtap="goRecordEdit">记一笔</view>
+        </view>
         <view class="summary-card card fade-up">
           <view class="summary-glow">
           </view>
@@ -161,7 +166,7 @@
           </view>
           <view class="record-item" wx:for="{{recentRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="goRecordDetail">
             <view class="category-dot {{item.type}}">
-              <tl-icon name="{{item.typeIcon}}" size="34" color="{{item.typeIconColor}}">
+              <tl-icon name="{{item.categoryIcon}}" size="34" color="{{item.typeIconColor}}">
               </tl-icon>
             </view>
             <view class="record-main">
@@ -180,7 +185,7 @@
               <view wx:if="{{item.hasNote}}" class="record-note">{{item.noteText}}</view>
             </view>
           </view>
-          <view class="record-limit-tip">—仅展示当月最近10笔—</view>
+          <view class="record-limit-tip">—仅展示账本最近10笔—</view>
         </view>
       </block>
     </view>

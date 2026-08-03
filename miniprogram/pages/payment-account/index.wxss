@@ -1,0 +1,64 @@
+.account-card {
+  padding: 30rpx;
+}
+.account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+.account-title {
+  color: #312522;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+.account-subtitle,
+.readonly-tip {
+  margin-top: 10rpx;
+  color: #9a8278;
+  font-size: 24rpx;
+}
+.account-list {
+  margin-top: 24rpx;
+  border-top: 1rpx solid #f3e6df;
+}
+.account-row {
+  min-height: 108rpx;
+  display: flex;
+  align-items: center;
+  border-bottom: 1rpx solid #f3e6df;
+}
+.account-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff0ea;
+}
+.account-name {
+  flex: 1;
+  min-width: 0;
+  margin-left: 18rpx;
+  color: #312522;
+  font-size: 29rpx;
+  font-weight: 800;
+}
+.delete-text {
+  padding: 12rpx 0 12rpx 24rpx;
+  color: #d85a49;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+.readonly-tip {
+  padding: 20rpx 8rpx;
+}
+.account-add-bar {
+  flex: none;
+  padding: 20rpx 0 calc(20rpx + env(safe-area-inset-bottom));
+}
+.account-add-bar .tomato-button {
+  width: 100%;
+  gap: 12rpx;
+}

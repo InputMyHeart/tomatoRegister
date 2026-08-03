@@ -8,6 +8,7 @@
     "pages/feedback-history/index",
     "pages/profile/index",
     "pages/profile-edit/index",
+    "pages/payment-account/index",
     "pages/budget-settings/index",
     "pages/quick-amount-settings/index",
     "pages/ledger-create/index",

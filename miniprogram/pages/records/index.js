@@ -45,6 +45,7 @@ function normalizeRecord(record = {}) {
     ...record,
     id: getId(record),
     type,
+    categoryIcon: record.categoryIcon || (type === "income" ? "funds-line" : "price-tag-3-line"),
     amountText: formatDisplayMoney(record.amount),
     sign: type === "income" ? "+" : "-",
     categoryText: record.categoryName || record.categoryLabel || "其他",
@@ -114,6 +115,10 @@ Page({
     loadingMore: false,
     hasMore: false,
     nextCursor: null,
+    historyRecordCount: 0,
+    rangeRecordCount: 0,
+    latestRecordDate: "",
+    latestRecordMonthLabel: "",
     isError: false,
     records: [],
     currentRange: null,
@@ -181,12 +186,20 @@ Page({
         normalizeRecord
       );
       const records = append ? [...this.data.records, ...page] : page;
+      const latestRecordDate = data.latestRecordDate || "";
+      const latestRecordMonthLabel = /^\d{4}-\d{2}-\d{2}$/.test(latestRecordDate)
+        ? getRange(Number(latestRecordDate.slice(0, 4)), Number(latestRecordDate.slice(5, 7))).label
+        : "";
       this.setData({
         loading: false,
         loadingMore: false,
         records,
         nextCursor: data.nextCursor || null,
         hasMore: Boolean(data.hasMore),
+        historyRecordCount: Number(data.historyRecordCount || 0),
+        rangeRecordCount: Number(data.rangeRecordCount || 0),
+        latestRecordDate,
+        latestRecordMonthLabel,
         readonly: Boolean(data.readonly),
         ...buildView(records, this.data.activeType),
       });
@@ -269,6 +282,22 @@ Page({
     this.loadRecords(nextRange);
   },
 
+  goRecordEdit() {
+    if (this.data.readonly) {
+      wx.showToast({ title: "访客不能记账", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/record-category/index?ledgerId=${encodeURIComponent(this.data.ledgerId)}`,
+    });
+  },
+  goLatestRecordMonth() {
+    const date = this.data.latestRecordDate;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const range = getRange(Number(date.slice(0, 4)), Number(date.slice(5, 7)));
+    this.setData({ currentRange: range, monthLabel: range.label, activeType: "all" });
+    this.loadRecords(range);
+  },
   openRecord(event) {
     const id = event.currentTarget.dataset.id;
     if (!id) return;

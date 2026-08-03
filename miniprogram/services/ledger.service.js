@@ -11,6 +11,7 @@ const getDashboard = (ledgerId) => callApi("ledger/dashboard/get", { ledgerId })
 const getAnalysis = (data) => callApi("ledger/analysis/get", data);
 const updateBudget = (data) => callApi("ledger/budget/update", data);
 const updateQuickAmounts = (data) => callApi("ledger/quick-amounts/update", data);
+const updateAccounts = (data) => callApi("ledger/accounts/update", data);
 const createLedgerInviteToken = (data) => callApi("invite/create", data);
 const joinLedgerByInviteToken = (inviteToken) => callApi("invite/join-token", { inviteToken });
 const joinLedger = (inviteCode) => callApi("invite/join", { inviteCode });
@@ -28,6 +29,7 @@ module.exports = {
   getAnalysis,
   updateBudget,
   updateQuickAmounts,
+  updateAccounts,
   createLedgerInviteToken,
   joinLedgerByInviteToken,
   joinLedger,

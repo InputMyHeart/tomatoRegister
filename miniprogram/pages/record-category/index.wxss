@@ -30,3 +30,11 @@
   background: #25a66a;
   box-shadow: 0 10rpx 22rpx rgba(37, 166, 106, 0.2);
 }
+.category-action {
+  flex: none;
+  padding: 20rpx 0 calc(20rpx + env(safe-area-inset-bottom));
+}
+
+.category-action .tomato-button {
+  gap: 12rpx;
+}

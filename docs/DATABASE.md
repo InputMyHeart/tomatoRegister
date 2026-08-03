@@ -4,7 +4,8 @@
 
 ## CloudBase 索引
 
-- records: ledgerId ASC, date DESC, _id DESC（账本记录游标分页）
+- records: ledgerId ASC, date DESC, _id DESC
+- records: ledgerId ASC, createdAt DESC (homepage recent-record query)（账本记录游标分页）
 - ledgerInvites: token ASC，唯一
 - ledgers: inviteCode ASC，唯一
 - ledgers: readonlyShareCode ASC，唯一
@@ -24,3 +25,4 @@
 
 - feedbacks: ownerOpenid ASC, createdAt DESC（用户反馈历史）
 - feedbacks 字段：ownerOpenid、content（必填，最多 200 字）、type（feature/bug/improvement/other，可空）、images（最多 9 张 cloud:// 文件）、status（submitted/processing/resolved）和时间戳。云函数仅按当前 OpenID 查询，创建时状态固定为 submitted。
+- ledgers.accounts stores 1-12 unique payment-account names; accountsConfigured distinguishes saved account lists from legacy defaults. Owner and member writes are revalidated in the cloud function; readonly visitors cannot update them.

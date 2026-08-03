@@ -145,7 +145,7 @@ Page({
   },
 
   manageAccounts() {
-    wx.showToast({ title: "支付账户入口已预留", icon: "none" });
+    wx.navigateTo({ url: "/pages/payment-account/index" });
   },
 
   manageBudget() {

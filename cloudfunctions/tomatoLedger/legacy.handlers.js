@@ -7,6 +7,7 @@ const _ = db.command;
 const defaultAvatarUrl = "/images/brand/tomato-ledger-logo-256-transparent.png";
 const SCHEMA_VERSION = 1;
 const defaultQuickAmounts = [18, 32, 68, 128];
+const defaultPaymentAccounts = ["微信", "支付宝", "银行卡", "信用卡", "现金"];
 
 const defaultExpenseCategories = [
   ["餐饮", "#E94B35"],
@@ -343,7 +344,8 @@ async function createLedger(openid, data = {}) {
     monthlyBudget,
     quickAmountsEnabled,
     quickAmounts: quickAmountsEnabled ? defaultQuickAmounts : [],
-    accounts: data.accounts || ["微信", "支付宝", "银行卡", "现金"],
+    accounts: defaultPaymentAccounts,
+    accountsConfigured: true,
     schemaVersion: SCHEMA_VERSION,
     createdAt: now(),
     updatedAt: now(),
@@ -766,6 +768,20 @@ async function listRecords(openid, data = {}) {
         _.or([{ date: _.lt(cursor.date) }, { date: cursor.date, _id: _.lt(cursor.id) }]),
       ])
     : baseQuery;
+  const historyQuery = { ledgerId: ledger._id };
+  const rangeQuery = { ledgerId: ledger._id };
+  if (data.start && data.end) rangeQuery.date = _.gte(data.start).and(_.lt(data.end));
+  const [historyCountResult, rangeCountResult, latestRecordResult] = await Promise.all([
+    db.collection("records").where(historyQuery).count(),
+    db.collection("records").where(rangeQuery).count(),
+    db
+      .collection("records")
+      .where(historyQuery)
+      .orderBy("date", "desc")
+      .orderBy("_id", "desc")
+      .limit(1)
+      .get(),
+  ]);
   const result = await db
     .collection("records")
     .where(query)
@@ -784,6 +800,9 @@ async function listRecords(openid, data = {}) {
     records: page.map((item) => attachRecordOwner(item, ownerMap, openid)),
     nextCursor: hasMore && last ? { date: last.date, id: last._id } : null,
     hasMore,
+    historyRecordCount: historyCountResult.total || 0,
+    rangeRecordCount: rangeCountResult.total || 0,
+    latestRecordDate: ((latestRecordResult.data || [])[0] || {}).date || "",
     ledger: {
       _id: ledger._id,
       name: ledger.name,
@@ -813,6 +832,8 @@ async function getRecord(openid, data = {}) {
       _id: ledger._id,
       name: ledger.name,
       type: ledger.type || "personal",
+      accounts: ledger.accounts || defaultPaymentAccounts,
+      accountsConfigured: Boolean(ledger.accountsConfigured),
     },
     role,
     roleText: getRoleText(role),
@@ -906,8 +927,18 @@ async function getDashboard(openid, data = {}) {
   const monthRecords = (records.data || []).sort(
     (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
   );
+  const [recentResult, totalRecordCountResult] = await Promise.all([
+    db
+      .collection("records")
+      .where({ ledgerId: ledger._id })
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get(),
+    db.collection("records").where({ ledgerId: ledger._id }).count(),
+  ]);
+  const latestRecords = recentResult.data || [];
   const ownerMap = await resolveUsersAvatarUrls(
-    await getUsersByOpenids(monthRecords.map((item) => item.ownerOpenid))
+    await getUsersByOpenids([...monthRecords, ...latestRecords].map((item) => item.ownerOpenid))
   );
   const monthIncome = monthRecords
     .filter((item) => item.type === "income")
@@ -947,13 +978,12 @@ async function getDashboard(openid, data = {}) {
     budgetLeft: budgetEnabled ? Number((budget - monthExpense).toFixed(2)) : 0,
     budgetRate,
     recordCount: monthRecords.length,
+    totalRecordCount: totalRecordCountResult.total || 0,
     topExpenseCategory,
     largestExpenseAmount,
     familyMood: monthRecords.length ? "本月记录持续更新" : "本月还没有记录",
     monthRange,
-    recentRecords: monthRecords
-      .slice(0, 10)
-      .map((item) => attachRecordOwner(item, ownerMap, openid)),
+    recentRecords: latestRecords.map((item) => attachRecordOwner(item, ownerMap, openid)),
   });
 }
 
@@ -1229,6 +1259,25 @@ async function updateQuickAmounts(openid, data = {}) {
     .doc(ledger._id)
     .update({ data: { quickAmountsEnabled, quickAmounts, updatedAt: now() } });
   return ok({ ledger: { ...ledger, quickAmountsEnabled, quickAmounts } });
+}
+function normalizePaymentAccounts(values) {
+  if (!Array.isArray(values) || values.length < 1 || values.length > 12) return null;
+  const accounts = values.map((value) => String(value || "").trim());
+  if (accounts.some((value) => !value || Array.from(value).length > 12)) return null;
+  return Array.from(new Set(accounts));
+}
+
+async function updateAccounts(openid, data = {}) {
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  assertWritable(role);
+  const accounts = normalizePaymentAccounts(data.accounts);
+  if (!accounts) return fail("支付账户需设置 1-12 个有效名称", "INVALID_PAYMENT_ACCOUNTS");
+  await db
+    .collection("ledgers")
+    .doc(ledger._id)
+    .update({ data: { accounts, accountsConfigured: true, updatedAt: now() } });
+  return ok({ ledger: { ...ledger, accounts, accountsConfigured: true } });
 }
 async function createLedgerInviteToken(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
@@ -1803,6 +1852,7 @@ async function execute(operation, openid, payload = {}) {
     getAnalysis,
     updateBudget,
     updateQuickAmounts,
+    updateAccounts,
     createLedgerInviteToken,
     joinLedgerByInviteToken,
     joinLedger,

@@ -1,11 +1,11 @@
 const app = getApp();
 const recordService = require("../../services/record.service");
-const accounts = ["微信", "支付宝", "银行卡", "现金"];
+const { getPaymentAccounts } = require("../../services/payment-account.service");
 Page({
   data: {
     ledgerName: "当前账本",
     ledgerId: "",
-    accounts,
+    accounts: getPaymentAccounts(),
     accountIndex: 0,
     uploading: false,
     resultVisible: false,
@@ -20,7 +20,11 @@ Page({
       setTimeout(() => wx.navigateBack(), 300);
       return;
     }
-    this.setData({ ledgerId: ledger._id || "", ledgerName: ledger.name || "当前账本" });
+    this.setData({
+      ledgerId: ledger._id || "",
+      ledgerName: ledger.name || "当前账本",
+      accounts: getPaymentAccounts(ledger),
+    });
   },
   onShow() {
     if (!this.data.uploading) {

@@ -65,7 +65,7 @@
           </view>
           <view class="record-row" wx:for="{{item.records}}" wx:for-item="record" wx:key="id" data-id="{{record.id}}" bindtap="openRecord">
             <view class="category-mark {{record.type}}">
-              <tl-icon name="{{record.type === 'income' ? 'funds-line' : 'price-tag-3-line'}}" size="32" color="{{record.type === 'income' ? '#2f9d68' : '#f0442f'}}">
+              <tl-icon name="{{record.categoryIcon}}" size="32" color="{{record.type === 'income' ? '#2f9d68' : '#f0442f'}}">
               </tl-icon>
             </view>
             <view class="record-main">
@@ -89,8 +89,12 @@
         <view class="page-load-more" wx:elif="{{!hasMore}}">没有更多记录了</view>
       </view>
       <view class="empty-wrap card fade-up" wx:else>
-        <tl-empty-state show="{{true}}" text="暂无数据">
+        <tl-empty-state show="{{true}}" text="{{rangeRecordCount ? '暂无数据' : historyRecordCount ? '本月暂无数据' : '暂无数据'}}">
         </tl-empty-state>
+        <view class="empty-actions">
+          <view wx:if="{{!rangeRecordCount && historyRecordCount}}" class="retry-button secondary" bindtap="goLatestRecordMonth">查看{{latestRecordMonthLabel}}记录</view>
+          <view class="retry-button" bindtap="goRecordEdit">记一笔</view>
+        </view>
       </view>
     </view>
   </scroll-view>

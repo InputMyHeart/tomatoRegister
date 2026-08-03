@@ -19,4 +19,11 @@
       </tl-category-tree>
     </view>
   </scroll-view>
+  <view class="category-action">
+    <view class="tomato-button" bindtap="openCategoryManager">
+      <tl-icon name="add-line" size="32" color="#ffffff">
+      </tl-icon>
+      <text>添加分类</text>
+    </view>
+  </view>
 </view>

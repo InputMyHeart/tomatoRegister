@@ -57,7 +57,7 @@ function normalizeRecord(item = {}) {
     ...item,
     id: getId(item),
     type,
-    typeIcon: type === "income" ? "funds-line" : "price-tag-3-line",
+    categoryIcon: item.categoryIcon || (type === "income" ? "funds-line" : "price-tag-3-line"),
     typeIconColor: type === "income" ? "#25a66a" : "#f0442f",
     amountText: formatDisplayMoney(item.amount),
     noteText: item.note || "未填写备注",
@@ -73,7 +73,8 @@ function normalizeDashboard(data = {}) {
   const recentRecords = Array.isArray(data.recentRecords)
     ? data.recentRecords.map(normalizeRecord)
     : [];
-  const recordCount = Number(data.recordCount || recentRecords.length || 0);
+  const recordCount = Number(data.recordCount || 0);
+  const totalRecordCount = Number(data.totalRecordCount || 0);
   const budgetRate = getBudgetRate(data.monthExpense, data.budget);
   return {
     ledgerId: data.ledgerId || "",
@@ -97,12 +98,14 @@ function normalizeDashboard(data = {}) {
     budgetRate: Number(data.budgetRate || 0),
     budgetRateText: Number(data.budgetRate || 0).toFixed(2),
     recordCount,
+    totalRecordCount,
+    hasMonthRecords: recordCount > 0,
     topExpenseCategory: data.topExpenseCategory || "暂无",
     largestExpenseAmount: formatDisplayMoney(data.largestExpenseAmount),
     largestExpenseCompact: compactMoney(data.largestExpenseAmount),
     familyMood: data.familyMood || "本月还没有记录",
     recentRecords,
-    hasDashboardData: recordCount > 0 || recentRecords.length > 0,
+    hasDashboardData: totalRecordCount > 0,
   };
 }
 

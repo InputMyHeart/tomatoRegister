@@ -41,13 +41,27 @@ Page({
     activeChildren: [],
     canCreate: false,
   },
+  onLoad(options = {}) {
+    const ledger = app.globalData.currentLedger || {};
+    const ledgerId = options.ledgerId || ledger._id || "";
+    const type = options.type === "income" ? "income" : "expense";
+    this.setData({
+      ledgerId,
+      ledgerName: options.ledgerName
+        ? decodeURIComponent(options.ledgerName)
+        : ledger.name || "分类管理",
+      type,
+      pageIndex: type === "income" ? 1 : 0,
+    });
+  },
   onShow() {
     this.loadCategories();
   },
   async loadCategories() {
     const ledger = app.globalData.currentLedger || {};
-    if (!ledger._id) return;
-    const data = await categoryService.listCategories(ledger._id);
+    const ledgerId = this.data.ledgerId || ledger._id;
+    if (!ledgerId) return;
+    const data = await categoryService.listCategories(ledgerId);
     const categories = data.categories || [];
     const expenseGroups = groupCategories(categories, "expense");
     const incomeGroups = groupCategories(categories, "income");
@@ -61,8 +75,7 @@ Page({
     const expenseRows = buildRows(expenseGroups, activeParentId, canCreate);
     const incomeRows = buildRows(incomeGroups, activeParentId, canCreate);
     this.setData({
-      ledgerId: ledger._id,
-      ledgerName: ledger.name || "分类管理",
+      ledgerId,
       role,
       expenseGroups,
       incomeGroups,

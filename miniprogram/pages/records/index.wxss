@@ -492,3 +492,21 @@
 .record-line .record-member {
   flex: 0 0 auto;
 }
+.empty-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.empty-actions .retry-button {
+  width: auto;
+  min-width: 180rpx;
+  margin: 0;
+  padding: 0 26rpx;
+}
+
+.empty-actions .retry-button.secondary {
+  color: #f0442f;
+  background: #fff0ea;
+}

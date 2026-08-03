@@ -26,6 +26,7 @@ const routes = {
   "ledger/analysis/get": ledger.analysis,
   "ledger/budget/update": ledger.updateBudget,
   "ledger/quick-amounts/update": ledger.updateQuickAmounts,
+  "ledger/accounts/update": ledger.updateAccounts,
   "record/create": record.create,
   "record/get": record.get,
   "record/list": record.list,
