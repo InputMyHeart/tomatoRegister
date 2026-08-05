@@ -13,6 +13,18 @@ function today() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
+function formatRecordTimestamp(value) {
+  if (!value) return "";
+  const date =
+    value instanceof Date ? value : new Date(value.$date || (value.seconds || 0) * 1000 || value);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
+}
+
 function quickAmountsFor(ledger) {
   return ledger && ledger.quickAmountsEnabled && Array.isArray(ledger.quickAmounts)
     ? ledger.quickAmounts
@@ -60,6 +72,8 @@ Page({
     accounts: getPaymentAccounts(),
     quickAmounts: [],
     quickNotes: quickNotesFor("expense", "其他支出"),
+    createdDate: "",
+    updatedDate: "",
   },
 
   onLoad(options = {}) {
@@ -84,6 +98,7 @@ Page({
         ? "price-tag-3-line"
         : "book-2-line";
     const currentLedger = app.globalData.currentLedger || {};
+    const date = options.id ? this.data.date : today();
     this.setData({
       type,
       typeLabel: type === "income" ? "收入" : "支出",
@@ -98,6 +113,7 @@ Page({
       accounts: getPaymentAccounts(currentLedger),
       quickAmounts: quickAmountsFor(currentLedger),
       quickNotes: quickNotesFor(type, categoryName),
+      date,
     });
     if (options.id) this.loadRecord(decodeURIComponent(options.id));
   },
@@ -132,6 +148,8 @@ Page({
         accountIndex,
         quickAmounts: quickAmountsFor(data.ledger),
         quickNotes: quickNotesFor(recordType, record.categoryName),
+        createdDate: formatRecordTimestamp(record.createdAt),
+        updatedDate: formatRecordTimestamp(record.updatedAt),
       });
       this.setAmountExpression(String(record.amount || ""));
     } catch (error) {

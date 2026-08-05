@@ -32,13 +32,26 @@ Page({
   async load() {
     const data = await categoryService.listCategories(this.data.ledgerId);
     const cs = data.categories || [];
-    const items = cs.filter(
-      (x) =>
-        x.type === this.data.type &&
-        x.level === this.data.level &&
-        (this.data.level !== "child" || x.parentId === this.data.parentId)
-    );
-    const p = cs.find((x) => x._id === this.data.parentId);
+    const parentMap = cs.reduce((map, item) => {
+      if (item.level === "parent") map[item._id] = item;
+      return map;
+    }, {});
+    const items = cs
+      .filter(
+        (item) =>
+          item.type === this.data.type &&
+          item.level === this.data.level &&
+          (this.data.level !== "child" || item.parentId === this.data.parentId)
+      )
+      .map((item) => ({
+        ...item,
+        isProtected:
+          Boolean(item.isOther) ||
+          Boolean(
+            item.isDefaultChild && parentMap[item.parentId] && parentMap[item.parentId].isOther
+          ),
+      }));
+    const p = cs.find((item) => item._id === this.data.parentId);
     this.setData({ items, role: data.role || "", parentName: p ? p.name : "" });
   },
   openCreate() {
@@ -48,6 +61,7 @@ Page({
   openEdit(e) {
     if (this.data.role !== "owner") return;
     const item = e.currentTarget.dataset.item;
+    if (item.isProtected) return;
     this.setData({
       showEditor: true,
       editingItem: item,
@@ -98,7 +112,7 @@ Page({
   async remove(e) {
     if (this.data.role !== "owner") return;
     const item = e.currentTarget.dataset.item;
-    if (item.isOther) return;
+    if (item.isProtected) return;
     if (item.level === "child" && item.isDefaultChild) {
       const hasOtherChildren = this.data.items.some(
         (child) => child._id !== item._id && !child.isDefaultChild

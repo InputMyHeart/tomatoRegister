@@ -6,6 +6,7 @@ const db = cloud.database();
 const _ = db.command;
 const defaultAvatarUrl = "/images/brand/tomato-ledger-logo-256-transparent.png";
 const SCHEMA_VERSION = 1;
+const OTHER_CATEGORY_SORT = 9999999999999;
 const defaultQuickAmounts = [18, 32, 68, 128];
 const defaultPaymentAccounts = ["微信", "支付宝", "银行卡", "信用卡", "现金"];
 
@@ -762,12 +763,30 @@ async function listRecords(openid, data = {}) {
   if (data.type && data.type !== "all") baseQuery.type = data.type;
   if (data.start && data.end) baseQuery.date = _.gte(data.start).and(_.lt(data.end));
   const cursor = data.cursor && data.cursor.date && data.cursor.id ? data.cursor : null;
-  const query = cursor
-    ? _.and([
-        baseQuery,
-        _.or([{ date: _.lt(cursor.date) }, { date: cursor.date, _id: _.lt(cursor.id) }]),
-      ])
-    : baseQuery;
+  let query = baseQuery;
+  if (cursor) {
+    const cursorResult = await db.collection("records").doc(cursor.id).get();
+    const cursorRecord = cursorResult.data;
+    if (
+      !cursorRecord ||
+      cursorRecord.ledgerId !== ledger._id ||
+      cursorRecord.date !== cursor.date ||
+      !cursorRecord.createdAt
+    )
+      throw new Error("INVALID_RECORD_CURSOR");
+    query = _.and([
+      baseQuery,
+      _.or([
+        { date: _.lt(cursor.date) },
+        { date: cursor.date, createdAt: _.lt(cursorRecord.createdAt) },
+        {
+          date: cursor.date,
+          createdAt: cursorRecord.createdAt,
+          _id: _.lt(cursor.id),
+        },
+      ]),
+    ]);
+  }
   const historyQuery = { ledgerId: ledger._id };
   const rangeQuery = { ledgerId: ledger._id };
   if (data.start && data.end) rangeQuery.date = _.gte(data.start).and(_.lt(data.end));
@@ -778,6 +797,7 @@ async function listRecords(openid, data = {}) {
       .collection("records")
       .where(historyQuery)
       .orderBy("date", "desc")
+      .orderBy("createdAt", "desc")
       .orderBy("_id", "desc")
       .limit(1)
       .get(),
@@ -786,6 +806,7 @@ async function listRecords(openid, data = {}) {
     .collection("records")
     .where(query)
     .orderBy("date", "desc")
+    .orderBy("createdAt", "desc")
     .orderBy("_id", "desc")
     .limit(pageSize + 1)
     .get();
@@ -931,7 +952,9 @@ async function getDashboard(openid, data = {}) {
     db
       .collection("records")
       .where({ ledgerId: ledger._id })
+      .orderBy("date", "desc")
       .orderBy("createdAt", "desc")
+      .orderBy("_id", "desc")
       .limit(10)
       .get(),
     db.collection("records").where({ ledgerId: ledger._id }).count(),
@@ -1606,7 +1629,17 @@ async function addDefaultChild(ledgerId, parent, openid) {
     .where({ ledgerId, level: "child", parentId: parent._id, isDefaultChild: true })
     .limit(1)
     .get();
-  if (existing.data.length) return existing.data[0];
+  if (existing.data.length) {
+    const child = existing.data[0];
+    if (child.source !== "system") {
+      await db
+        .collection("categories")
+        .doc(child._id)
+        .update({ data: { source: "system", updatedAt: now() } });
+      child.source = "system";
+    }
+    return child;
+  }
   const res = await db.collection("categories").add({
     data: {
       ledgerId,
@@ -1618,6 +1651,7 @@ async function addDefaultChild(ledgerId, parent, openid) {
       icon: parent.icon || "price-tag-3-line",
       sort: -1,
       isDefaultChild: true,
+      source: "system",
       createdBy: openid,
       createdAt: now(),
       updatedAt: now(),
@@ -1642,7 +1676,22 @@ async function ensureLedgerCategoryTree(ledgerId, openid) {
     .limit(200)
     .get();
   if (parentResult.data.length) {
-    await Promise.all(parentResult.data.map((parent) => addDefaultChild(ledgerId, parent, openid)));
+    await Promise.all(
+      parentResult.data.map(async (parent) => {
+        if (
+          parent.isOther &&
+          (parent.source !== "system" || Number(parent.sort) !== OTHER_CATEGORY_SORT)
+        ) {
+          await db
+            .collection("categories")
+            .doc(parent._id)
+            .update({
+              data: { source: "system", sort: OTHER_CATEGORY_SORT, updatedAt: now() },
+            });
+        }
+        return addDefaultChild(ledgerId, parent, openid);
+      })
+    );
     return;
   }
   for (const type of ["expense", "income"])
@@ -1655,8 +1704,9 @@ async function ensureLedgerCategoryTree(ledgerId, openid) {
           level: "parent",
           name,
           icon,
-          sort: index,
+          sort: name === "\u5176\u4ed6" ? OTHER_CATEGORY_SORT : index,
           isOther: name === "\u5176\u4ed6",
+          source: "system",
           createdBy: openid,
           createdAt: now(),
           updatedAt: now(),
@@ -1677,6 +1727,7 @@ async function ensureLedgerCategoryTree(ledgerId, openid) {
               icon,
               sort: childIndex,
               isDefaultChild: false,
+              source: "system",
               createdBy: openid,
               createdAt: now(),
               updatedAt: now(),
@@ -1699,6 +1750,13 @@ async function listCategories(openid, data = {}) {
     .get();
   return ok({ categories: result.data || [], role });
 }
+async function isProtectedOtherCategory(category) {
+  if (category.isOther && category.level === "parent") return true;
+  if (category.level !== "child" || !category.isDefaultChild || !category.parentId) return false;
+  const parent = (await db.collection("categories").doc(category.parentId).get()).data;
+  return Boolean(parent && parent.isOther);
+}
+
 async function saveCategory(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   const role = getLedgerRole(openid, ledger);
@@ -1712,8 +1770,7 @@ async function saveCategory(openid, data = {}) {
   if (editing) {
     const category = (await db.collection("categories").doc(data.categoryId).get()).data;
     if (!category || category.ledgerId !== ledger._id) throw new Error("CATEGORY_NOT_FOUND");
-    if (category.isOther && category.level === "parent" && name !== "\u5176\u4ed6")
-      throw new Error("OTHER_CATEGORY_NAME_LOCKED");
+    if (await isProtectedOtherCategory(category)) throw new Error("SYSTEM_CATEGORY_PROTECTED");
     await db
       .collection("categories")
       .doc(category._id)
@@ -1745,6 +1802,7 @@ async function saveCategory(openid, data = {}) {
       sort: Date.now(),
       isOther: false,
       isDefaultChild: false,
+      source: "custom",
       createdBy: openid,
       createdAt: now(),
       updatedAt: now(),
@@ -1797,6 +1855,7 @@ async function removeCategory(openid, data = {}) {
   if (getLedgerRole(openid, ledger) !== "owner") throw new Error("ONLY_OWNER_CAN_DELETE_CATEGORY");
   const category = (await db.collection("categories").doc(data.categoryId).get()).data;
   if (!category || category.ledgerId !== ledger._id) throw new Error("CATEGORY_NOT_FOUND");
+  if (await isProtectedOtherCategory(category)) throw new Error("SYSTEM_CATEGORY_PROTECTED");
   const key = "category-delete:" + category._id;
   let operation = await getOperation("category-delete", key);
   if (!operation)

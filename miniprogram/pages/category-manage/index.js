@@ -1,9 +1,15 @@
 const app = getApp();
 const categoryService = require("../../services/category.service");
+function compareCategoryOrder(left, right) {
+  if (left.isOther !== right.isOther) return left.isOther ? 1 : -1;
+  return Number(left.sort || 0) - Number(right.sort || 0);
+}
+
 function groupCategories(categories, type) {
   const children = categories.filter((item) => item.type === type && item.level === "child");
   return categories
     .filter((item) => item.type === type && item.level === "parent")
+    .sort(compareCategoryOrder)
     .map((parent) => ({
       ...parent,
       children: children.filter((child) => child.parentId === parent._id),

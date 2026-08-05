@@ -13,7 +13,7 @@
   <view wx:if="{{showKeypad}}" class="tl-record-form__keypad {{isEditing ? 'is-editing' : ''}}">
     <view class="tl-record-form__keypad-header">
       <text>番茄记一笔</text>
-      <view class="tl-record-form__keypad-close" bindtap="closeKeypad">关闭</view>
+      <view class="tl-record-form__keypad-close" bindtap="closeKeypad">确认</view>
     </view>
     <view class="tl-record-form__keypad-grid">
       <view class="keypad-key" data-digit="1" bindtap="pressNumber">1</view>

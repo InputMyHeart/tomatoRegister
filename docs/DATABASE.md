@@ -4,12 +4,17 @@
 
 ## CloudBase 索引
 
-- records: ledgerId ASC, date DESC, _id DESC
+- records: ledgerId ASC, date DESC, createdAt DESC, _id DESC (record-detail pagination and homepage recent records)
 - records: ledgerId ASC, createdAt DESC (homepage recent-record query)（账本记录游标分页）
 - ledgerInvites: token ASC，唯一
 - ledgers: inviteCode ASC，唯一
 - ledgers: readonlyShareCode ASC，唯一
 - users: openid ASC，唯一
+
+## 分类来源
+
+- categories.source：`system` 表示账本初始化或系统自动补齐的分类；`custom` 表示用户手动新建的分类。
+- “其他”一级分类及其系统默认子分类使用稳定标识保护，前端不展示编辑、删除入口，云函数也会拒绝对应写请求；“其他”的 sort 使用保留最大值，固定排在新增一级分类之后。
 
 ## 字段约束
 

@@ -87,3 +87,15 @@
   font-weight: 900;
   flex: 0 0 auto;
 }
+
+.record-timestamps {
+  margin: 18rpx 16rpx 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  color: #a89289;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 32rpx;
+  text-align: center;
+}
