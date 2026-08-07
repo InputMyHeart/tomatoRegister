@@ -1,5 +1,5 @@
 .record-import-page .page-content {
-  padding: 32rpx 30rpx 64rpx;
+  padding: 32rpx 30rpx 24px;
   box-sizing: border-box;
 }
 .hero-card {
@@ -105,7 +105,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48rpx;
+  padding: env(safe-area-inset-top) 48rpx env(safe-area-inset-bottom);
   box-sizing: border-box;
   background: rgba(49, 37, 34, 0.42);
 }

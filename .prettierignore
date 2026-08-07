@@ -8,3 +8,4 @@ project.private.config.json
 *.log
 *.zip
 *.tgz
+miniprogram/components/ec-canvas/

@@ -60,13 +60,16 @@
   font-weight: 900;
 }
 
+.budget-settings-page .page-content {
+  padding-bottom: calc(24px + 92rpx);
+}
+
 .save-bar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
   z-index: 20;
-  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
   background: rgba(255, 247, 242, 0.94);
   backdrop-filter: blur(18rpx);
 }

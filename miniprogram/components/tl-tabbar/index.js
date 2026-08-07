@@ -4,14 +4,12 @@ const leftTabs = [
   {
     key: "index",
     text: "首页",
-    pagePath: "/pages/index/index",
     icon: "home-5-line",
     activeIcon: "home-5-fill",
   },
   {
     key: "records",
     text: "明细",
-    pagePath: "/pages/records/index",
     icon: "file-list-3-line",
     activeIcon: "file-list-3-fill",
   },
@@ -21,14 +19,12 @@ const rightTabs = [
   {
     key: "analysis",
     text: "分析",
-    pagePath: "/pages/analysis/index",
     icon: "pie-chart-2-line",
     activeIcon: "pie-chart-2-fill",
   },
   {
     key: "profile",
     text: "我的",
-    pagePath: "/pages/profile/index",
     icon: "user-3-line",
     activeIcon: "user-3-fill",
   },
@@ -36,6 +32,10 @@ const rightTabs = [
 
 Component({
   properties: {
+    showTabs: {
+      type: Boolean,
+      value: true,
+    },
     active: {
       type: String,
       value: "index",
@@ -70,9 +70,9 @@ Component({
 
   methods: {
     switchTab(e) {
-      const { key, path } = e.currentTarget.dataset;
-      if (!path || key === this.data.active) return;
-      wx.redirectTo({ url: path });
+      const { key } = e.currentTarget.dataset;
+      if (!key || key === this.data.active) return;
+      this.triggerEvent("change", { key });
     },
 
     getRecordDisabledReason() {

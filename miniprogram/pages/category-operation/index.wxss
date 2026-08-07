@@ -1,11 +1,5 @@
-.category-operation-page {
-  height: 100vh;
-}
-.category-operation-page .page-scroll {
-  height: calc(100vh - 120rpx);
-}
 .category-operation-page .page-content {
-  padding: 28rpx 30rpx calc(210rpx + env(safe-area-inset-bottom));
+  padding: 28rpx 30rpx calc(24px + 84rpx);
 }
 .operation-row {
   display: flex;
@@ -47,10 +41,9 @@
 .create-bar {
   position: fixed;
   z-index: 5;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
   background: rgba(255, 247, 242, 0.96);
 }
 .create-bar view,
@@ -75,7 +68,7 @@
 .editor-sheet {
   width: 100%;
   box-sizing: border-box;
-  padding: 18rpx 30rpx calc(34rpx + env(safe-area-inset-bottom));
+  padding: 18rpx 30rpx env(safe-area-inset-bottom);
   border-radius: 36rpx 36rpx 0 0;
   background: #fff7f2;
 }

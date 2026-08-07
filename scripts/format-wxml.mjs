@@ -84,7 +84,10 @@ function format(source) {
   return lines.join("\n") + "\n";
 }
 const changed = [];
-for (const file of files(root).filter((file) => file.endsWith(".wxml"))) {
+const ignoredDirectories = ["miniprogram_npm", path.join("components", "ec-canvas")];
+for (const file of files(root).filter(
+  (file) => file.endsWith(".wxml") && !ignoredDirectories.some((dir) => file.includes(dir))
+)) {
   const input = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const output = format(input);
   if (input !== output) {

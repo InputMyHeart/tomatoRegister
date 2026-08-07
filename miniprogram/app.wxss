@@ -47,9 +47,9 @@ button::after {
 }
 
 /* Layout convention:
- * tl-navbar is the fixed flex header.
- * Put scrollable content in page-scroll > page-content.
- * Use tabbar-page for native tabbar pages, plain-page for non-tabbar pages.
+ * Page shells contain tl-navbar, tl-container and, when needed, tl-tabbar.
+ * tl-container owns the remaining viewport height; pages decide whether their
+ * content is a scroll-view or a naturally laid out view.
  */
 .page {
   box-sizing: border-box;
@@ -81,7 +81,7 @@ button::after {
 .page-content {
   width: 100%;
   min-height: 100%;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: 24px;
 }
 
 .card {

@@ -1,47 +1,51 @@
 <view class="page plain-page feedback-page">
   <tl-navbar title="意见反馈" showBack="{{true}}">
   </tl-navbar>
-  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
-    <view class="page-content">
-      <view class="history-entry" bindtap="openHistory">
-        <text>反馈历史</text>
-        <tl-icon name="arrow-right-s-line" size="30" color="#f0442f">
-        </tl-icon>
-      </view>
-      <view class="feedback-card card fade-up">
-        <view class="field-label required">反馈内容</view>
-        <textarea class="content-input" value="{{content}}" maxlength="200" placeholder="请写下您的想法或遇到的问题" placeholder-class="input-placeholder" bindinput="onContentInput" auto-height="{{true}}">
-        </textarea>
-        <view class="counter">{{contentLength}}/200</view>
-        <view class="field-label required">反馈类型</view>
-        <view class="type-list">
-          <view wx:for="{{typeOptions}}" wx:key="value" class="type-option {{type === item.value ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="selectType">{{item.label}}</view>
+  <tl-container>
+    <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+      <view class="page-content">
+        <view class="history-entry" bindtap="openHistory">
+          <text>反馈历史</text>
+          <tl-icon name="arrow-right-s-line" size="30" color="#f0442f">
+          </tl-icon>
         </view>
-        <view class="field-label">图片</view>
-        <view class="image-grid">
-          <view wx:for="{{images}}" wx:key="*this" class="image-item">
-            <image src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewImage">
-            </image>
-            <view class="remove-image" data-index="{{index}}" bindtap="removeImage">
-              <tl-icon name="close-line" size="24" color="#ffffff">
+        <view class="feedback-card card fade-up">
+          <view class="field-label required">反馈内容</view>
+          <textarea class="content-input" value="{{content}}" maxlength="200" placeholder="请写下您的想法或遇到的问题" placeholder-class="input-placeholder" bindinput="onContentInput" auto-height="{{true}}">
+          </textarea>
+          <view class="counter">{{contentLength}}/200</view>
+          <view class="field-label required">反馈类型</view>
+          <view class="type-list">
+            <view wx:for="{{typeOptions}}" wx:key="value" class="type-option {{type === item.value ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="selectType">{{item.label}}</view>
+          </view>
+          <view class="field-label">图片</view>
+          <view class="image-grid">
+            <view wx:for="{{images}}" wx:key="*this" class="image-item">
+              <image src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewImage">
+              </image>
+              <view class="remove-image" data-index="{{index}}" bindtap="removeImage">
+                <tl-icon name="close-line" size="24" color="#ffffff">
+                </tl-icon>
+              </view>
+            </view>
+            <view wx:if="{{imageCount < 9}}" class="add-image" bindtap="chooseImages">
+              <tl-icon name="add-line" size="38" color="#f0442f">
               </tl-icon>
+              <text>{{imageCount}}/9</text>
             </view>
           </view>
-          <view wx:if="{{imageCount < 9}}" class="add-image" bindtap="chooseImages">
-            <tl-icon name="add-line" size="38" color="#f0442f">
-            </tl-icon>
-            <text>{{imageCount}}/9</text>
-          </view>
         </view>
+        <view class="hint">您的每一条反馈都至关重要，感谢您的支持</view>
+        <button class="tomato-button submit-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="submitFeedback">
+          <view class="submit-button-inner">
+            <view wx:if="{{saving}}" class="submit-spinner">
+            </view>
+            <text>{{saving ? '提交中...' : '提交反馈'}}</text>
+          </view>
+        </button>
       </view>
-      <view class="hint">您的每一条反馈都至关重要，感谢您的支持</view>
-      <button class="tomato-button submit-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="submitFeedback">
-        <view class="submit-button-inner">
-          <view wx:if="{{saving}}" class="submit-spinner">
-          </view>
-          <text>{{saving ? '提交中...' : '提交反馈'}}</text>
-        </view>
-      </button>
-    </view>
-  </scroll-view>
+    </scroll-view>
+  </tl-container>
+  <tl-tabbar show-tabs="{{false}}">
+  </tl-tabbar>
 </view>

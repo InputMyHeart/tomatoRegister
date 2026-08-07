@@ -1,18 +1,27 @@
 .login-page {
-  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 0 28rpx;
+  background:
+    radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
+    linear-gradient(180deg, #ffe1d6 0%, #fff1ea 260rpx, #fff7f2 520rpx, #fffaf7 100%);
+  display: flex;
+  overflow: hidden;
 }
 
-.login-page tl-navbar {
-  position: absolute;
-  top: 0;
-  left: 28rpx;
-  right: 28rpx;
-  z-index: 2;
+.login-scroll {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0;
 }
 
 .login-content {
   min-height: 100%;
-  padding: 0 22rpx env(safe-area-inset-bottom);
+  padding: 0 22rpx;
   display: flex;
   flex-direction: column;
   align-items: center;

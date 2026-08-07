@@ -1,5 +1,5 @@
 .ledger-settings-page .page-content {
-  padding-bottom: calc(210rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(24px + 82rpx);
 }
 
 .settings-card {
@@ -182,13 +182,12 @@
 
 .ledger-bottom-actions {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
   z-index: 20;
   display: flex;
   gap: 18rpx;
-  padding: 18rpx 30rpx calc(18rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   background: rgba(255, 250, 247, 0.94);
   box-shadow: 0 -12rpx 30rpx rgba(104, 63, 47, 0.08);

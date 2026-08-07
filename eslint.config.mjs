@@ -3,6 +3,7 @@ export default [
     ignores: [
       "**/node_modules/**",
       "miniprogram/miniprogram_npm/**",
+      "miniprogram/components/ec-canvas/**",
       "work/**",
       ".codegraph/**",
       ".codex/**",
@@ -13,7 +14,7 @@ export default [
     files: ["miniprogram/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "commonjs",
+      sourceType: "module",
       globals: {
         App: "readonly",
         Behavior: "readonly",
@@ -23,6 +24,8 @@ export default [
         getApp: "readonly",
         getCurrentPages: "readonly",
         setTimeout: "readonly",
+        require: "readonly",
+        module: "readonly",
         wx: "readonly",
       },
     },

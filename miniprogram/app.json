@@ -2,11 +2,8 @@
   "pages": [
     "pages/login/index",
     "pages/index/index",
-    "pages/records/index",
-    "pages/analysis/index",
     "pages/feedback/index",
     "pages/feedback-history/index",
-    "pages/profile/index",
     "pages/profile-edit/index",
     "pages/payment-account/index",
     "pages/budget-settings/index",
@@ -33,10 +30,10 @@
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
-  "lazyCodeLoading": "requiredComponents",
   "usingComponents": {
     "tl-empty-state": "/components/tl-empty-state/index",
     "tl-navbar": "/components/tl-navbar/index",
+    "tl-container": "/components/tl-container/index",
     "tl-icon": "/components/tl-icon/index",
     "tl-tabbar": "/components/tl-tabbar/index",
     "tl-budget-progress": "/components/tl-budget-progress/index",

@@ -1,6 +1,0 @@
-{
-  "usingComponents": {
-    "tl-view-ledger-switcher": "/components/tl-view-ledger-switcher/index"
-  },
-  "navigationBarTitleText": "分析"
-}

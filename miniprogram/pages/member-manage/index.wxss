@@ -1,5 +1,5 @@
 .member-manage-page .page-content {
-  padding-bottom: 56rpx;
+  padding-bottom: 24px;
 }
 .page-head {
   margin: 18rpx 2rpx 22rpx;
@@ -106,7 +106,7 @@
 }
 .share-sheet {
   width: 100%;
-  padding: 34rpx 30rpx calc(42rpx + env(safe-area-inset-bottom));
+  padding: 34rpx 30rpx env(safe-area-inset-bottom);
   border-radius: 34rpx 34rpx 0 0;
   background: #fffaf7;
 }

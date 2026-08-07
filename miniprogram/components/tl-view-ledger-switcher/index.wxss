@@ -11,7 +11,7 @@
 .tl-view-ledger-switcher__panel {
   width: 100%;
   max-height: 72vh;
-  padding: 18rpx 28rpx calc(34rpx + env(safe-area-inset-bottom));
+  padding: 18rpx 28rpx env(safe-area-inset-bottom);
   box-sizing: border-box;
   border-radius: 28rpx 28rpx 0 0;
   background: #fffaf7;

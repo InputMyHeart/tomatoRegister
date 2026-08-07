@@ -143,7 +143,7 @@
 .tl-record-form__submit {
   position: fixed;
   right: 30rpx;
-  bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+  bottom: env(safe-area-inset-bottom);
   left: 30rpx;
   z-index: 10;
   width: auto;
@@ -191,7 +191,7 @@
 .tl-record-form__delete {
   position: fixed;
   right: 30rpx;
-  bottom: calc(env(safe-area-inset-bottom) + 132rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 108rpx);
   left: 30rpx;
   z-index: 10;
   width: auto;
@@ -277,12 +277,12 @@
 }
 
 .tl-record-form__submit {
-  bottom: calc(env(safe-area-inset-bottom) + 410rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 386rpx);
   z-index: 11;
 }
 
 .tl-record-form__delete {
-  bottom: calc(env(safe-area-inset-bottom) + 512rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 488rpx);
   z-index: 11;
 }
 .tl-record-form__keypad-header {
@@ -305,41 +305,42 @@
 }
 
 .tl-record-form__submit {
-  bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+  bottom: env(safe-area-inset-bottom);
   z-index: 10;
 }
 
 .tl-record-form__delete {
-  bottom: calc(env(safe-area-inset-bottom) + 132rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 108rpx);
   z-index: 10;
 }
 
 .tl-record-form__submit.is-keypad-open {
-  bottom: calc(env(safe-area-inset-bottom) + 448rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 424rpx);
   z-index: 11;
 }
 
 .tl-record-form__delete.is-keypad-open {
-  bottom: calc(env(safe-area-inset-bottom) + 550rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 526rpx);
   z-index: 11;
 }
 .tl-record-form__keypad {
-  bottom: calc(env(safe-area-inset-bottom) + 116rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 92rpx);
 }
 
 .tl-record-form__keypad.is-editing {
-  bottom: calc(env(safe-area-inset-bottom) + 208rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 184rpx);
 }
 
 .tl-record-form__submit {
-  bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+  bottom: env(safe-area-inset-bottom);
   z-index: 12;
 }
 
 .tl-record-form__delete {
-  bottom: calc(env(safe-area-inset-bottom) + 132rpx);
+  bottom: calc(env(safe-area-inset-bottom) + 108rpx);
   z-index: 12;
 }
+
 .tl-record-form__keypad,
 .tl-record-form__keypad.is-editing {
   bottom: 0;

@@ -1,7 +1,5 @@
-<view class="page tabbar-page analysis-page">
-  <tl-navbar title="分析">
-  </tl-navbar>
-  <scroll-view class="page-scroll" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
+<view class="tab-panel analysis-page">
+  <scroll-view class="analysis-scroll" scroll-y="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view class="analysis-header fade-up">
         <view class="analysis-toolbar">
@@ -80,81 +78,16 @@
           <view class="chart-tab {{activeChart === 'category' ? 'is-active' : ''}}" data-chart="category" bindtap="switchChart">分类占比</view>
           <view wx:if="{{ledgerType === 'shared'}}" class="chart-tab {{activeChart === 'member' ? 'is-active' : ''}}" data-chart="member" bindtap="switchChart">成员支出</view>
         </view>
-        <view wx:if="{{activeChart === 'trend'}}" class="chart-card card fade-up">
-          <view class="chart-legend">
-            <text>
-              <text class="legend-dot income-dot">
-              </text>
-              收入
-            </text>
-            <text>
-              <text class="legend-dot expense-dot">
-              </text>
-              支出
-            </text>
+        <view class="chart-card card fade-up">
+          <view wx:if="{{hasChartData}}" class="analysis-chart-canvas">
+            <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}">
+            </ec-canvas>
           </view>
-          <view wx:for="{{trend}}" wx:key="label" class="trend-row">
-            <view class="trend-label">{{item.label}}</view>
-            <view class="trend-bars">
-              <view class="trend-line">
-                <text>收</text>
-                <view class="trend-track">
-                  <view class="income-bar" style="width:{{item.incomeRate}}%">
-                  </view>
-                </view>
-                <text>¥{{item.incomeText}}</text>
-              </view>
-              <view class="trend-line">
-                <text>支</text>
-                <view class="trend-track">
-                  <view class="expense-bar" style="width:{{item.expenseRate}}%">
-                  </view>
-                </view>
-                <text>¥{{item.expenseText}}</text>
-              </view>
-            </view>
-          </view>
-          <view wx:if="{{!trend.length}}" class="empty-copy">这个时段还没有记录</view>
-        </view>
-        <view wx:elif="{{activeChart === 'category'}}" class="chart-card card fade-up">
-          <view wx:for="{{categories}}" wx:key="name" class="rank-row">
-            <view class="rank-number">{{index + 1}}</view>
-            <view class="rank-content">
-              <view class="rank-line">
-                <text>{{item.name}}</text>
-                <text>¥{{item.amountText}}</text>
-              </view>
-              <view class="rank-track">
-                <view style="width:{{item.rate}}%">
-                </view>
-              </view>
-            </view>
-            <text class="rank-rate">{{item.rate}}%</text>
-          </view>
-          <view wx:if="{{!categories.length}}" class="empty-copy">暂无支出分类数据</view>
-        </view>
-        <view wx:else class="chart-card card fade-up">
-          <view wx:for="{{members}}" wx:key="name" class="rank-row">
-            <view class="member-avatar">{{item.initial}}</view>
-            <view class="rank-content">
-              <view class="rank-line">
-                <text>{{item.name}}</text>
-                <text>¥{{item.amountText}}</text>
-              </view>
-              <view class="rank-track member-track">
-                <view style="width:{{item.rate}}%">
-                </view>
-              </view>
-            </view>
-            <text class="rank-rate">{{item.rate}}%</text>
-          </view>
-          <view wx:if="{{!members.length}}" class="empty-copy">暂无成员支出数据</view>
+          <view wx:else class="empty-copy">这个时段还没有可展示的数据</view>
         </view>
       </block>
     </view>
   </scroll-view>
   <tl-view-ledger-switcher visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" viewing-id="{{ledgerId}}" title="切换账本分析" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
   </tl-view-ledger-switcher>
-  <tl-tabbar active="analysis" readonly="{{false}}">
-  </tl-tabbar>
 </view>

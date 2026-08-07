@@ -1,6 +1,4 @@
-<view class="page tabbar-page records-page">
-  <tl-navbar title="明细">
-  </tl-navbar>
+<view class="tab-panel records-page">
   <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}" lower-threshold="200" bindscrolltolower="loadMore">
     <view class="page-content">
       <view class="records-toolbar fade-up">
@@ -100,6 +98,4 @@
   </scroll-view>
   <tl-view-ledger-switcher visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" viewing-id="{{ledgerId}}" title="切换账本明细" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
   </tl-view-ledger-switcher>
-  <tl-tabbar active="records" readonly="{{readonly}}">
-  </tl-tabbar>
 </view>

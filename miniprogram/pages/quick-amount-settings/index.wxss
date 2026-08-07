@@ -81,12 +81,15 @@
   color: #e66a53;
   font-size: 24rpx;
 }
+.quick-amount-settings-page .page-content {
+  padding-bottom: calc(24px + 92rpx);
+}
+
 .save-bar {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 20rpx 30rpx calc(20rpx + env(safe-area-inset-bottom));
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
   background: rgba(255, 247, 242, 0.94);
 }
 .save-button {

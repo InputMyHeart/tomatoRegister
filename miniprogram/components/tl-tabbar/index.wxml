@@ -1,6 +1,6 @@
-<view class="tl-tabbar">
-  <view class="tabbar-shell">
-    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{leftTabs}}" wx:key="key" data-key="{{item.key}}" data-path="{{item.pagePath}}" bindtap="switchTab">
+<view class="tl-tabbar {{showTabs ? '' : 'safe-area-only'}}">
+  <view wx:if="{{showTabs}}" class="tabbar-shell">
+    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{leftTabs}}" wx:key="key" data-key="{{item.key}}" bindtap="switchTab">
       <view class="tab-icon">
         <tl-icon name="{{active === item.key ? item.activeIcon : item.icon}}" size="36" color="{{active === item.key ? '#f0442f' : '#b39a90'}}">
         </tl-icon>
@@ -13,7 +13,7 @@
         </tl-icon>
       </view>
     </view>
-    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{rightTabs}}" wx:key="key" data-key="{{item.key}}" data-path="{{item.pagePath}}" bindtap="switchTab">
+    <view class="tab-item {{active === item.key ? 'active' : ''}}" wx:for="{{rightTabs}}" wx:key="key" data-key="{{item.key}}" bindtap="switchTab">
       <view class="tab-icon">
         <tl-icon name="{{active === item.key ? item.activeIcon : item.icon}}" size="36" color="{{active === item.key ? '#f0442f' : '#b39a90'}}">
         </tl-icon>

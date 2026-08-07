@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "tl-icon": "/components/tl-icon/index",
+    "ec-canvas": "/components/ec-canvas/ec-canvas",
+    "tl-view-ledger-switcher": "/components/tl-view-ledger-switcher/index"
+  }
+}

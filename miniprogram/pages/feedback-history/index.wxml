@@ -1,45 +1,49 @@
 <view class="page plain-page feedback-history-page">
   <tl-navbar title="反馈历史" showBack="{{true}}">
   </tl-navbar>
-  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
-    <view class="page-content">
-      <view wx:if="{{loading}}" class="feedback-skeleton-list">
-        <view wx:for="{{[1, 2, 3]}}" wx:key="*this" class="feedback-skeleton card fade-up">
-          <view class="skeleton-row">
-            <view class="skeleton-block skeleton-tag">
+  <tl-container>
+    <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+      <view class="page-content">
+        <view wx:if="{{loading}}" class="feedback-skeleton-list">
+          <view wx:for="{{[1, 2, 3]}}" wx:key="*this" class="feedback-skeleton card fade-up">
+            <view class="skeleton-row">
+              <view class="skeleton-block skeleton-tag">
+              </view>
+              <view class="skeleton-block skeleton-status">
+              </view>
             </view>
-            <view class="skeleton-block skeleton-status">
+            <view class="skeleton-block skeleton-line wide">
             </view>
-          </view>
-          <view class="skeleton-block skeleton-line wide">
-          </view>
-          <view class="skeleton-block skeleton-line">
-          </view>
-          <view class="skeleton-block skeleton-date">
+            <view class="skeleton-block skeleton-line">
+            </view>
+            <view class="skeleton-block skeleton-date">
+            </view>
           </view>
         </view>
-      </view>
-      <view wx:elif="{{isError}}" class="empty-wrap">
-        <tl-empty-state title="加载失败" description="请稍后再试">
+        <view wx:elif="{{isError}}" class="empty-wrap">
+          <tl-empty-state title="加载失败" description="请稍后再试">
+          </tl-empty-state>
+          <button class="ghost-button" bindtap="loadFeedbacks">重新加载</button>
+        </view>
+        <tl-empty-state wx:elif="{{!feedbacks.length}}" title="还没有反馈记录" description="你的反馈会在这里展示">
         </tl-empty-state>
-        <button class="ghost-button" bindtap="loadFeedbacks">重新加载</button>
-      </view>
-      <tl-empty-state wx:elif="{{!feedbacks.length}}" title="还没有反馈记录" description="你的反馈会在这里展示">
-      </tl-empty-state>
-      <view wx:else class="feedback-list">
-        <view wx:for="{{feedbacks}}" wx:key="id" class="feedback-item card fade-up">
-          <view class="item-head">
-            <text class="type-tag">{{item.typeText}}</text>
-            <text class="status status-{{item.status}}">{{item.statusText}}</text>
+        <view wx:else class="feedback-list">
+          <view wx:for="{{feedbacks}}" wx:key="id" class="feedback-item card fade-up">
+            <view class="item-head">
+              <text class="type-tag">{{item.typeText}}</text>
+              <text class="status status-{{item.status}}">{{item.statusText}}</text>
+            </view>
+            <view class="content">{{item.content}}</view>
+            <view wx:if="{{item.images.length}}" class="history-images">
+              <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" data-src="{{item}}" data-urls="{{item.images}}" bindtap="previewImage">
+              </image>
+            </view>
+            <view class="date">{{item.dateText}}</view>
           </view>
-          <view class="content">{{item.content}}</view>
-          <view wx:if="{{item.images.length}}" class="history-images">
-            <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" data-src="{{item}}" data-urls="{{item.images}}" bindtap="previewImage">
-            </image>
-          </view>
-          <view class="date">{{item.dateText}}</view>
         </view>
       </view>
-    </view>
-  </scroll-view>
+    </scroll-view>
+  </tl-container>
+  <tl-tabbar show-tabs="{{false}}">
+  </tl-tabbar>
 </view>

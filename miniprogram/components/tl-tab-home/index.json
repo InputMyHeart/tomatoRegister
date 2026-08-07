@@ -1,0 +1,10 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "tl-icon": "/components/tl-icon/index",
+    "tl-empty-state": "/components/tl-empty-state/index",
+    "tl-budget-progress": "/components/tl-budget-progress/index",
+    "tl-ledger-selector": "/components/tl-ledger-selector/index"
+  }
+}

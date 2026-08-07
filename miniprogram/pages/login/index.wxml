@@ -1,8 +1,6 @@
-<view class="page plain-page login-page">
-  <tl-navbar hideBrand="{{true}}" hideTitle="{{true}}">
-  </tl-navbar>
-  <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
-    <view class="page-content login-content">
+<view class="login-page">
+  <scroll-view class="login-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
+    <view class="login-content">
       <image class="login-logo soft-pop" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
       </image>
       <view class="login-title fade-up">番茄记一笔</view>

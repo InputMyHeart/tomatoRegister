@@ -111,7 +111,7 @@ Page({
   viewRecords() {
     const month = this.data.result.startDate ? this.data.result.startDate.slice(0, 7) : "";
     wx.redirectTo({
-      url: `/pages/records/index${month ? `?month=${encodeURIComponent(month)}` : ""}`,
+      url: `/pages/index/index?tab=records${month ? `&month=${encodeURIComponent(month)}` : ""}`,
     });
   },
 });

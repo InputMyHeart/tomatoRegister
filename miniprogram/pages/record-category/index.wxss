@@ -30,9 +30,16 @@
   background: #25a66a;
   box-shadow: 0 10rpx 22rpx rgba(37, 166, 106, 0.2);
 }
+.category-page .page-content {
+  padding-bottom: calc(24px + 92rpx);
+}
+
 .category-action {
-  flex: none;
-  padding: 20rpx 0 calc(20rpx + env(safe-area-inset-bottom));
+  position: fixed;
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
+  z-index: 20;
 }
 
 .category-action .tomato-button {

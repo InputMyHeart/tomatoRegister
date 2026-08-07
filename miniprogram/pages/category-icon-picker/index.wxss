@@ -3,7 +3,7 @@
 }
 
 .icon-picker-page .page-content {
-  padding: 24rpx 30rpx calc(50rpx + env(safe-area-inset-bottom));
+  padding: 24rpx 30rpx 24px;
 }
 
 .search-box {

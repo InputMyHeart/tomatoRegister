@@ -1,11 +1,5 @@
-.category-manage-page {
-  height: 100vh;
-}
-.category-manage-page .page-scroll {
-  height: calc(100vh - 120rpx);
-}
 .category-manage-page .page-content {
-  padding: 26rpx 30rpx calc(50rpx + env(safe-area-inset-bottom));
+  padding: 26rpx 30rpx 24px;
 }
 .page-title {
   color: #312522;

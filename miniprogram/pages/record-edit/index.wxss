@@ -1,5 +1,9 @@
-.edit-page {
-  padding-bottom: 230rpx;
+.edit-page .page-content.has-record-submit {
+  padding-bottom: calc(24px + 92rpx);
+}
+
+.edit-page .page-content.has-record-delete {
+  padding-bottom: calc(24px + 180rpx);
 }
 
 .selected-card,

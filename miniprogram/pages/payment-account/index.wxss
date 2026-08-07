@@ -54,9 +54,16 @@
 .readonly-tip {
   padding: 20rpx 8rpx;
 }
+.payment-account-page .page-content {
+  padding-bottom: calc(24px + 92rpx);
+}
+
 .account-add-bar {
-  flex: none;
-  padding: 20rpx 0 calc(20rpx + env(safe-area-inset-bottom));
+  position: fixed;
+  right: 28rpx;
+  bottom: env(safe-area-inset-bottom);
+  left: 28rpx;
+  z-index: 20;
 }
 .account-add-bar .tomato-button {
   width: 100%;

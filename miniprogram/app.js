@@ -12,6 +12,7 @@ App({
     stats: null,
     readonly: false,
     loggedIn: false,
+    recordsNeedRefresh: false,
   },
 
   authRequest: null,

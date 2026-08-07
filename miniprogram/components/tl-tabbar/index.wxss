@@ -1,10 +1,21 @@
 .tl-tabbar {
+  position: relative;
+  z-index: 20;
   flex: 0 0 auto;
   width: calc(100% + 56rpx);
   margin: 12rpx -28rpx 0;
   padding: 0 24rpx calc(12rpx + env(safe-area-inset-bottom));
   background: rgba(255, 250, 247, 0.96);
   box-shadow: 0 -12rpx 32rpx rgba(165, 74, 47, 0.08);
+}
+
+.tl-tabbar.safe-area-only {
+  width: 100%;
+  height: env(safe-area-inset-bottom);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .tabbar-shell {
