@@ -1,7 +1,7 @@
 <view class="page plain-page category-page">
   <tl-navbar title="{{ledgerName}}" showBack="{{true}}">
   </tl-navbar>
-  <tl-container>
+  <tl-container safe-area="{{false}}">
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
       <view class="page-content">
         <view class="type-switch fade-up">
@@ -20,14 +20,12 @@
         </tl-category-tree>
       </view>
     </scroll-view>
-    <view class="category-action">
-      <view class="tomato-button" bindtap="openCategoryManager">
-        <tl-icon name="add-line" size="32" color="#ffffff">
-        </tl-icon>
-        <text>添加分类</text>
-      </view>
-    </view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
+  <tl-page-actions>
+    <tl-button block="{{true}}" bind:tap="openCategoryManager">
+      <tl-icon name="add-line" size="32" color="#ffffff">
+      </tl-icon>
+      <text>添加分类</text>
+    </tl-button>
+  </tl-page-actions>
 </view>

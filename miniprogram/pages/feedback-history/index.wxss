@@ -1,66 +1,3 @@
-.feedback-skeleton-list {
-  padding-top: 24rpx;
-}
-
-.feedback-skeleton {
-  margin-bottom: 20rpx;
-  padding: 28rpx;
-}
-
-.skeleton-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.skeleton-block {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12rpx;
-  background: #f7eae4;
-}
-
-.skeleton-block::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
-  animation: feedback-shimmer 1.25s ease-in-out infinite;
-}
-
-.skeleton-tag,
-.skeleton-status {
-  height: 42rpx;
-}
-
-.skeleton-tag {
-  width: 120rpx;
-}
-
-.skeleton-status {
-  width: 100rpx;
-}
-
-.skeleton-line {
-  width: 68%;
-  height: 28rpx;
-  margin-top: 24rpx;
-}
-
-.skeleton-line.wide {
-  width: 92%;
-}
-
-.skeleton-date {
-  width: 180rpx;
-  height: 22rpx;
-  margin-top: 24rpx;
-}
-
-.empty-wrap {
-  padding-top: 80rpx;
-}
-
 .feedback-list {
   padding-top: 24rpx;
 }
@@ -79,14 +16,14 @@
 .type-tag,
 .status {
   padding: 8rpx 14rpx;
-  border-radius: 999rpx;
-  font-size: 22rpx;
-  font-weight: 800;
+  border-radius: var(--tl-radius-pill);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .type-tag {
   color: #9a5a4d;
-  background: #fff0ea;
+  background: var(--tl-color-primary-soft);
 }
 
 .status {
@@ -100,14 +37,14 @@
 }
 
 .status-resolved {
-  color: #27865a;
-  background: #e8f8ef;
+  color: var(--tl-color-income);
+  background: var(--tl-color-income-soft);
 }
 
 .content {
   margin-top: 22rpx;
-  color: #312522;
-  font-size: 28rpx;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
   line-height: 1.55;
   white-space: pre-wrap;
 }
@@ -122,17 +59,11 @@
 .history-images image {
   width: 136rpx;
   height: 136rpx;
-  border-radius: 16rpx;
+  border-radius: var(--tl-radius-xs);
 }
 
 .date {
   margin-top: 20rpx;
-  color: #a58d83;
-  font-size: 22rpx;
-}
-
-@keyframes feedback-shimmer {
-  to {
-    transform: translateX(100%);
-  }
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
 }

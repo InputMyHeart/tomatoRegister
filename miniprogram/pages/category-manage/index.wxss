@@ -1,24 +1,13 @@
 .category-manage-page .page-content {
   padding: 26rpx 30rpx 24px;
 }
-.page-title {
-  color: #312522;
-  font-size: 42rpx;
-  font-weight: 900;
-}
-.page-subtitle {
-  margin-top: 8rpx;
-  color: #9a8278;
-  font-size: 24rpx;
-  font-weight: 700;
-}
 .category-tabs {
   position: relative;
   display: flex;
   margin-top: 0;
   padding: 8rpx;
-  border-radius: 999rpx;
-  background: #f7eee8;
+  border-radius: var(--tl-radius-pill);
+  background: var(--tl-color-surface-muted);
   overflow: hidden;
 }
 .tab {
@@ -26,10 +15,10 @@
   z-index: 1;
   flex: 1;
   padding: 18rpx;
-  color: #8d756b;
+  color: var(--tl-color-text-tertiary);
   text-align: center;
-  font-size: 28rpx;
-  font-weight: 900;
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 .tab-indicator {
   position: absolute;
@@ -38,9 +27,9 @@
   top: 8rpx;
   bottom: 8rpx;
   width: calc(50% - 8rpx);
-  border-radius: 999rpx;
+  border-radius: var(--tl-radius-pill);
   background: #f0442f;
-  box-shadow: 0 10rpx 22rpx rgba(240, 68, 47, 0.2);
+
   transition:
     transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
     background 260ms ease;
@@ -50,7 +39,7 @@
   background: #25a66a;
 }
 .tab.active {
-  color: #fff;
+  color: var(--tl-color-text-inverse);
 }
 .category-panel {
   margin-top: 26rpx;
@@ -73,9 +62,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #4b3b36;
-  font-size: 23rpx;
-  font-weight: 800;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
   text-align: center;
 }
 .category-item text {
@@ -90,45 +79,42 @@
   box-sizing: border-box;
   width: 104rpx;
   height: 104rpx;
-  border-radius: 32rpx;
+  border-radius: var(--tl-radius-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff0ea;
+  background: var(--tl-color-primary-soft);
 }
 .category-icon.income {
-  background: #edf9f2;
+  background: var(--tl-color-income-soft);
 }
 .category-item.selected .category-icon {
-  box-shadow: inset 0 0 0 4rpx #f0442f;
 }
 .category-item.selected.income .category-icon {
-  box-shadow: inset 0 0 0 4rpx #25a66a;
 }
 .add-icon {
-  color: #f0442f;
+  color: var(--tl-color-primary);
   background: #fff8f4;
   border: 2rpx dashed #f6b7aa;
-  font-size: 54rpx;
-  font-weight: 400;
+  font-size: var(--tl-font-data-lg);
+  font-weight: var(--tl-font-weight-regular);
 }
 .income-add .add-icon {
-  color: #25a66a;
+  color: var(--tl-color-income);
   border-color: #9bd9b8;
 }
 .children-panel {
   margin: 0 0 42rpx;
   padding: 24rpx;
-  border-radius: 28rpx;
-  background: #fffdfb;
+  border-radius: var(--tl-radius-md);
+  background: var(--tl-color-surface);
   border: 1rpx solid #f3e3dc;
-  box-shadow: 0 12rpx 26rpx rgba(104, 63, 47, 0.06);
 }
 .children-title {
   margin-bottom: 22rpx;
-  color: #312522;
-  font-size: 28rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 .page-scroll::-webkit-scrollbar {
   display: none;

@@ -1,0 +1,7 @@
+<view wx:if="{{visible}}" class="tl-bottom-sheet" catchtap="close">
+  <view class="tl-bottom-sheet__panel" catchtap="stopTap">
+    <view class="tl-bottom-sheet__handle">
+    </view>
+    <slot />
+  </view>
+</view>

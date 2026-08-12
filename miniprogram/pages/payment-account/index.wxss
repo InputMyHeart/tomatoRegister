@@ -8,64 +8,52 @@
   gap: 24rpx;
 }
 .account-title {
-  color: #312522;
-  font-size: 34rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
 }
 .account-subtitle,
 .readonly-tip {
   margin-top: 10rpx;
-  color: #9a8278;
-  font-size: 24rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
 }
 .account-list {
   margin-top: 24rpx;
-  border-top: 1rpx solid #f3e6df;
+  border-top: 1rpx solid var(--tl-color-divider);
 }
 .account-row {
-  min-height: 108rpx;
+  min-height: var(--tl-list-row-height);
   display: flex;
   align-items: center;
-  border-bottom: 1rpx solid #f3e6df;
+  border-bottom: 1rpx solid var(--tl-color-divider);
 }
 .account-icon {
   width: 60rpx;
   height: 60rpx;
-  border-radius: 20rpx;
+  border-radius: var(--tl-radius-control);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff0ea;
+  background: var(--tl-color-primary-soft);
 }
 .account-name {
   flex: 1;
   min-width: 0;
   margin-left: 18rpx;
-  color: #312522;
-  font-size: 29rpx;
-  font-weight: 800;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 .delete-text {
   padding: 12rpx 0 12rpx 24rpx;
-  color: #d85a49;
-  font-size: 25rpx;
-  font-weight: 800;
+  color: var(--tl-color-danger);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 .readonly-tip {
   padding: 20rpx 8rpx;
 }
 .payment-account-page .page-content {
-  padding-bottom: calc(24px + 92rpx);
-}
-
-.account-add-bar {
-  position: fixed;
-  right: 28rpx;
-  bottom: env(safe-area-inset-bottom);
-  left: 28rpx;
-  z-index: 20;
-}
-.account-add-bar .tomato-button {
-  width: 100%;
-  gap: 12rpx;
+  padding-bottom: var(--tl-page-content-bottom);
 }

@@ -40,6 +40,11 @@
     "tl-category-tree": "/components/tl-category-tree/index",
     "tl-ledger-selector": "/components/tl-ledger-selector/index",
     "tl-member-list": "/components/tl-member-list/index",
-    "tl-record-form": "/components/tl-record-form/index"
+    "tl-record-form": "/components/tl-record-form/index",
+    "tl-button": "/components/tl-button/index",
+    "tl-page-actions": "/components/tl-page-actions/index",
+    "tl-bottom-sheet": "/components/tl-bottom-sheet/index",
+    "tl-skeleton": "/components/tl-skeleton/index",
+    "tl-dialog": "/components/tl-dialog/index"
   }
 }

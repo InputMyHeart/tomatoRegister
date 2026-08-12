@@ -32,10 +32,6 @@ const rightTabs = [
 
 Component({
   properties: {
-    showTabs: {
-      type: Boolean,
-      value: true,
-    },
     active: {
       type: String,
       value: "index",

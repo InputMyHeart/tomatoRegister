@@ -16,3 +16,5 @@ project.private.config.json
 # archives
 *.tgz
 *.zip
+tests/visual-actual/
+tests/visual-diff/

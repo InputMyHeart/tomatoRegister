@@ -13,26 +13,6 @@
   justify-content: center;
 }
 
-.loading-line {
-  width: 72%;
-  height: 24rpx;
-  margin-top: 24rpx;
-  border-radius: 999rpx;
-  background: #fff0ea;
-}
-
-.loading-line:first-child {
-  margin-top: 0;
-}
-
-.loading-line.wide {
-  width: 92%;
-}
-
-.loading-line.short {
-  width: 46%;
-}
-
 .ledger-list {
   display: flex;
   flex-direction: column;
@@ -49,9 +29,9 @@
 
 .ledger-name {
   overflow: hidden;
-  color: #312522;
-  font-size: 32rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -65,9 +45,9 @@
 
 .ledger-tag {
   padding: 7rpx 16rpx;
-  border-radius: 999rpx;
-  font-size: 22rpx;
-  font-weight: 800;
+  border-radius: var(--tl-radius-pill);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.2;
 }
 
@@ -78,11 +58,11 @@
 
 .type-tag.shared {
   color: #2f7163;
-  background: #e9f6f2;
+  background: var(--tl-color-income-soft);
 }
 
 .role-tag.owner {
-  color: #b24332;
+  color: var(--tl-color-danger);
   background: #ffe9e4;
 }
 
@@ -98,8 +78,8 @@
 
 .ledger-remark {
   margin-top: 18rpx;
-  color: #6f5d56;
-  font-size: 24rpx;
+  color: var(--tl-color-text-secondary);
+  font-size: var(--tl-font-body-sm);
   line-height: 1.6;
 }
 
@@ -128,22 +108,17 @@
   box-sizing: border-box;
   border: 3rpx solid #fffdfb;
   border-radius: 50%;
-  background: #fff0ea;
+  background: var(--tl-color-primary-soft);
 }
 
 .member-avatar:first-child {
   margin-left: 0;
 }
 
-.member-avatar-fallback {
-  margin-left: 0;
-  padding: 7rpx;
-}
-
 .member-summary {
-  color: #9a8278;
-  font-size: 22rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .ledger-card-actions {
@@ -151,7 +126,7 @@
   gap: 14rpx;
   margin-top: 24rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #f5e9e3;
+  border-top: 1rpx solid var(--tl-color-divider);
 }
 
 .ledger-action {
@@ -162,11 +137,11 @@
   gap: 8rpx;
   min-height: 68rpx;
   border: 2rpx solid #f3dfd8;
-  border-radius: 18rpx;
-  background: #fffdfb;
+  border-radius: var(--tl-radius-control);
+  background: var(--tl-color-surface);
   color: #825f54;
-  font-size: 24rpx;
-  font-weight: 800;
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .ledger-action.edit {
@@ -176,52 +151,15 @@
 .ledger-action.danger {
   border-color: #e33d2d;
   background: #f0442f;
-  box-shadow: 0 8rpx 18rpx rgba(240, 68, 47, 0.2);
-  color: #fff;
-}
-
-.ledger-bottom-actions {
-  position: fixed;
-  right: 28rpx;
-  bottom: env(safe-area-inset-bottom);
-  left: 28rpx;
-  z-index: 20;
-  display: flex;
-  gap: 18rpx;
-  box-sizing: border-box;
-  background: rgba(255, 250, 247, 0.94);
-  box-shadow: 0 -12rpx 30rpx rgba(104, 63, 47, 0.08);
-}
-
-.ledger-bottom-button {
-  flex: 1;
-  height: 82rpx;
-  border-radius: 999rpx;
-  box-sizing: border-box;
-  font-size: 28rpx;
-  font-weight: 900;
-  line-height: 82rpx;
-  text-align: center;
-}
-
-.ledger-bottom-button.secondary {
-  border: 1rpx solid rgba(240, 68, 47, 0.18);
-  background: #fffdfb;
-  color: #f0442f;
-}
-
-.ledger-bottom-button.primary {
-  background: #f0442f;
-  box-shadow: 0 14rpx 28rpx rgba(240, 68, 47, 0.16);
-  color: #fff;
+  color: var(--tl-color-text-inverse);
 }
 
 .member-avatar-status {
   color: #a58c82;
-  font-size: 22rpx;
-  font-weight: 700;
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .member-avatar-status.error {
-  color: #d9483b;
+  color: var(--tl-color-danger);
 }

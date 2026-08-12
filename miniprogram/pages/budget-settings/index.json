@@ -1,5 +1,6 @@
 {
   "usingComponents": {
-    "tl-navbar": "/components/tl-navbar/index"
+    "tl-navbar": "/components/tl-navbar/index",
+    "tl-page-actions": "/components/tl-page-actions/index"
   }
 }

@@ -131,7 +131,7 @@
           </view>
         </view>
       </view>
-      <button class="logout-button fade-up" bindtap="logout">退出账号</button>
+      <tl-button class="logout-button" variant="danger" block="{{true}}" bind:tap="logout">退出账号</tl-button>
     </view>
   </scroll-view>
 </view>

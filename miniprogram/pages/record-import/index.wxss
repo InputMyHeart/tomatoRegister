@@ -7,7 +7,7 @@
   align-items: center;
   gap: 24rpx;
   padding: 32rpx;
-  background: linear-gradient(135deg, #fff5f0, #fffdfb);
+  background: var(--tl-color-primary-soft);
 }
 .hero-icon {
   display: flex;
@@ -15,15 +15,15 @@
   height: 86rpx;
   align-items: center;
   justify-content: center;
-  border-radius: 24rpx;
+  border-radius: var(--tl-radius-control);
   background: #ffe6df;
 }
 .hero-title,
 .card-title,
 .result-title {
-  color: #312522;
-  font-size: 32rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
 }
 .hero-copy,
 .template-copy,
@@ -31,7 +31,7 @@
 .result-copy {
   margin-top: 8rpx;
   color: #967f76;
-  font-size: 23rpx;
+  font-size: var(--tl-font-caption);
   line-height: 1.6;
 }
 .import-card {
@@ -40,9 +40,9 @@
 }
 .field-label {
   margin-top: 28rpx;
-  color: #6f5d56;
-  font-size: 25rpx;
-  font-weight: 800;
+  color: var(--tl-color-text-secondary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 .picker-field {
   display: flex;
@@ -51,9 +51,9 @@
   margin-top: 12rpx;
   padding: 21rpx;
   border: 2rpx solid #f3dfd8;
-  border-radius: 18rpx;
-  color: #312522;
-  font-size: 27rpx;
+  border-radius: var(--tl-radius-control);
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
 }
 .template-row {
   display: flex;
@@ -62,63 +62,41 @@
   gap: 18rpx;
   margin-top: 26rpx;
   padding: 20rpx;
-  border-radius: 18rpx;
+  border-radius: var(--tl-radius-control);
   background: #fff7f3;
 }
 .template-title {
   color: #6f4a41;
-  font-size: 25rpx;
-  font-weight: 900;
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 .template-button {
+  display: inline-flex;
+  min-height: 58rpx;
   flex: 0 0 auto;
   padding: 13rpx 18rpx;
-  border-radius: 16rpx;
-  background: #ffe5de;
-  color: #f0442f;
-  font-size: 23rpx;
-  font-weight: 900;
-}
-.import-button {
-  display: flex;
-  height: 92rpx;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
-  margin-top: 30rpx;
-  border-radius: 46rpx;
-  background: #f0442f;
-  color: #fff;
-  font-size: 29rpx;
-  font-weight: 900;
+  line-height: 1;
+  border-radius: var(--tl-radius-xs);
+  background: #ffe5de;
+  color: var(--tl-color-primary);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
 }
-.import-button.disabled {
-  opacity: 0.55;
-}
+
 .import-note {
   text-align: center;
 }
-.result-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: env(safe-area-inset-top) 48rpx env(safe-area-inset-bottom);
-  box-sizing: border-box;
-  background: rgba(49, 37, 34, 0.42);
-}
+
 .result-dialog {
   width: 100%;
   padding: 42rpx 34rpx 30rpx;
-  border-radius: 32rpx;
   box-sizing: border-box;
-  background: #fffaf7;
 }
 .result-title {
   text-align: center;
-  font-size: 36rpx;
+  font-size: var(--tl-font-heading);
 }
 .result-copy {
   text-align: center;
@@ -134,21 +112,21 @@
   flex-direction: column;
   gap: 8rpx;
   padding: 22rpx 12rpx;
-  border-radius: 20rpx;
+  border-radius: var(--tl-radius-control);
   background: #fff4ef;
-  color: #8f7f78;
-  font-size: 22rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
   text-align: center;
 }
 .result-number {
-  font-size: 42rpx;
-  font-weight: 900;
+  font-size: var(--tl-font-data);
+  font-weight: var(--tl-font-weight-bold);
 }
 .success {
-  color: #20a161;
+  color: var(--tl-color-income);
 }
 .fail {
-  color: #d9784c;
+  color: var(--tl-color-danger);
 }
 .error-list {
   display: flex;
@@ -157,28 +135,11 @@
   max-height: 140rpx;
   margin-top: 18rpx;
   overflow: auto;
-  color: #d9483b;
-  font-size: 21rpx;
+  color: var(--tl-color-danger);
+  font-size: var(--tl-font-caption);
 }
 .dialog-actions {
   display: flex;
   gap: 18rpx;
   margin-top: 32rpx;
-}
-.secondary-button,
-.primary-button {
-  flex: 1;
-  padding: 23rpx 0;
-  border-radius: 20rpx;
-  font-size: 27rpx;
-  font-weight: 900;
-  text-align: center;
-}
-.secondary-button {
-  background: #fff0eb;
-  color: #e15a45;
-}
-.primary-button {
-  background: #f0442f;
-  color: #fff;
 }

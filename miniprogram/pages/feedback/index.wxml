@@ -36,16 +36,8 @@
           </view>
         </view>
         <view class="hint">您的每一条反馈都至关重要，感谢您的支持</view>
-        <button class="tomato-button submit-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="submitFeedback">
-          <view class="submit-button-inner">
-            <view wx:if="{{saving}}" class="submit-spinner">
-            </view>
-            <text>{{saving ? '提交中...' : '提交反馈'}}</text>
-          </view>
-        </button>
+        <tl-button class="page-submit" block="{{true}}" loading="{{saving}}" loading-text="提交中..." bind:tap="submitFeedback">提交反馈</tl-button>
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

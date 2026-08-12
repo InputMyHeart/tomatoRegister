@@ -18,21 +18,20 @@ Component({
     note: { type: String, value: "" },
     tagInput: { type: String, value: "" },
     tags: { type: Array, value: [] },
-    canSave: { type: Boolean, value: false },
-    saving: { type: Boolean, value: false },
-    isEditing: { type: Boolean, value: false },
-    deleting: { type: Boolean, value: false },
   },
   data: {
     showKeypad: false,
   },
   methods: {
     openKeypad() {
+      if (this.data.showKeypad) return;
       this.setData({ showKeypad: true });
+      this.triggerEvent("keypadchange", { open: true });
     },
     closeKeypad() {
       this.settleAmount(false);
       this.setData({ showKeypad: false });
+      this.triggerEvent("keypadchange", { open: false });
     },
     updateAmount(value) {
       this.triggerEvent("amountinput", { value: limitAmountPrecision(value) });
@@ -107,12 +106,6 @@ Component({
     },
     removeTag(event) {
       this.triggerEvent("removetag", { index: event.currentTarget.dataset.index });
-    },
-    deleteRecord() {
-      this.triggerEvent("delete");
-    },
-    submit() {
-      this.triggerEvent("submit");
     },
   },
 });

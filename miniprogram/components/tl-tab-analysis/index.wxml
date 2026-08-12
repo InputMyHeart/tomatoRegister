@@ -28,8 +28,11 @@
           </view>
         </view>
       </view>
-      <view wx:if="{{loading}}" class="card state-card">正在计算账本数据...</view>
-      <view wx:elif="{{error}}" class="card state-card" bindtap="reload">加载失败，点击重试</view>
+      <tl-skeleton wx:if="{{loading}}" variant="analysis">
+      </tl-skeleton>
+      <tl-empty-state wx:elif="{{error}}" variant="error" title="分析数据加载失败">
+        <tl-button variant="secondary" size="small" bind:tap="reload">重新加载</tl-button>
+      </tl-empty-state>
       <block wx:else>
         <view class="overview-card card fade-up">
           <view class="overview-orb">

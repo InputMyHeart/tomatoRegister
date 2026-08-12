@@ -1,18 +1,31 @@
+:host {
+  --tl-category-radius-card: 34rpx;
+  --tl-category-radius-control: 20rpx;
+  --tl-category-radius-item: 28rpx;
+  --tl-category-primary: #f0442f;
+  --tl-category-primary-soft: #fff0ea;
+  --tl-category-surface: #fffdfc;
+  --tl-category-text: #312522;
+  --tl-category-text-tertiary: #9a8278;
+  --tl-category-font: 28rpx;
+  --tl-category-caption: 22rpx;
+  --tl-category-font-weight: 700;
+}
+
 .tl-category-tree__group {
   margin-top: 24rpx;
   margin-bottom: 18rpx;
   overflow: hidden;
   border: 1rpx solid rgba(240, 68, 47, 0.08);
-  border-radius: 34rpx;
-  background: #fffdfc;
-  box-shadow: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+  border-radius: var(--tl-category-radius-card);
+  background: var(--tl-category-surface);
 }
 .tl-category-tree__parent {
   display: flex;
   align-items: center;
   gap: 18rpx;
   padding: 24rpx;
-  color: #9a8278;
+  color: var(--tl-category-text-tertiary);
 }
 .tl-category-tree__parent-icon,
 .tl-category-tree__child-icon {
@@ -24,20 +37,21 @@
   width: 70rpx;
   height: 70rpx;
   flex: 0 0 70rpx;
-  border-radius: 24rpx;
-  color: #f0442f;
-  background: #fff0ea;
+  border-radius: var(--tl-category-radius-control);
+  color: var(--tl-category-primary);
+  background: var(--tl-category-primary-soft);
 }
 .tl-category-tree__parent-name {
   flex: 1;
-  color: #2f2926;
-  font-size: 30rpx;
-  font-weight: 900;
+  color: var(--tl-category-text);
+  font-size: var(--tl-category-font);
+  font-weight: var(--tl-category-font-weight);
 }
 .tl-category-tree__children {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16rpx 12rpx;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 12rpx;
+  row-gap: 16rpx;
   margin: 0 24rpx;
   padding: 22rpx 0 24rpx;
   border-top: 1rpx solid #f2e9e3;
@@ -48,14 +62,16 @@
   align-items: center;
   justify-content: center;
   gap: 10rpx;
+  width: 100%;
+  height: 140rpx;
   min-width: 0;
-  height: 122rpx;
   padding: 12rpx 6rpx;
+  box-sizing: border-box;
   overflow: hidden;
-  border-radius: 28rpx;
-  color: #4b3b36;
-  font-size: 23rpx;
-  font-weight: 900;
+  border-radius: var(--tl-category-radius-item);
+  color: var(--tl-category-text);
+  font-size: var(--tl-category-caption);
+  font-weight: var(--tl-category-font-weight);
   line-height: 1.15;
   text-align: center;
   background: #fff8f4;
@@ -64,7 +80,7 @@
   width: 48rpx;
   height: 48rpx;
   flex: 0 0 48rpx;
-  border-radius: 18rpx;
-  color: #f0442f;
-  background: #fff0ea;
+  border-radius: var(--tl-category-radius-control);
+  color: var(--tl-category-primary);
+  background: var(--tl-category-primary-soft);
 }

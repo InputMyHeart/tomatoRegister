@@ -48,6 +48,4 @@
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

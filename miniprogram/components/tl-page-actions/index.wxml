@@ -1,0 +1,5 @@
+<view class="tl-page-actions">
+  <view class="tl-page-actions__content">
+    <slot />
+  </view>
+</view>

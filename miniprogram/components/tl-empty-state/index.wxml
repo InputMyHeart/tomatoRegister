@@ -1,5 +1,9 @@
-<view wx:if="{{show}}" class="tl-empty-state">
-  <image class="empty-icon" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
+<view wx:if="{{show}}" class="tl-empty-state tl-empty-state--{{variant}}">
+  <image class="tl-empty-state__icon" src="/images/brand/tomato-ledger-logo-256-transparent.png" mode="aspectFit">
   </image>
-  <view class="empty-text">{{text}}</view>
+  <view class="tl-empty-state__title">{{title || text}}</view>
+  <view wx:if="{{description}}" class="tl-empty-state__description">{{description}}</view>
+  <view class="tl-empty-state__actions">
+    <slot />
+  </view>
 </view>

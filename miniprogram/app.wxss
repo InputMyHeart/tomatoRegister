@@ -1,30 +1,119 @@
-:root {
+page {
+  /* Base palette */
+  --tl-palette-white: #ffffff;
+  --tl-palette-warm-50: #fffdfc;
+  --tl-palette-warm-100: #fff7f2;
+  --tl-palette-warm-200: #fff0ea;
+  --tl-palette-warm-300: #ffe1d6;
+  --tl-palette-brown-400: #9a8278;
+  --tl-palette-brown-600: #6f625d;
+  --tl-palette-brown-900: #312522;
+  --tl-palette-tomato-500: #f0442f;
+  --tl-palette-tomato-600: #d9483b;
+  --tl-palette-green-500: #25a66a;
+
+  /* Semantic colors */
   --tl-color-page: #fff7f2;
   --tl-color-surface: #fffdfc;
+  --tl-color-surface-soft: #fff0ea;
+  --tl-color-surface-muted: #f7eee8;
   --tl-color-primary: #f0442f;
+  --tl-color-primary-pressed: #d9483b;
   --tl-color-primary-soft: #fff0ea;
   --tl-color-income: #25a66a;
+  --tl-color-income-soft: #edf9f2;
+  --tl-color-expense: #f0442f;
+  --tl-color-danger: #d9483b;
+  --tl-color-danger-soft: #fff1ef;
   --tl-color-text: #312522;
   --tl-color-text-secondary: #6f625d;
+  --tl-color-text-tertiary: #9a8278;
+  --tl-color-text-inverse: #ffffff;
   --tl-color-border: rgba(240, 68, 47, 0.08);
+  --tl-color-divider: rgba(49, 37, 34, 0.08);
+  --tl-color-mask: rgba(49, 37, 34, 0.36);
+
+  /* Base spacing */
   --tl-space-xs: 8rpx;
   --tl-space-sm: 16rpx;
   --tl-space-md: 24rpx;
   --tl-space-lg: 32rpx;
+  --tl-space-xl: 48rpx;
+  --tl-space-2xl: 64rpx;
+
+  /* Semantic spacing */
+  --tl-page-inline: 28rpx;
+  --tl-page-content-bottom: 48rpx;
+
+  /* Base radii */
+  --tl-radius-xs: 16rpx;
   --tl-radius-sm: 20rpx;
-  --tl-radius-md: 34rpx;
+  --tl-radius-md: 28rpx;
+  --tl-radius-lg: 34rpx;
   --tl-radius-pill: 999rpx;
-  --tl-font-sm: 24rpx;
-  --tl-font-md: 28rpx;
-  --tl-font-lg: 32rpx;
-  --tl-shadow-card: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+
+  /* Semantic radii */
+  --tl-radius-control: 20rpx;
+  --tl-radius-card: 34rpx;
+  --tl-radius-sheet: 34rpx 34rpx 0 0;
+
+  /* Base typography */
+  --tl-font-size-xs: 22rpx;
+  --tl-font-size-sm: 24rpx;
+  --tl-font-size-md: 28rpx;
+  --tl-font-size-lg: 32rpx;
+  --tl-font-size-xl: 40rpx;
+  --tl-font-size-2xl: 48rpx;
+  --tl-font-size-3xl: 56rpx;
+  --tl-font-size-4xl: 72rpx;
+  --tl-font-weight-regular: 400;
+  --tl-font-weight-medium: 500;
+  --tl-font-weight-semibold: 600;
+  --tl-font-weight-bold: 700;
+  --tl-line-height-tight: 1.25;
+  --tl-line-height-normal: 1.5;
+
+  /* Semantic typography */
+  --tl-font-caption: 22rpx;
+  --tl-font-body-sm: 24rpx;
+  --tl-font-body: 28rpx;
+  --tl-font-heading: 32rpx;
+  --tl-font-data: 40rpx;
+  --tl-font-data-lg: 56rpx;
+  --tl-font-data-xl: 72rpx;
+  --tl-font-action: 30rpx;
+
+  /* Controls and borders */
+  --tl-control-height-sm: 78rpx;
+  --tl-control-height-md: 92rpx;
+  --tl-tabbar-shell-height: 108rpx;
+  --tl-list-row-height: 112rpx;
+  --tl-border-width: 1rpx;
+
+  /* Background and elevation */
+  --tl-background-page:
+    radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
+    linear-gradient(180deg, #ffe1d6 0%, #fff0ea 260rpx, #fff7f2 520rpx, #fff7f2 100%);
+  --tl-shadow-tabbar: 0 -8rpx 24rpx rgba(49, 37, 34, 0.06);
+
+  /* Layering */
   --tl-z-content: 1;
-  --tl-z-overlay: 100;
+  --tl-z-sticky: 20;
+  --tl-z-bottom: 40;
+  --tl-z-mask: 80;
+  --tl-z-overlay: 90;
+  --tl-z-keyboard: 100;
+  --tl-z-keyboard-action: 110;
+
+  /* Motion */
+  --tl-duration-fast: 180ms;
+  --tl-duration-normal: 220ms;
+  --tl-easing-standard: ease;
 }
 page {
   min-height: 100%;
-  background: #fff7f2;
-  color: #312522;
+  background: var(--tl-color-page);
+  color: var(--tl-color-text);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
@@ -55,10 +144,8 @@ button::after {
   box-sizing: border-box;
   height: 100vh;
   min-height: 100vh;
-  padding: 0 28rpx;
-  background:
-    radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
-    linear-gradient(180deg, #ffe1d6 0%, #fff1ea 260rpx, #fff7f2 520rpx, #fffaf7 100%);
+  padding: 0 var(--tl-page-inline);
+  background: var(--tl-background-page);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -81,47 +168,25 @@ button::after {
 .page-content {
   width: 100%;
   min-height: 100%;
-  padding-bottom: 24px;
+  padding-bottom: var(--tl-page-content-bottom);
 }
 
 .card {
-  border-radius: 34rpx;
-  background: #fffdfc;
-  border: 1rpx solid rgba(240, 68, 47, 0.08);
-  box-shadow: 0 14rpx 34rpx rgba(165, 74, 47, 0.08);
+  border: var(--tl-border-width) solid var(--tl-color-border);
+  border-radius: var(--tl-radius-card);
+  background: var(--tl-color-surface);
 }
 
-.tomato-button {
-  height: 92rpx;
-  border-radius: 46rpx;
-  background: linear-gradient(135deg, #ff7d63 0%, #f0442f 100%);
-  color: #fff;
-  font-size: 30rpx;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 14rpx 30rpx rgba(240, 68, 47, 0.28);
-}
-
-.ghost-button {
-  height: 78rpx;
-  border-radius: 39rpx;
-  color: #f0442f;
-  background: #fff0ea;
-  font-size: 28rpx;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.page-submit {
+  margin-top: var(--tl-space-lg);
 }
 
 .fade-up {
-  animation: fadeUp 180ms ease both;
+  animation: fadeUp var(--tl-duration-fast) var(--tl-easing-standard) both;
 }
 
 .soft-pop {
-  animation: softPop 220ms ease both;
+  animation: softPop var(--tl-duration-normal) var(--tl-easing-standard) both;
 }
 
 @keyframes fadeUp {

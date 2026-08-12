@@ -61,6 +61,8 @@ Page({
     showAmountResult: false,
     canSave: false,
     saving: false,
+    deleting: false,
+    keypadOpen: false,
     note: "",
     tagInput: "",
     tags: [],
@@ -199,6 +201,9 @@ Page({
 
   onAmountInput(event) {
     this.setAmountExpression(event.detail.value);
+  },
+  onKeypadChange(event) {
+    this.setData({ keypadOpen: Boolean(event.detail.open) });
   },
   onNoteInput(event) {
     this.setData({ note: String(event.detail.value || "").slice(0, 100) });

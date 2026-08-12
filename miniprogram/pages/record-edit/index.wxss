@@ -1,11 +1,3 @@
-.edit-page .page-content.has-record-submit {
-  padding-bottom: calc(24px + 92rpx);
-}
-
-.edit-page .page-content.has-record-delete {
-  padding-bottom: calc(24px + 180rpx);
-}
-
 .selected-card,
 .selected-left {
   display: flex;
@@ -26,38 +18,38 @@
 .type-badge {
   height: 54rpx;
   padding: 0 16rpx;
-  border-radius: 999rpx;
+  border-radius: var(--tl-radius-pill);
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 6rpx;
-  font-size: 23rpx;
-  font-weight: 900;
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .type-badge.expense {
-  color: #f0442f;
-  background: #fff0ea;
+  color: var(--tl-color-primary);
+  background: var(--tl-color-primary-soft);
 }
 
 .type-badge.income {
-  color: #25a66a;
-  background: #edf9f2;
+  color: var(--tl-color-income);
+  background: var(--tl-color-income-soft);
 }
 
 .selected-icon {
   width: 74rpx;
   height: 74rpx;
-  border-radius: 26rpx;
+  border-radius: var(--tl-radius-md);
   flex: 0 0 74rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff0ea;
+  background: var(--tl-color-primary-soft);
 }
 
 .selected-icon.income {
-  background: #edf9f2;
+  background: var(--tl-color-income-soft);
 }
 
 .selected-text {
@@ -66,9 +58,9 @@
 
 .selected-name {
   max-width: 360rpx;
-  color: #2f2926;
-  font-size: 32rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -77,18 +69,18 @@
 .selected-meta {
   max-width: 360rpx;
   margin-top: 6rpx;
-  color: #9a8278;
-  font-size: 24rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .change-link {
-  color: #f0442f;
-  font-size: 26rpx;
-  font-weight: 900;
+  color: var(--tl-color-primary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
   flex: 0 0 auto;
 }
 
@@ -98,8 +90,19 @@
   flex-direction: column;
   gap: 6rpx;
   color: #a89289;
-  font-size: 22rpx;
-  font-weight: 600;
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-semibold);
   line-height: 32rpx;
   text-align: center;
+}
+
+.record-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr;
+  gap: var(--tl-space-sm);
+}
+
+.record-actions.has-delete {
+  grid-template-columns: 220rpx minmax(0, 1fr);
 }

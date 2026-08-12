@@ -31,7 +31,8 @@ cloudfunctions/tomatoLedger/          业务云函数
   legacy.handlers.js                 当前业务实现与数据访问逻辑
 scripts/                              本地质量检查脚本
 tests/                                Node 内置测试
-docs/                                 数据模型、环境、回归与写安全说明
+docs/                                 长期有效的数据、环境、回归与协作规则
+plan/PENDING.md                       唯一待办入口
 ```
 
 ## 云函数接口
@@ -115,9 +116,13 @@ npm run verify
 npm run format       # 格式化全部文件（包括 WXML）
 npm run test         # 仅运行测试
 npm run cloud:check  # 仅检查云函数语法
+npm run ui:check     # 检查 UI 规则与 Token 使用
+npm run visual:check # 对比关键页面视觉基线
 ```
 
 WXML 已纳入格式检查；不要再将模板压缩成单行。
+
+UI 修改遵循 [UI 视觉与语义规则](./docs/UI-GUIDELINES.md)。视觉基线只在人工确认差异正确后使用 `npm run visual:update` 更新；运行截图回归前需开启微信开发者工具服务端口。
 
 ## 日志与排错
 
@@ -142,8 +147,13 @@ WXML 已纳入格式检查；不要再将模板压缩成单行。
 
 ## 相关文档
 
-- [项目改造蓝图](./plan/BLUEPRINT.md)
+- [协作规则](./AGENTS.md)
+- [工程与提交规范](./docs/CONTRIBUTING.md)
 - [数据库模型与索引](./docs/DATABASE.md)
 - [云环境切换](./docs/CLOUD-ENVIRONMENTS.md)
 - [写操作一致性](./docs/WRITE-SAFETY.md)
 - [发布前回归清单](./docs/REGRESSION.md)
+- [UI 视觉与语义规则](./docs/UI-GUIDELINES.md)
+- [当前待办](./plan/PENDING.md)
+
+文档职责：`README.md` 描述当前项目入口与已实现能力；`docs/` 保存长期规则；`plan/PENDING.md` 只保存未完成事项；已完成记录以 Git 历史为准。

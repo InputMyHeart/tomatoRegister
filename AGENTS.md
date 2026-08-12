@@ -1,13 +1,11 @@
 # 番茄记账：项目协作规则
 
-本文件面向在此仓库工作的自动化协作者。它提炼自 `README.md`、`docs/` 和 `plan/`；当它与现有代码或更具体目录下的 `AGENTS.md` 冲突时，以更具体的规则和已验证的实现为准。
+本文件面向在此仓库工作的自动化协作者。它提炼自 `README.md`、`docs/` 和 `plan/PENDING.md`；当它与现有代码或更具体目录下的 `AGENTS.md` 冲突时，以更具体的规则和已验证的实现为准。
 
 ## 项目边界
 
 - 这是微信小程序云开发项目：前端位于 `miniprogram/`，云函数位于 `cloudfunctions/`；核心业务云函数为 `tomatoLedger`。
 - 前端只能通过 `miniprogram/services/` 调用 `tomatoLedger`。使用 `{ route, payload }` 新协议和 `{ ok, data }` / `{ ok, error }` 返回结构；不要重新引入旧的 `action + data` 协议。
-- 新业务云函数放在 `cloudfunctions/` 下；不得修改 `quickstartFunctions`。
-- 分析页暂不改动，除非任务明确要求。
 
 ## 代码与接口约定
 
@@ -35,13 +33,17 @@
 
 ## UI 与产品一致性
 
+- UI 设计与实现以 `docs/UI-GUIDELINES.md` 为准；新增样式优先复用 `miniprogram/app.wxss` 的语义 Token 和已有 `tl-` 公共组件。
 - 保持现有温暖番茄色设计体系：主色 `#F0442F`、浅暖背景、统一的圆角/卡片/自定义 navbar 语言。
+- 除 `tl-tabbar` 外不使用阴影；渐变仅限规范允许的页面背景、Tabbar 中央操作和骨架动画，并保证端点自然衔接。
+- 页面不得私有实现通用骨架、空状态、按钮、固定底部操作、Bottom Sheet 或 Dialog；同一时刻只能有一个组件负责底部安全区。
+- 页面数据状态使用互斥的 Loading → Error / Empty / Ready 状态链，Loading 时不得提前渲染 Ready 内容。
 - 图标继续使用本地 `ri-icon` 的 Remix Icon 线性风格；品牌 Logo 使用 `miniprogram/images/brand/tomato-ledger-logo-256-transparent.png`。
 - 未经明确要求，不要随意修改全局颜色、背景、圆角、卡片语言、图标风格或 navbar 风格。
 - 只读访客不能执行写入、导入、导出等操作；共享账本成员只能编辑/删除自己的记录，创建者可管理全部记录。
 
 ## 验证与提交
 
-- 日常修改后至少运行受影响的检查；代码改动通常运行 `npm run verify`。可按需使用 `npm run format`、`npm run lint:fix`、`npm run test`、`npm run cloud:check`。
+- 日常修改后至少运行受影响的检查；代码改动通常运行 `npm run verify`。可按需使用 `npm run format`、`npm run lint:fix`、`npm run test`、`npm run cloud:check`。UI 修改还需运行 `npm run ui:check`，关键页面视觉变更运行 `npm run visual:check`。
 - 行为、数据边界或验收预期变化时，同步更新相关文档和测试，并完成对应手工回归。
 - 每次提交只处理一个明确目标。提交信息使用 `feat:`、`fix:`、`refactor:`、`docs:`、`style:`、`test:` 或 `chore:` 前缀，说明可用中文或英文。

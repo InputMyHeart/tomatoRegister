@@ -20,25 +20,12 @@
         </view>
       </view>
       <view class="join-actions">
-        <button wx:if="{{status === 'login'}}" class="primary-action" loading="{{busy}}" bindtap="loginAndJoin">{{actionText}}</button>
-        <button wx:elif="{{status === 'success'}}" class="primary-action" bindtap="viewLedger">
-          <view wx:if="{{activating}}" class="button-spinner">
-          </view>
-          <text wx:if="{{activating}}">正在打开</text>
-          <text wx:else>查看账本</text>
-        </button>
-        <button wx:elif="{{status === 'error'}}" class="primary-action" loading="{{busy}}" bindtap="retry">重试</button>
-        <button wx:elif="{{status === 'notice' && ledgerId}}" class="primary-action" bindtap="viewLedger">
-          <view wx:if="{{activating}}" class="button-spinner">
-          </view>
-          <text wx:if="{{activating}}">正在打开</text>
-          <text wx:else>查看账本</text>
-        </button>
-        <button wx:elif="{{status !== 'notice'}}" class="primary-action is-disabled">处理中</button>
-        <button wx:if="{{status === 'success' || status === 'error' || status === 'notice'}}" class="secondary-action" bindtap="goHome">返回首页</button>
+        <tl-button wx:if="{{status === 'login'}}" block="{{true}}" loading="{{busy}}" loading-text="{{actionText}}" bind:tap="loginAndJoin">{{actionText}}</tl-button>
+        <tl-button wx:elif="{{status === 'success' || (status === 'notice' && ledgerId)}}" block="{{true}}" loading="{{activating}}" loading-text="正在打开" bind:tap="viewLedger">查看账本</tl-button>
+        <tl-button wx:elif="{{status === 'error'}}" block="{{true}}" loading="{{busy}}" loading-text="重试中..." bind:tap="retry">重试</tl-button>
+        <tl-button wx:elif="{{status !== 'notice'}}" block="{{true}}" disabled="{{true}}">处理中</tl-button>
+        <tl-button wx:if="{{status === 'success' || status === 'error' || status === 'notice'}}" variant="secondary" block="{{true}}" bind:tap="goHome">返回首页</tl-button>
       </view>
     </view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

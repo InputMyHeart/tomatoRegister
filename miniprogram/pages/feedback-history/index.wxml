@@ -4,27 +4,11 @@
   <tl-container>
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
       <view class="page-content">
-        <view wx:if="{{loading}}" class="feedback-skeleton-list">
-          <view wx:for="{{[1, 2, 3]}}" wx:key="*this" class="feedback-skeleton card fade-up">
-            <view class="skeleton-row">
-              <view class="skeleton-block skeleton-tag">
-              </view>
-              <view class="skeleton-block skeleton-status">
-              </view>
-            </view>
-            <view class="skeleton-block skeleton-line wide">
-            </view>
-            <view class="skeleton-block skeleton-line">
-            </view>
-            <view class="skeleton-block skeleton-date">
-            </view>
-          </view>
-        </view>
-        <view wx:elif="{{isError}}" class="empty-wrap">
-          <tl-empty-state title="加载失败" description="请稍后再试">
-          </tl-empty-state>
-          <button class="ghost-button" bindtap="loadFeedbacks">重新加载</button>
-        </view>
+        <tl-skeleton wx:if="{{loading}}" variant="list">
+        </tl-skeleton>
+        <tl-empty-state wx:elif="{{isError}}" variant="error" title="加载失败" description="请稍后再试">
+          <tl-button variant="secondary" size="small" bind:tap="loadFeedbacks">重新加载</tl-button>
+        </tl-empty-state>
         <tl-empty-state wx:elif="{{!feedbacks.length}}" title="还没有反馈记录" description="你的反馈会在这里展示">
         </tl-empty-state>
         <view wx:else class="feedback-list">
@@ -44,6 +28,4 @@
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

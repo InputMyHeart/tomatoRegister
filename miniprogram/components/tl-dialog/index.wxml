@@ -1,0 +1,5 @@
+<view wx:if="{{visible}}" class="tl-dialog" catchtap="close">
+  <view class="tl-dialog__panel" catchtap="stopTap">
+    <slot />
+  </view>
+</view>

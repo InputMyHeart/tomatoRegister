@@ -2,7 +2,6 @@ const app = getApp();
 const { formatDisplayMoney } = require("../../utils/money");
 const { formatDateLabel } = require("../../utils/date");
 const { getId } = require("../../utils/mapper");
-const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 const recordService = require("../../services/record.service");
 const { resolveAvatarUrls } = require("../../utils/avatar");
@@ -55,7 +54,6 @@ function normalizeRecord(record = {}) {
     timeText: record.date || "未选择日期",
     memberName: record.memberName || "我",
     memberAvatar: record.memberAvatar || "/images/brand/tomato-ledger-logo-256-transparent.png",
-    accountText: record.account || "未选择账户",
   };
 }
 
@@ -241,7 +239,6 @@ Component({
     closeLedgerSwitcher() {
       this.setData({ isLedgerSwitcherVisible: false });
     },
-    stopLedgerSwitcherTap() {},
 
     chooseViewLedger(event) {
       const ledgerId = event.detail.ledgerId;

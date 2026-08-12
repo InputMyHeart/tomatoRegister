@@ -1,17 +1,11 @@
 <view class="page ledger-settings-page">
   <tl-navbar title="账本设置" showBack="{{true}}">
   </tl-navbar>
-  <tl-container>
+  <tl-container safe-area="{{false}}">
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
       <view class="page-content">
-        <view wx:if="{{loading}}" class="settings-card card fade-up">
-          <view class="loading-line wide">
-          </view>
-          <view class="loading-line">
-          </view>
-          <view class="loading-line short">
-          </view>
-        </view>
+        <tl-skeleton wx:if="{{loading}}" variant="list">
+        </tl-skeleton>
         <view wx:elif="{{!ledgers.length}}" class="settings-card card empty-card fade-up">
           <tl-empty-state text="还没有账本">
           </tl-empty-state>
@@ -53,11 +47,9 @@
         </view>
       </view>
     </scroll-view>
-    <view class="ledger-bottom-actions">
-      <view class="ledger-bottom-button secondary" bindtap="createLedger">创建账本</view>
-      <view class="ledger-bottom-button primary" bindtap="joinLedger">加入账本</view>
-    </view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
+  <tl-page-actions>
+    <tl-button variant="secondary" block="{{true}}" bind:tap="createLedger">创建账本</tl-button>
+    <tl-button block="{{true}}" bind:tap="joinLedger">加入账本</tl-button>
+  </tl-page-actions>
 </view>

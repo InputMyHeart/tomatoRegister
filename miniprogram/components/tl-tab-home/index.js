@@ -26,26 +26,12 @@ function getRoleText(role) {
   return "访客";
 }
 
-function getBudgetRate(expense, budget) {
-  const safeExpense = Number(expense) || 0;
-  const safeBudget = Number(budget) || 0;
-  return safeExpense > 0 && safeBudget > 0 ? (safeExpense / safeBudget) * 100 : 0;
-}
-
-function formatBudgetRate(rate) {
-  if (rate > 0 && rate < 0.01) return "<0.01";
-  return (Math.floor((rate + Number.EPSILON) * 100) / 100).toFixed(2);
-}
-
 function getStatusFlags(status) {
   return {
-    pageStatus: status,
     isLoading: status === "loading",
     isNoLedger: status === "noLedger",
     isEmpty: status === "empty",
     isError: status === "error",
-    isReady: status === "ready",
-    canRecord: status === "ready" || status === "empty",
   };
 }
 
@@ -75,7 +61,6 @@ function normalizeDashboard(data = {}) {
     : [];
   const recordCount = Number(data.recordCount || 0);
   const totalRecordCount = Number(data.totalRecordCount || 0);
-  const budgetRate = getBudgetRate(data.monthExpense, data.budget);
   return {
     ledgerId: data.ledgerId || "",
     ledgerName: data.ledgerName || "我的账本",
@@ -232,8 +217,6 @@ Component({
       if (this.data.isSwitchingLedger) return Promise.resolve(false);
       return this.bootstrap();
     },
-
-    noop() {},
 
     getLedgerRoleTag(item = {}) {
       const role = getLedgerRole(app.globalData.openid, item);

@@ -40,10 +40,8 @@
           </view>
         </view>
       </view>
-      <view class="empty-wrap card fade-up" wx:if="{{loading}}">
-        <tl-empty-state show="{{true}}" text="正在加载明细">
-        </tl-empty-state>
-      </view>
+      <tl-skeleton wx:if="{{loading}}" variant="records">
+      </tl-skeleton>
       <view class="empty-wrap card fade-up" wx:elif="{{isError}}">
         <tl-empty-state show="{{true}}" text="明细加载失败">
         </tl-empty-state>

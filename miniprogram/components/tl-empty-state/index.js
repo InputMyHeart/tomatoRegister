@@ -4,9 +4,21 @@ Component({
       type: Boolean,
       value: true,
     },
+    variant: {
+      type: String,
+      value: "empty",
+    },
+    title: {
+      type: String,
+      value: "",
+    },
     text: {
       type: String,
-      value: "暂无数据",
+      value: "????",
+    },
+    description: {
+      type: String,
+      value: "",
     },
   },
 });

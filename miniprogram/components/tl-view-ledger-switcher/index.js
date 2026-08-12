@@ -35,6 +35,5 @@ Component({
     retry() {
       this.triggerEvent("retry");
     },
-    stopTap() {},
   },
 });

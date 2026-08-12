@@ -1,7 +1,7 @@
 <view class="page plain-page budget-settings-page">
   <tl-navbar title="月预算" showBack="{{true}}">
   </tl-navbar>
-  <tl-container>
+  <tl-container safe-area="{{false}}">
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
       <view class="page-content">
         <view class="setting-card card fade-up">
@@ -23,16 +23,8 @@
         </view>
       </view>
     </scroll-view>
-    <view class="save-bar">
-      <button class="tomato-button save-button {{saving ? 'disabled' : ''}}" disabled="{{saving}}" bindtap="saveBudget">
-        <view class="save-button-inner">
-          <view wx:if="{{saving}}" class="save-spinner">
-          </view>
-          <text>{{saving ? '保存中...' : '保存'}}</text>
-        </view>
-      </button>
-    </view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
+  <tl-page-actions>
+    <tl-button block="{{true}}" loading="{{saving}}" loading-text="保存中..." bind:tap="saveBudget">保存预算</tl-button>
+  </tl-page-actions>
 </view>

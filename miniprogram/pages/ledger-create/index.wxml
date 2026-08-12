@@ -29,7 +29,7 @@
         <view wx:else class="detail-stage fade-up">
           <view class="step-line">
             <view class="selected-pill">{{selectedType === 'shared' ? '共享账本' : '个人账本'}}</view>
-            <view class="ghost-button back-type" bindtap="backToType">重选</view>
+            <tl-button class="back-type" variant="secondary" size="small" bind:tap="backToType">重选</tl-button>
           </view>
           <view class="form-panel">
             <view class="field-block">
@@ -83,18 +83,12 @@
                 </view>
               </view>
             </view>
-            <view class="tomato-button create-button {{saving ? 'is-saving' : ''}}" bindtap="createLedger">
-              <view class="button-loading">
-                <view wx:if="{{saving}}" class="button-spinner">
-                </view>
-                <text>{{saving ? '创建中...' : '创建账本'}}</text>
-              </view>
-            </view>
+            <tl-button class="page-submit" block="{{true}}" loading="{{saving}}" loading-text="创建中..." bind:tap="createLedger">创建账本</tl-button>
           </view>
         </view>
       </view>
     </scroll-view>
-    <view wx:if="{{resultVisible}}" class="result-mask">
+    <tl-bottom-sheet visible="{{resultVisible}}" close-on-mask="{{false}}">
       <view class="result-sheet">
         <view class="result-title">创建成功</view>
         <view class="result-summary">
@@ -109,12 +103,10 @@
           <view wx:if="{{createdLedger.quickAmountsEnabled}}" class="quick-amount-guide">快捷金额已开启，可在「我的 - 快捷金额」修改常用金额</view>
         </view>
         <view class="sheet-actions">
-          <view class="tomato-button sheet-action" bindtap="goRecord">记一笔</view>
-          <view class="ghost-button sheet-action close-action" bindtap="closeResult">关闭</view>
+          <tl-button block="{{true}}" bind:tap="goRecord">记一笔</tl-button>
+          <tl-button variant="secondary" block="{{true}}" bind:tap="closeResult">关闭</tl-button>
         </view>
       </view>
-    </view>
+    </tl-bottom-sheet>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

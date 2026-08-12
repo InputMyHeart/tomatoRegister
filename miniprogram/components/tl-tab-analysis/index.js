@@ -9,33 +9,18 @@ function monthAnchor() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 function decorate(data = {}) {
-  const max = Math.max(1, ...(data.trend || []).map((x) => Math.max(x.income, x.expense)));
+  const overview = data.overview || {};
   return {
     ...data,
     overview: {
-      ...(data.overview || {}),
-      incomeText: formatDisplayMoney(data.overview && data.overview.income),
-      expenseText: formatDisplayMoney(data.overview && data.overview.expense),
-      balanceText: formatDisplayMoney(data.overview && data.overview.balance),
-      budgetText: formatDisplayMoney(data.overview && data.overview.budget),
-      budgetLeftText: formatDisplayMoney(data.overview && data.overview.budgetLeft),
+      ...overview,
+      incomeText: formatDisplayMoney(overview.income),
+      expenseText: formatDisplayMoney(overview.expense),
+      balanceText: formatDisplayMoney(overview.balance),
     },
-    trend: (data.trend || []).map((x) => ({
-      ...x,
-      incomeText: formatDisplayMoney(x.income),
-      expenseText: formatDisplayMoney(x.expense),
-      incomeRate: Math.max(2, Math.round((x.income * 100) / max)),
-      expenseRate: Math.max(2, Math.round((x.expense * 100) / max)),
-    })),
-    categories: (data.categories || []).map((x) => ({
-      ...x,
-      amountText: formatDisplayMoney(x.amount),
-    })),
-    members: (data.members || []).map((x) => ({
-      ...x,
-      initial: String(x.name || "?").slice(0, 1),
-      amountText: formatDisplayMoney(x.amount),
-    })),
+    trend: data.trend || [],
+    categories: data.categories || [],
+    members: data.members || [],
   };
 }
 let analysisPage = null;
@@ -231,7 +216,6 @@ Component({
     closeLedgerSwitcher() {
       this.setData({ isLedgerSwitcherVisible: false });
     },
-    stopLedgerSwitcherTap() {},
     chooseViewLedger(e) {
       const id = e.detail.ledgerId,
         ledger = this.data.ledgerOptions.find((x) => (x._id || x.id) === id);

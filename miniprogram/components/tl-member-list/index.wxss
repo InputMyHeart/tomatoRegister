@@ -1,16 +1,16 @@
 .tl-member-list {
   margin-top: var(--tl-space-lg);
   padding: var(--tl-space-md);
-  border-radius: var(--tl-radius-md);
+  border: var(--tl-border-width) solid var(--tl-color-border);
+  border-radius: var(--tl-radius-card);
   background: var(--tl-color-surface);
-  box-shadow: var(--tl-shadow-card);
 }
 .tl-member-list__title {
   display: block;
   margin-bottom: var(--tl-space-sm);
   color: var(--tl-color-text);
-  font-size: var(--tl-font-md);
-  font-weight: 700;
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 .tl-member-list__item {
   display: flex;
@@ -34,11 +34,11 @@
 .tl-member-list__name {
   overflow: hidden;
   color: var(--tl-color-text);
-  font-size: var(--tl-font-sm);
+  font-size: var(--tl-font-body-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .tl-member-list__role {
   color: var(--tl-color-text-secondary);
-  font-size: 22rpx;
+  font-size: var(--tl-font-caption);
 }

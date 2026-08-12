@@ -4,19 +4,11 @@
   <tl-container>
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
       <view class="page-content">
-        <view wx:if="{{loading}}" class="detail-card card loading-card fade-up">
-          <view class="loading-line wide">
-          </view>
-          <view class="loading-line">
-          </view>
-          <view class="loading-line short">
-          </view>
-        </view>
-        <view wx:elif="{{isError}}" class="detail-card card empty-card fade-up">
-          <tl-empty-state text="记录加载失败">
-          </tl-empty-state>
-          <view class="primary-action" bindtap="reload">重新加载</view>
-        </view>
+        <tl-skeleton wx:if="{{loading}}" variant="detail">
+        </tl-skeleton>
+        <tl-empty-state wx:elif="{{isError}}" variant="error" title="记录加载失败" description="请检查网络后重试">
+          <tl-button variant="secondary" size="small" bind:tap="reload">重新加载</tl-button>
+        </tl-empty-state>
         <block wx:else>
           <view class="detail-hero card fade-up">
             <view class="type-mark {{record.type}}">
@@ -66,6 +58,4 @@
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

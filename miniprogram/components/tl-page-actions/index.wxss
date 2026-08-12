@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.tl-page-actions {
+  position: relative;
+  z-index: var(--tl-z-bottom);
+  width: calc(100% + 2 * var(--tl-page-inline));
+  margin: 0 calc(-1 * var(--tl-page-inline));
+  padding: 12rpx var(--tl-page-inline) calc(12rpx + env(safe-area-inset-bottom));
+  border-top: var(--tl-border-width) solid var(--tl-color-divider);
+  box-sizing: border-box;
+  background: rgba(255, 250, 247, 0.96);
+}
+
+.tl-page-actions__content {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--tl-space-sm);
+}

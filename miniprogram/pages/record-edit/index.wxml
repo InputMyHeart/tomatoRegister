@@ -1,9 +1,9 @@
 <view class="page plain-page edit-page">
   <tl-navbar title="{{typeLabel}}明细" showBack="{{true}}">
   </tl-navbar>
-  <tl-container>
+  <tl-container safe-area="{{false}}">
     <scroll-view class="page-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
-      <view class="page-content {{isEditing ? 'has-record-delete' : 'has-record-submit'}}">
+      <view class="page-content">
         <view class="selected-card card fade-up" bindtap="reselectCategory">
           <view class="selected-left">
             <view class="type-badge {{type}}">
@@ -22,7 +22,7 @@
           </view>
           <view class="change-link">重选</view>
         </view>
-        <tl-record-form type="{{type}}" amount="{{amount}}" amount-result="{{amountResult}}" show-amount-result="{{showAmountResult}}" quick-amounts="{{quickAmounts}}" ledger-name="{{ledgerName}}" accounts="{{accounts}}" account-index="{{accountIndex}}" date="{{date}}" note="{{note}}" tag-input="{{tagInput}}" tags="{{tags}}" can-save="{{canSave}}" saving="{{saving}}" is-editing="{{isEditing}}" deleting="{{deleting}}" bind:amountinput="onAmountInput" bind:quickamount="setQuickAmount" bind:accountchange="onAccountChange" bind:datechange="onDateChange" bind:noteinput="onNoteInput" bind:taginput="onTagInput" bind:addtag="addTag" bind:removetag="removeTag" bind:delete="deleteRecord" bind:submit="saveRecord">
+        <tl-record-form type="{{type}}" amount="{{amount}}" amount-result="{{amountResult}}" show-amount-result="{{showAmountResult}}" quick-amounts="{{quickAmounts}}" ledger-name="{{ledgerName}}" accounts="{{accounts}}" account-index="{{accountIndex}}" date="{{date}}" note="{{note}}" tag-input="{{tagInput}}" tags="{{tags}}" bind:amountinput="onAmountInput" bind:quickamount="setQuickAmount" bind:accountchange="onAccountChange" bind:datechange="onDateChange" bind:noteinput="onNoteInput" bind:taginput="onTagInput" bind:addtag="addTag" bind:removetag="removeTag" bind:keypadchange="onKeypadChange">
         </tl-record-form>
         <view wx:if="{{isEditing}}" class="record-timestamps">
           <text wx:if="{{createdDate}}">创建于：{{createdDate}}</text>
@@ -31,6 +31,10 @@
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
+  <tl-page-actions wx:if="{{!keypadOpen}}">
+    <view class="record-actions {{isEditing ? 'has-delete' : ''}}">
+      <tl-button wx:if="{{isEditing}}" variant="danger" block="{{true}}" loading="{{deleting}}" loading-text="删除中..." disabled="{{saving}}" bind:tap="deleteRecord">删除记录</tl-button>
+      <tl-button block="{{true}}" loading="{{saving}}" loading-text="保存中..." disabled="{{deleting || !canSave}}" bind:tap="saveRecord">保存记录</tl-button>
+    </view>
+  </tl-page-actions>
 </view>

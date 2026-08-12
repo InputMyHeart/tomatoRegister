@@ -9,14 +9,14 @@
   gap: 24rpx;
 }
 .setting-title {
-  color: #312522;
-  font-size: 34rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
 }
 .setting-subtitle {
   margin-top: 10rpx;
-  color: #9a8278;
-  font-size: 24rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
   line-height: 1.45;
 }
 .amount-card {
@@ -28,9 +28,9 @@
 .amount-head {
   display: flex;
   justify-content: space-between;
-  color: #8d7f78;
-  font-size: 26rpx;
-  font-weight: 800;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 .amount-list {
   display: flex;
@@ -40,11 +40,11 @@
 }
 .amount-pill {
   padding: 14rpx 18rpx 14rpx 22rpx;
-  border-radius: 999rpx;
-  color: #f0442f;
-  background: #fff0ea;
-  font-size: 28rpx;
-  font-weight: 900;
+  border-radius: var(--tl-radius-pill);
+  color: var(--tl-color-primary);
+  background: var(--tl-color-primary-soft);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 .amount-pill text {
   margin-left: 16rpx;
@@ -54,75 +54,35 @@
   display: flex;
   align-items: center;
   gap: 14rpx;
-  height: 88rpx;
+  height: var(--tl-control-height-md);
   padding: 0 14rpx 0 24rpx;
   border: 1rpx solid #f1ddd5;
-  border-radius: 22rpx;
-  color: #f0442f;
-  background: #fffaf7;
-  font-size: 32rpx;
-  font-weight: 900;
+  border-radius: var(--tl-radius-control);
+  color: var(--tl-color-primary);
+  background: var(--tl-color-page);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
 }
 .amount-add input {
   flex: 1;
   min-width: 0;
-  color: #312522;
-  font-size: 28rpx;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
 }
 .add-button {
+  display: inline-flex;
+  min-height: 58rpx;
   padding: 12rpx 22rpx;
-  border-radius: 16rpx;
-  color: #fff;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: var(--tl-radius-xs);
+  color: var(--tl-color-text-inverse);
   background: #f0442f;
-  font-size: 24rpx;
+  font-size: var(--tl-font-body-sm);
 }
 .default-link {
   margin-top: 22rpx;
   color: #e66a53;
-  font-size: 24rpx;
-}
-.quick-amount-settings-page .page-content {
-  padding-bottom: calc(24px + 92rpx);
-}
-
-.save-bar {
-  position: fixed;
-  right: 28rpx;
-  bottom: env(safe-area-inset-bottom);
-  left: 28rpx;
-  background: rgba(255, 247, 242, 0.94);
-}
-.save-button {
-  width: 100%;
-}
-
-.save-button[disabled],
-.save-button.is-saving {
-  color: #ffffff;
-  opacity: 0.92;
-}
-
-.save-button-inner {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14rpx;
-  color: #ffffff;
-}
-
-.save-spinner {
-  width: 32rpx;
-  height: 32rpx;
-  box-sizing: border-box;
-  border: 4rpx solid rgba(255, 255, 255, 0.45);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: saveButtonSpin 760ms linear infinite;
-}
-
-@keyframes saveButtonSpin {
-  to {
-    transform: rotate(360deg);
-  }
+  font-size: var(--tl-font-body-sm);
 }

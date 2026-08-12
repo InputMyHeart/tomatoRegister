@@ -2,7 +2,7 @@
   position: relative;
   overflow: hidden;
   padding: 34rpx 30rpx 28rpx;
-  background: linear-gradient(145deg, #fffdfb 0%, #fff0ea 100%);
+  background: var(--tl-color-primary-soft);
 }
 
 .profile-hero-card::after {
@@ -34,9 +34,8 @@
   width: 116rpx;
   height: 116rpx;
   flex: 0 0 116rpx;
-  border-radius: 36rpx;
-  background: #fff0ea;
-  box-shadow: 0 14rpx 28rpx rgba(240, 68, 47, 0.06);
+  border-radius: var(--tl-radius-card);
+  background: var(--tl-color-primary-soft);
 }
 
 .identity-main {
@@ -54,25 +53,20 @@
 
 .user-name {
   min-width: 0;
-  color: #312522;
-  font-size: 38rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-data);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.user-tip,
 .stat-label {
-  color: #9d867c;
-  font-size: 24rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.35;
-}
-
-.user-tip {
-  margin-top: 9rpx;
 }
 
 .profile-setting {
@@ -82,12 +76,11 @@
   z-index: 2;
   width: 58rpx;
   height: 58rpx;
-  border-radius: 22rpx;
+  border-radius: var(--tl-radius-control);
   background: rgba(255, 253, 251, 0.86);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 20rpx rgba(240, 68, 47, 0.08);
 }
 
 .stats-grid {
@@ -107,9 +100,9 @@
 }
 
 .stat-value {
-  color: #312522;
-  font-size: 34rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1;
 }
 
@@ -131,9 +124,9 @@
 
 .section-title {
   margin-bottom: 18rpx;
-  color: #312522;
-  font-size: 30rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.2;
 }
 
@@ -147,7 +140,7 @@
   min-width: 0;
   min-height: 128rpx;
   padding: 14rpx 4rpx 12rpx;
-  border-radius: 22rpx;
+  border-radius: var(--tl-radius-control);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -164,9 +157,9 @@
 .function-icon {
   width: 66rpx;
   height: 66rpx;
-  border-radius: 24rpx;
-  color: #f0442f;
-  background: #fff0ea;
+  border-radius: var(--tl-radius-control);
+  color: var(--tl-color-primary);
+  background: var(--tl-color-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,9 +168,9 @@
 .tool-title {
   width: 100%;
   margin-top: 10rpx;
-  color: #312522;
-  font-size: 22rpx;
-  font-weight: 800;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.25;
   text-align: center;
   overflow: hidden;
@@ -187,13 +180,13 @@
 
 .function-list {
   margin-top: 22rpx;
-  border-top: 1rpx solid #f3e6df;
+  border-top: 1rpx solid var(--tl-color-divider);
 }
 
 .function-row {
-  min-height: 112rpx;
+  min-height: var(--tl-list-row-height);
   padding: 18rpx 0;
-  border-bottom: 1rpx solid #f3e6df;
+  border-bottom: 1rpx solid var(--tl-color-divider);
   display: flex;
   align-items: center;
 }
@@ -210,17 +203,17 @@
 }
 
 .function-title {
-  color: #312522;
-  font-size: 28rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.25;
 }
 
 .function-tip {
   margin-top: 8rpx;
-  color: #9d867c;
-  font-size: 23rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -236,11 +229,11 @@
 }
 
 .danger-icon {
-  background: #fff1ef;
+  background: var(--tl-color-danger-soft);
 }
 
 .danger-title {
-  color: #c55249;
+  color: var(--tl-color-danger);
 }
 
 .tool-icon tl-icon,
@@ -252,24 +245,7 @@
   justify-content: center;
 }
 .logout-button {
-  width: 100%;
-  height: 92rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  margin-top: 28rpx;
-  border-radius: 30rpx;
-  color: #f0442f;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1rpx solid rgba(240, 68, 47, 0.16);
-  font-size: 29rpx;
-  font-weight: 900;
-  box-shadow: 0 14rpx 38rpx rgba(104, 63, 47, 0.07);
-}
-
-.logout-button::after {
-  border: none;
+  margin-top: var(--tl-space-lg);
 }
 
 :host {
@@ -289,8 +265,7 @@
   overflow: hidden;
 }
 
-.page-scroll,
-.analysis-scroll {
+.page-scroll {
   display: block;
   width: 100%;
   height: 100%;

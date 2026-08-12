@@ -4,6 +4,7 @@
   "usingComponents": {
     "tl-icon": "/components/tl-icon/index",
     "tl-empty-state": "/components/tl-empty-state/index",
+    "tl-skeleton": "/components/tl-skeleton/index",
     "tl-view-ledger-switcher": "/components/tl-view-ledger-switcher/index"
   }
 }

@@ -19,16 +19,8 @@
             <input class="profile-input" type="nickname" value="{{nickName}}" placeholder="请输入昵称" bindinput="onNickNameInput" />
           </view>
         </view>
-        <button class="save-button fade-up {{saving ? 'is-saving' : ''}}" disabled="{{saving}}" bindtap="saveProfile">
-          <view class="save-button-inner">
-            <view wx:if="{{saving}}" class="save-spinner">
-            </view>
-            <text>{{saving ? '保存中...' : '保存资料'}}</text>
-          </view>
-        </button>
+        <tl-button class="page-submit" block="{{true}}" loading="{{saving}}" loading-text="保存中..." bind:tap="saveProfile">保存资料</tl-button>
       </view>
     </scroll-view>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

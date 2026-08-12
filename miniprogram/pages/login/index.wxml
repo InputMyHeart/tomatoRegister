@@ -5,13 +5,7 @@
       </image>
       <view class="login-title fade-up">番茄记一笔</view>
       <view class="login-subtitle fade-up">简单、干净、好用的记账小程序</view>
-      <button class="tomato-button login-button fade-up {{loggingIn ? 'is-loading' : ''}}" disabled="{{loggingIn}}" bindtap="login">
-        <view class="login-button-inner">
-          <view wx:if="{{loggingIn}}" class="login-spinner">
-          </view>
-          <text>{{loggingIn ? '登录中...' : '微信登录'}}</text>
-        </view>
-      </button>
+      <tl-button class="login-button" block="{{true}}" loading="{{loggingIn}}" loading-text="登录中..." bind:tap="login">微信快捷登录</tl-button>
     </view>
   </scroll-view>
 </view>

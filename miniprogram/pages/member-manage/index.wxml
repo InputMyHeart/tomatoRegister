@@ -8,8 +8,11 @@
           <view class="ledger-name">{{ledgerName}}</view>
           <view class="ledger-tip">当前账本的所有成员与访客</view>
         </view>
-        <view wx:if="{{loading}}" class="state-card card">正在加载成员...</view>
-        <view wx:elif="{{error}}" class="state-card card" bindtap="loadMembers">加载失败，点击重试</view>
+        <tl-skeleton wx:if="{{loading}}" variant="list">
+        </tl-skeleton>
+        <tl-empty-state wx:elif="{{error}}" variant="error" title="加载失败" description="成员信息暂时无法加载">
+          <tl-button variant="secondary" size="small" bind:tap="loadMembers">重新加载</tl-button>
+        </tl-empty-state>
         <block wx:else>
           <view class="member-card card fade-up">
             <view wx:for="{{members}}" wx:key="openid" class="member-row">
@@ -22,17 +25,17 @@
               <view wx:if="{{canManage && !item.isOwner}}" class="member-remove" data-openid="{{item.openid}}" data-name="{{item.nickName}}" bindtap="removeMember">移除</view>
             </view>
           </view>
-          <view wx:if="{{canManage}}" class="invite-entry fade-up" bindtap="inviteLedger">
+          <tl-button wx:if="{{canManage}}" class="page-submit" block="{{true}}" bind:tap="inviteLedger">
             <tl-icon name="user-add-line" size="34" color="#ffffff">
             </tl-icon>
             <text>邀请成员</text>
-          </view>
+          </tl-button>
           <view wx:else class="readonly-tip">仅账本拥有者可以邀请或移除成员</view>
         </block>
       </view>
     </scroll-view>
-    <view wx:if="{{shareSheetVisible}}" class="sheet-mask" bindtap="closeShareSheet">
-      <view class="share-sheet" catchtap="stopSheetTap">
+    <tl-bottom-sheet visible="{{shareSheetVisible}}" bind:close="closeShareSheet">
+      <view class="share-sheet">
         <view class="sheet-title">选择邀请方式</view>
         <button wx:for="{{shareOptions}}" wx:key="mode" class="share-option" open-type="share" data-mode="{{item.mode}}" bindtap="selectShareMode">
           <tl-icon name="{{item.icon}}" size="34" color="#c85d4a">
@@ -43,8 +46,6 @@
           </view>
         </button>
       </view>
-    </view>
+    </tl-bottom-sheet>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

@@ -31,16 +31,16 @@
             </view>
             <view class="template-button" bindtap="downloadTemplate">下载模板</view>
           </view>
-          <view class="import-button {{uploading ? 'disabled' : ''}}" bindtap="chooseAndImport">
+          <tl-button class="page-submit" block="{{true}}" loading="{{uploading}}" loading-text="正在导入..." bind:tap="chooseAndImport">
             <tl-icon name="upload-2-line" size="34" color="#ffffff">
             </tl-icon>
-            <text>{{uploading ? '正在导入…' : '选择账单文件'}}</text>
-          </view>
+            <text>选择账单文件</text>
+          </tl-button>
           <view class="import-note">支持 .xls / .xlsx；必填：日期、收支类型、金额。</view>
         </view>
       </view>
     </scroll-view>
-    <view wx:if="{{resultVisible}}" class="result-mask">
+    <tl-dialog visible="{{resultVisible}}" close-on-mask="{{false}}">
       <view class="result-dialog">
         <view class="result-title">导入结果</view>
         <view class="result-copy">{{resultDateText}}</view>
@@ -58,12 +58,10 @@
           <text wx:for="{{result.errors}}" wx:key="*this">{{item}}</text>
         </view>
         <view class="dialog-actions">
-          <view class="secondary-button" bindtap="continueImport">继续导入</view>
-          <view class="primary-button" bindtap="viewRecords">查看记录</view>
+          <tl-button variant="secondary" block="{{true}}" bind:tap="continueImport">继续导入</tl-button>
+          <tl-button block="{{true}}" bind:tap="viewRecords">查看记录</tl-button>
         </view>
       </view>
-    </view>
+    </tl-dialog>
   </tl-container>
-  <tl-tabbar show-tabs="{{false}}">
-  </tl-tabbar>
 </view>

@@ -4,9 +4,7 @@
   height: 100vh;
   min-height: 100vh;
   padding: 0 28rpx;
-  background:
-    radial-gradient(circle at 12% -70rpx, rgba(255, 112, 88, 0.28), transparent 360rpx),
-    linear-gradient(180deg, #ffe1d6 0%, #fff1ea 260rpx, #fff7f2 520rpx, #fffaf7 100%);
+  background: var(--tl-background-page);
   display: flex;
   overflow: hidden;
 }
@@ -32,56 +30,24 @@
 .login-logo {
   width: 188rpx;
   height: 188rpx;
-  filter: drop-shadow(0 22rpx 42rpx rgba(240, 68, 47, 0.22));
 }
 
 .login-title {
   margin-top: 32rpx;
-  color: #312522;
-  font-size: 48rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-size-2xl);
+  font-weight: var(--tl-font-weight-bold);
   line-height: 1.15;
 }
 
 .login-subtitle {
   margin-top: 16rpx;
-  color: #8d756b;
-  font-size: 28rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .login-button {
   width: 420rpx;
   margin-top: 72rpx;
-  color: #fff;
-}
-
-.login-button[disabled],
-.login-button.is-loading {
-  color: #fff;
-  opacity: 0.92;
-}
-
-.login-button-inner {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14rpx;
-  color: #fff;
-}
-
-.login-spinner {
-  width: 32rpx;
-  height: 32rpx;
-  border: 4rpx solid rgba(255, 255, 255, 0.45);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: loginSpin 760ms linear infinite;
-}
-
-@keyframes loginSpin {
-  to {
-    transform: rotate(360deg);
-  }
 }

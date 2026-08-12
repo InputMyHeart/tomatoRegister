@@ -5,7 +5,7 @@
 .tl-budget-progress__track {
   height: 12rpx;
   overflow: hidden;
-  border-radius: 999rpx;
+  border-radius: var(--tl-radius-pill);
   background: rgba(240, 68, 47, 0.12);
 }
 .tl-budget-progress__bar {

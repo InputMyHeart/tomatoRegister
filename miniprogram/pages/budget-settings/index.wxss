@@ -11,15 +11,15 @@
 }
 
 .setting-title {
-  color: #312522;
-  font-size: 34rpx;
-  font-weight: 900;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .setting-subtitle {
-  color: #9a8278;
-  font-size: 24rpx;
-  font-weight: 700;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
   margin-top: 10rpx;
   line-height: 1.45;
 }
@@ -33,9 +33,9 @@
 }
 
 .amount-label {
-  color: #9a8278;
-  font-size: 26rpx;
-  font-weight: 800;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .amount-input-row {
@@ -47,64 +47,15 @@
 }
 
 .currency {
-  color: #f0442f;
-  font-size: 38rpx;
-  font-weight: 900;
+  color: var(--tl-color-primary);
+  font-size: var(--tl-font-data);
+  font-weight: var(--tl-font-weight-bold);
 }
 
 .amount-input {
   flex: 1;
   min-width: 0;
-  color: #312522;
-  font-size: 54rpx;
-  font-weight: 900;
-}
-
-.budget-settings-page .page-content {
-  padding-bottom: calc(24px + 92rpx);
-}
-
-.save-bar {
-  position: fixed;
-  right: 28rpx;
-  bottom: env(safe-area-inset-bottom);
-  left: 28rpx;
-  z-index: 20;
-  background: rgba(255, 247, 242, 0.94);
-  backdrop-filter: blur(18rpx);
-}
-
-.save-button {
-  width: 100%;
-}
-
-.save-button[disabled],
-.save-button.is-saving {
-  color: #ffffff;
-  opacity: 0.92;
-}
-
-.save-button-inner {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14rpx;
-  color: #ffffff;
-}
-
-.save-spinner {
-  width: 32rpx;
-  height: 32rpx;
-  box-sizing: border-box;
-  border: 4rpx solid rgba(255, 255, 255, 0.45);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: saveButtonSpin 760ms linear infinite;
-}
-
-@keyframes saveButtonSpin {
-  to {
-    transform: rotate(360deg);
-  }
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-data-lg);
+  font-weight: var(--tl-font-weight-bold);
 }

@@ -1,0 +1,124 @@
+:host {
+  --tl-button-padding-inline: 24rpx;
+  --tl-button-radius: 999rpx;
+  --tl-button-height-medium: 92rpx;
+  --tl-button-height-small: 78rpx;
+  --tl-button-font-medium: 30rpx;
+  --tl-button-font-small: 28rpx;
+  --tl-button-font-weight: 700;
+  --tl-button-primary: #f0442f;
+  --tl-button-primary-soft: #fff0ea;
+  --tl-button-danger: #d9483b;
+  --tl-button-inverse: #ffffff;
+  --tl-button-gap: 16rpx;
+  --tl-button-duration: 180ms;
+
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.tl-button {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--tl-button-padding-inline);
+  border: 0;
+  border-radius: var(--tl-button-radius);
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--tl-button-font-weight);
+  line-height: 1;
+  transition:
+    opacity var(--tl-button-duration) ease,
+    transform var(--tl-button-duration) ease;
+}
+
+.tl-button::after {
+  border: 0;
+}
+
+.tl-button--medium {
+  height: var(--tl-button-height-medium);
+  font-size: var(--tl-button-font-medium);
+}
+
+.tl-button--small {
+  height: var(--tl-button-height-small);
+  font-size: var(--tl-button-font-small);
+}
+
+.tl-button--primary {
+  background: var(--tl-button-primary);
+  color: var(--tl-button-inverse);
+}
+
+.tl-button--secondary {
+  background: var(--tl-button-primary-soft);
+  color: var(--tl-button-primary);
+}
+
+.tl-button--danger {
+  border: 1rpx solid var(--tl-button-danger);
+  background: transparent;
+  color: var(--tl-button-danger);
+}
+
+.tl-button--text {
+  height: auto;
+  padding: var(--tl-button-gap);
+  background: transparent;
+  color: var(--tl-button-primary);
+}
+
+.tl-button:active {
+  opacity: 0.82;
+  transform: scale(0.985);
+}
+
+.tl-button[disabled] {
+  opacity: 0.48;
+  transform: none;
+}
+
+.tl-button.is-block {
+  width: 100%;
+}
+
+.tl-button__content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tl-button-gap);
+  line-height: 1;
+}
+
+.tl-button__content text {
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  line-height: 1;
+}
+
+.tl-button__spinner {
+  width: 28rpx;
+  height: 28rpx;
+  border: 4rpx solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  opacity: 0.72;
+  animation: tl-button-spin 720ms linear infinite;
+}
+
+@keyframes tl-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
