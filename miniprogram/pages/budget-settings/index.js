@@ -1,5 +1,4 @@
 const app = getApp();
-const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 
 function normalizeBudget(value) {
@@ -56,7 +55,7 @@ Page({
     }
     this.setData({ saving: true });
     try {
-      const data = await ledgerService.updateBudget({
+      const data = await ledgerStore.updateBudget({
         ledgerId: this.data.ledgerId,
         budgetEnabled: this.data.budgetEnabled,
         monthlyBudget: normalizeBudget(this.data.monthlyBudget),
@@ -68,7 +67,8 @@ Page({
           ...ledger,
         };
         app.persistAuthState();
-        await ledgerStore.refreshLedgers();
+      }
+      if (ledger) {
         const pages = getCurrentPages();
         const previousPage = pages[pages.length - 2];
         if (previousPage && typeof previousPage.loadDashboard === "function") {

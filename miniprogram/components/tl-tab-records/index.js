@@ -141,6 +141,12 @@ Component({
   },
 
   methods: {
+    refreshRecords() {
+      const currentLedger = app.globalData.currentLedger || {};
+      if ((currentLedger._id || "") !== this.data.ledgerId) return this.bootstrap();
+      return this.loadRecords(this.data.currentRange);
+    },
+
     async bootstrap() {
       if (!app.globalData.loggedIn) {
         wx.reLaunch({ url: "/pages/login/index" });

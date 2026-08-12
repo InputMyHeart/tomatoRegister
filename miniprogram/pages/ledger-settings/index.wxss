@@ -163,3 +163,73 @@
 .member-avatar-status.error {
   color: var(--tl-color-danger);
 }
+
+.ledger-edit-dialog {
+  width: 100%;
+  padding: 42rpx 34rpx 30rpx;
+  box-sizing: border-box;
+}
+
+.edit-dialog-title {
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-heading);
+  font-weight: var(--tl-font-weight-bold);
+  text-align: center;
+}
+
+.edit-dialog-copy {
+  margin-top: 10rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+  text-align: center;
+}
+
+.edit-field {
+  margin-top: 28rpx;
+}
+
+.edit-field-label {
+  margin-bottom: 14rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
+}
+
+.required-star {
+  color: var(--tl-color-primary);
+}
+
+.optional-tip {
+  padding-left: 6rpx;
+  font-weight: var(--tl-font-weight-regular);
+}
+
+.edit-input,
+.edit-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(240, 68, 47, 0.1);
+  border-radius: var(--tl-radius-control);
+  background: var(--tl-color-page);
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body);
+  font-weight: var(--tl-font-weight-bold);
+}
+
+.edit-input {
+  height: var(--tl-control-height-md);
+  padding: 0 24rpx;
+}
+
+.edit-textarea {
+  height: 156rpx;
+  padding: 22rpx 24rpx;
+  line-height: 1.45;
+}
+
+.edit-dialog-actions {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 32rpx;
+}

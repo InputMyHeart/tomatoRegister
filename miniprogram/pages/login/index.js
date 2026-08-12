@@ -59,14 +59,13 @@ Page({
     if (!inviteCode && !readonlyShareCode) return;
 
     const data = readonlyShareCode
-      ? await ledgerService.joinReadonlyLedger(readonlyShareCode)
-      : await ledgerService.joinLedger(inviteCode);
+      ? await ledgerStore.joinReadonlyLedger(readonlyShareCode)
+      : await ledgerStore.joinLedger(inviteCode);
     const ledgerId = data.ledgerId;
     if (ledgerId) {
       await ledgerService.setCurrentLedger(ledgerId);
     }
     await app.loginWithWechat({ force: true });
-    await ledgerStore.refreshLedgers();
     this.setData({ inviteCode: "", readonlyShareCode: "" });
   },
 

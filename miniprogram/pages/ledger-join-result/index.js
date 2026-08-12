@@ -101,16 +101,15 @@ Page({
 
     try {
       const data = hasInviteToken
-        ? await ledgerService.joinLedgerByInviteToken(payload.inviteToken)
+        ? await ledgerStore.joinLedgerByInviteToken(payload.inviteToken)
         : isReadonly
-          ? await ledgerService.joinReadonlyLedger(payload.readonlyShareCode)
-          : await ledgerService.joinLedger(payload.inviteCode);
+          ? await ledgerStore.joinReadonlyLedger(payload.readonlyShareCode)
+          : await ledgerStore.joinLedger(payload.inviteCode);
 
       const ledgerId = data.ledgerId;
       const ledger = data.ledger;
       const role = data.role || (isReadonly ? "readonly" : "member");
       await app.loginWithWechat({ force: true });
-      await ledgerStore.refreshLedgers();
 
       if (data.already) {
         this.setData({
@@ -154,7 +153,7 @@ Page({
     this.setData({ activating: true });
     try {
       const current = await ledgerService.setCurrentLedger(ledgerId);
-      await ledgerStore.refreshLedgers();
+      await ledgerStore.refreshLedgers({ force: true });
       if (current) {
         const ledger = current.ledger || null;
         app.globalData.currentLedger = ledger || app.globalData.currentLedger;

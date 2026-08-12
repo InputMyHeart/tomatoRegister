@@ -52,4 +52,23 @@
     <tl-button variant="secondary" block="{{true}}" bind:tap="createLedger">创建账本</tl-button>
     <tl-button block="{{true}}" bind:tap="joinLedger">加入账本</tl-button>
   </tl-page-actions>
+  <tl-dialog visible="{{editVisible}}" close-on-mask="{{!editSaving}}" bind:close="closeEditDialog">
+    <view class="ledger-edit-dialog">
+      <view class="edit-dialog-title">编辑账本</view>
+      <view class="edit-dialog-copy">修改后会同步给账本内的其他成员</view>
+      <view class="edit-field">
+        <view class="edit-field-label">账本名称 <text class="required-star">*</text></view>
+        <input class="edit-input" value="{{editName}}" placeholder="1-8个字符" bindinput="onEditNameInput" />
+      </view>
+      <view class="edit-field">
+        <view class="edit-field-label">备注 <text class="optional-tip">选填，最多80字</text></view>
+        <textarea class="edit-textarea" value="{{editRemark}}" maxlength="80" placeholder="写一句账本用途" bindinput="onEditRemarkInput">
+        </textarea>
+      </view>
+      <view class="edit-dialog-actions">
+        <tl-button variant="secondary" block="{{true}}" disabled="{{editSaving}}" bind:tap="closeEditDialog">取消</tl-button>
+        <tl-button block="{{true}}" loading="{{editSaving}}" loading-text="正在同步" bind:tap="saveLedgerEdit">保存</tl-button>
+      </view>
+    </view>
+  </tl-dialog>
 </view>

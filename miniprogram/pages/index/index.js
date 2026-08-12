@@ -1,4 +1,5 @@
 const app = getApp();
+const ledgerStore = require("../../services/ledger.store");
 
 const TAB_TITLES = {
   index: "",
@@ -21,14 +22,37 @@ Page({
       navbarTitle: TAB_TITLES[activeTab],
       recordsMonth: /^\d{4}-\d{2}$/.test(options.month || "") ? options.month : "",
     });
+    this.unsubscribeLedgerSync = ledgerStore.subscribeSync((result) => {
+      if (result.changed) this.refreshActiveTab(result);
+    });
+  },
+
+  onUnload() {
+    if (this.unsubscribeLedgerSync) this.unsubscribeLedgerSync();
+    this.unsubscribeLedgerSync = null;
   },
 
   onShow() {
+    ledgerStore.syncLedgers().catch((error) => console.warn("page ledger sync failed", error));
     if (!app.globalData.recordsNeedRefresh || this.data.activeTab !== "index") return;
     const home = this.selectComponent("#tab-home");
     if (!home || typeof home.refreshDashboard !== "function") return;
     app.globalData.recordsNeedRefresh = false;
     home.refreshDashboard();
+  },
+
+  refreshActiveTab(syncResult) {
+    const targets = {
+      index: ["#tab-home", "refreshDashboard"],
+      records: ["#tab-records", "refreshRecords"],
+      analysis: ["#tab-analysis", "refreshAnalysis"],
+      profile: ["#tab-profile", "refreshAfterSync"],
+    };
+    const target = targets[this.data.activeTab];
+    if (!target) return;
+    const component = this.selectComponent(target[0]);
+    if (component && typeof component[target[1]] === "function")
+      component[target[1]](syncResult);
   },
 
   switchTab(event) {

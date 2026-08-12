@@ -1,7 +1,9 @@
 const { callApi } = require("./api");
 
 const createLedger = (data) => callApi("ledger/create", data);
+const updateLedger = (data) => callApi("ledger/update", data);
 const listLedgers = () => callApi("ledger/list");
+const syncLedgers = (revisions) => callApi("ledger/sync", { revisions });
 const setCurrentLedger = (ledgerId) => callApi("ledger/current/set", { ledgerId });
 const deleteLedger = (ledgerId) => callApi("ledger/delete", { ledgerId });
 const getLedgerMembers = (ledgerId) => callApi("ledger/members/get", { ledgerId });
@@ -20,7 +22,9 @@ const joinReadonlyLedger = (readonlyShareCode) =>
 
 module.exports = {
   createLedger,
+  updateLedger,
   listLedgers,
+  syncLedgers,
   setCurrentLedger,
   deleteLedger,
   getLedgerMembers,

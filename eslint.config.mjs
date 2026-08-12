@@ -24,6 +24,7 @@ export default [
         getApp: "readonly",
         getCurrentPages: "readonly",
         setTimeout: "readonly",
+        clearTimeout: "readonly",
         require: "readonly",
         module: "readonly",
         wx: "readonly",

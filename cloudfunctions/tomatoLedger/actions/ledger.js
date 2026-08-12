@@ -1,6 +1,8 @@
 const { execute } = require("../legacy.handlers");
 const create = (context, payload) => execute("createLedger", context.openid, payload);
+const update = (context, payload) => execute("updateLedger", context.openid, payload);
 const list = (context, payload) => execute("listLedgers", context.openid, payload);
+const sync = (context, payload) => execute("syncLedgers", context.openid, payload);
 const setCurrent = (context, payload) => execute("setCurrentLedger", context.openid, payload);
 const members = (context, payload) => execute("getLedgerMembers", context.openid, payload);
 const removeMember = (context, payload) => execute("removeLedgerMember", context.openid, payload);
@@ -13,7 +15,9 @@ const updateQuickAmounts = (context, payload) =>
 const updateAccounts = (context, payload) => execute("updateAccounts", context.openid, payload);
 module.exports = {
   create,
+  update,
   list,
+  sync,
   setCurrent,
   members,
   removeMember,

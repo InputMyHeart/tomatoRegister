@@ -6,6 +6,8 @@ test("cloud entrypoint exposes required route protocol", () => {
   for (const route of [
     "auth/login",
     "ledger/create",
+    "ledger/update",
+    "ledger/sync",
     "ledger/accounts/update",
     "record/list",
     "category/delete",

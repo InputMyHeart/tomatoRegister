@@ -1,5 +1,4 @@
 const app = getApp();
-const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
 
@@ -36,7 +35,7 @@ Page({
     if (this.data.saving) return false;
     this.setData({ saving: true });
     try {
-      const data = await ledgerService.updateAccounts({
+      const data = await ledgerStore.updateAccounts({
         ledgerId: this.data.ledgerId,
         accounts,
       });
@@ -45,7 +44,6 @@ Page({
         ...(data.ledger || {}),
       };
       app.persistAuthState();
-      await ledgerStore.refreshLedgers();
       this.setData({ accounts });
       return true;
     } catch (error) {

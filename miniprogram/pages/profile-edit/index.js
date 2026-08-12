@@ -69,7 +69,13 @@ Page({
         nickName,
       });
       wx.showToast({ title: "已保存", icon: "success" });
-      setTimeout(() => wx.navigateBack(), 350);
+      setTimeout(() => {
+        if (getCurrentPages().length > 1) {
+          wx.navigateBack();
+          return;
+        }
+        wx.reLaunch({ url: "/pages/index/index?tab=profile" });
+      }, 350);
     } catch (error) {
       wx.showToast({ title: error.message || "保存失败", icon: "none" });
     } finally {

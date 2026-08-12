@@ -87,6 +87,22 @@
       <view class="more-panel card fade-up">
         <view class="section-title">其他</view>
         <view class="function-list">
+          <view class="function-row" bindtap="syncData">
+            <view class="function-icon">
+              <tl-icon name="refresh-line" size="30" color="#f0442f">
+              </tl-icon>
+            </view>
+            <view class="function-main">
+              <view class="function-title">同步数据</view>
+              <view class="function-tip">{{syncing ? '正在检查共享账本和记录变化...' : lastSyncedText}}</view>
+            </view>
+            <view class="function-arrow">
+              <tl-icon name="loader-4-line" size="32" color="#f0442f" wx:if="{{syncing}}">
+              </tl-icon>
+              <tl-icon name="arrow-right-s-line" size="32" color="#f0442f" wx:else>
+              </tl-icon>
+            </view>
+          </view>
           <view class="function-row" bindtap="feedback">
             <view class="function-icon">
               <tl-icon name="message-3-line" size="30" color="#f0442f">

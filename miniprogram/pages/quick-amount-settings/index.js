@@ -1,5 +1,4 @@
 const app = getApp();
-const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 const DEFAULT_AMOUNTS = [18, 32, 68, 128];
 
@@ -77,7 +76,7 @@ Page({
       return wx.showToast({ title: "请设置 1-5 个有效金额", icon: "none" });
     this.setData({ saving: true });
     try {
-      const data = await ledgerService.updateQuickAmounts({
+      const data = await ledgerStore.updateQuickAmounts({
         ledgerId: this.data.ledgerId,
         quickAmountsEnabled: this.data.quickAmountsEnabled,
         quickAmounts: amounts,
@@ -87,7 +86,6 @@ Page({
         ...(data.ledger || {}),
       };
       app.persistAuthState();
-      await ledgerStore.refreshLedgers();
       wx.showToast({ title: "已保存", icon: "success" });
       setTimeout(() => wx.navigateBack(), 500);
     } catch (error) {

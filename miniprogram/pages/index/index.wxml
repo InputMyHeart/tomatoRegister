@@ -4,11 +4,11 @@
   <tl-container safe-area="{{false}}">
     <tl-tab-home id="tab-home" wx:if="{{activeTab === 'index'}}" bind:switchtab="switchTab">
     </tl-tab-home>
-    <tl-tab-records wx:elif="{{activeTab === 'records'}}" initial-month="{{recordsMonth}}">
+    <tl-tab-records id="tab-records" wx:elif="{{activeTab === 'records'}}" initial-month="{{recordsMonth}}">
     </tl-tab-records>
-    <tl-tab-analysis wx:elif="{{activeTab === 'analysis'}}">
+    <tl-tab-analysis id="tab-analysis" wx:elif="{{activeTab === 'analysis'}}">
     </tl-tab-analysis>
-    <tl-tab-profile wx:else>
+    <tl-tab-profile id="tab-profile" wx:else>
     </tl-tab-profile>
   </tl-container>
   <tl-tabbar active="{{activeTab}}" bind:change="switchTab">

@@ -77,8 +77,7 @@ Page({
         if (!result.confirm) return;
         wx.showLoading({ title: "正在移除" });
         try {
-          await ledgerService.removeLedgerMember(openid, this.data.ledgerId);
-          await ledgerStore.refreshLedgers();
+          await ledgerStore.removeLedgerMember(openid, this.data.ledgerId);
           wx.showToast({ title: "已移除", icon: "success" });
           this.loadMembers();
         } catch (error) {
@@ -95,7 +94,7 @@ Page({
     try {
       const options = await Promise.all(
         getShareOptions(this.data.ledger).map(async (item) => {
-          const data = await ledgerService.createLedgerInviteToken({
+          const data = await ledgerStore.createLedgerInviteToken({
             ledgerId: this.data.ledgerId,
             mode: item.mode,
           });

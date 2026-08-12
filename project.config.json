@@ -76,64 +76,64 @@
   "packOptions": {
     "ignore": [
       {
-        "type": "file",
-        "value": "miniprogram/images/create_cbr.png"
+        "value": "miniprogram/images/create_cbr.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/create_cbrf.png"
+        "value": "miniprogram/images/create_cbrf.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/ai_example1.png"
+        "value": "miniprogram/images/ai_example1.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/ai_example2.png"
+        "value": "miniprogram/images/ai_example2.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/env-select.png"
+        "value": "miniprogram/images/env-select.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/default-goods-image.png"
+        "value": "miniprogram/images/default-goods-image.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/database.png"
+        "value": "miniprogram/images/database.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/create_env.png"
+        "value": "miniprogram/images/create_env.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/function_deploy.png"
+        "value": "miniprogram/images/function_deploy.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/database_add.png"
+        "value": "miniprogram/images/database_add.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/scf-enter.png"
+        "value": "miniprogram/images/scf-enter.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/cloud_dev.png"
+        "value": "miniprogram/images/cloud_dev.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/avatar.png"
+        "value": "miniprogram/images/avatar.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/arrow.svg"
+        "value": "miniprogram/images/arrow.svg",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "miniprogram/images/copy.svg"
+        "value": "miniprogram/images/copy.svg",
+        "type": "file"
       }
     ],
     "include": []

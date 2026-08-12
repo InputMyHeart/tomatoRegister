@@ -1,4 +1,11 @@
 const cloud = require("wx-server-sdk");
+const {
+  collapseRanking: collapseAnalysisRanking,
+  makeComparison: getAnalysisComparison,
+  makeTrendBuckets: makeAnalysisTrendBuckets,
+  roundMoney: roundAnalysisMoney,
+  summarizeRecords: summarizeAnalysisRecords,
+} = require("./analysis.helpers");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
@@ -46,6 +53,18 @@ function fail(message, code = "FAILED") {
 
 function now() {
   return db.serverDate();
+}
+
+async function bumpLedgerSyncRevision(ledgerId) {
+  if (!ledgerId) return;
+  try {
+    await db
+      .collection("ledgers")
+      .doc(ledgerId)
+      .update({ data: { syncRevision: _.inc(1), updatedAt: now() } });
+  } catch (error) {
+    console.error("failed to bump ledger sync revision", ledgerId, error);
+  }
 }
 
 function makeCode(prefix = "", length = 8) {
@@ -347,6 +366,7 @@ async function createLedger(openid, data = {}) {
     quickAmounts: quickAmountsEnabled ? defaultQuickAmounts : [],
     accounts: defaultPaymentAccounts,
     accountsConfigured: true,
+    syncRevision: 1,
     schemaVersion: SCHEMA_VERSION,
     createdAt: now(),
     updatedAt: now(),
@@ -358,6 +378,38 @@ async function createLedger(openid, data = {}) {
     .where({ openid })
     .update({ data: { currentLedgerId: res._id, updatedAt: now() } });
   return ok({ ledgerId: res._id, ledger: { ...ledger, _id: res._id } });
+}
+
+async function updateLedger(openid, data = {}) {
+  assertLedgerId(data.ledgerId);
+  const ledger = await getLedgerForUser(openid, data.ledgerId);
+  const role = getLedgerRole(openid, ledger);
+  if (role !== "owner") return fail("只有账本拥有者可以编辑账本", "ONLY_OWNER_CAN_UPDATE_LEDGER");
+
+  const name = String(data.name || "").trim();
+  if (Array.from(name).length < 1 || Array.from(name).length > 8)
+    return fail("账本名称需为1-8个字符", "INVALID_LEDGER_NAME");
+
+  const remark = String(data.remark || "").trim();
+  if (Array.from(remark).length > 80)
+    return fail("账本备注最多 80 个字", "INVALID_LEDGER_REMARK");
+
+  if (name === String(ledger.name || "").trim() && remark === String(ledger.remark || "").trim())
+    return ok({ changed: false, ledger });
+
+  const syncRevision = Number(ledger.syncRevision || 0) + 1;
+  await db
+    .collection("ledgers")
+    .doc(ledger._id)
+    .update({
+      data: {
+        name,
+        remark,
+        syncRevision: _.inc(1),
+        updatedAt: now(),
+      },
+    });
+  return ok({ changed: true, ledger: { ...ledger, name, remark, syncRevision } });
 }
 
 async function getLedgerForUser(openid, ledgerId) {
@@ -482,6 +534,70 @@ async function listLedgers(openid) {
   return ok({ ledgers });
 }
 
+function getLedgerRevisionMap(ledgers = []) {
+  return ledgers.reduce((result, ledger) => {
+    result[ledger._id] = Number(ledger.syncRevision || 1);
+    return result;
+  }, {});
+}
+
+async function syncLedgers(openid, data = {}) {
+  const revisionRows =
+    (
+      await db
+        .collection("ledgers")
+        .where(_.or([{ ownerOpenid: openid }, { memberOpenids: openid }, { viewerOpenids: openid }]))
+        .field({ _id: true, syncRevision: true })
+        .get()
+    ).data || [];
+  await Promise.all(
+    revisionRows
+      .filter((ledger) => !Number(ledger.syncRevision))
+      .map((ledger) =>
+        db.collection("ledgers").doc(ledger._id).update({ data: { syncRevision: 1 } })
+      )
+  );
+  const revisions = getLedgerRevisionMap(revisionRows);
+  const clientRevisions =
+    data.revisions && typeof data.revisions === "object" && !Array.isArray(data.revisions)
+      ? data.revisions
+      : {};
+  const changedLedgerIds = Object.keys(revisions).filter(
+    (ledgerId) =>
+      !Object.prototype.hasOwnProperty.call(clientRevisions, ledgerId) ||
+      Number(clientRevisions[ledgerId]) !== revisions[ledgerId]
+  );
+  const removedLedgerIds = Object.keys(clientRevisions).filter(
+    (ledgerId) => !Object.prototype.hasOwnProperty.call(revisions, ledgerId)
+  );
+  const changed = Boolean(changedLedgerIds.length || removedLedgerIds.length);
+  const ledgers = changed ? await listLedgersForUser(openid) : [];
+  const user = await getUser(openid);
+  const currentLedgerId =
+    user && Object.prototype.hasOwnProperty.call(revisions, user.currentLedgerId)
+      ? user.currentLedgerId
+      : revisionRows[0]
+        ? revisionRows[0]._id
+        : "";
+  const currentLedger = changed
+    ? ledgers.find((ledger) => ledger._id === currentLedgerId) || null
+    : null;
+  if (user && user._id && user.currentLedgerId !== currentLedgerId) {
+    await db
+      .collection("users")
+      .doc(user._id)
+      .update({ data: { currentLedgerId, updatedAt: now() } });
+  }
+  return ok({
+    changed,
+    changedLedgerIds,
+    removedLedgerIds,
+    revisions,
+    currentLedgerId,
+    ...(changed ? { currentLedger, ledgers } : {}),
+  });
+}
+
 function toUniqueOpenids(values = []) {
   return Array.from(new Set(values.map((value) => String(value || "")).filter(Boolean)));
 }
@@ -552,6 +668,7 @@ async function removeLedgerMember(openid, data = {}) {
         memberOpenids,
         viewers: (ledger.viewers || []).filter((item) => item.openid !== targetOpenid),
         viewerOpenids,
+        syncRevision: _.inc(1),
         updatedAt: now(),
       },
     });
@@ -598,6 +715,7 @@ async function createRecord(openid, data = {}) {
     updatedAt: now(),
   };
   const res = await db.collection("records").add({ data: record });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok({ recordId: res._id, record });
 }
 
@@ -744,6 +862,7 @@ async function importRecords(openid, data = {}) {
         .slice(index, index + 20)
         .map((record) => db.collection("records").add({ data: record }))
     );
+  if (records.length) await bumpLedgerSyncRevision(ledger._id);
   const dates = records.map((record) => record.date).sort();
   return ok({
     imported: records.length,
@@ -893,6 +1012,7 @@ async function updateRecord(openid, data = {}) {
         updatedAt: now(),
       },
     });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok();
 }
 
@@ -906,6 +1026,7 @@ async function deleteRecord(openid, data = {}) {
     throw new Error("ONLY_OWNER_CAN_DELETE_OTHERS");
 
   await db.collection("records").doc(data.recordId).remove();
+  await bumpLedgerSyncRevision(ledger._id);
   return ok();
 }
 
@@ -926,6 +1047,7 @@ function getCurrentMonthRange() {
   return {
     year,
     month,
+    day: nowDate.getUTCDate(),
     start: makeDateText(year, month, 1),
     end: makeDateText(next.year, next.month, 1),
   };
@@ -1011,14 +1133,18 @@ async function getDashboard(openid, data = {}) {
 }
 
 function getAnalysisRange(mode, anchor) {
-  if (mode === "all") return { start: "", end: "", label: "all" };
+  if (mode === "all") return { start: "", end: "", label: "全部时间" };
   if (mode === "year") {
     const y = Number(anchor) || new Date().getFullYear();
-    return { start: String(y) + "-01-01", end: String(y + 1) + "-01-01", label: String(y) };
+    return {
+      start: String(y) + "-01-01",
+      end: String(y + 1) + "-01-01",
+      label: `${y}年`,
+    };
   }
   const c = getCurrentMonthRange(),
     m = /^(\d{4})-(\d{1,2})$/.exec(String(anchor || ""));
-  if (!m) return { ...c, label: String(c.year) + "-" + String(c.month) };
+  if (!m) return { ...c, label: `${c.year}年${c.month}月` };
   const y = Number(m[1]),
     mo = Number(m[2]),
     n = addMonth(y, mo, 1);
@@ -1027,8 +1153,17 @@ function getAnalysisRange(mode, anchor) {
     month: mo,
     start: makeDateText(y, mo, 1),
     end: makeDateText(n.year, n.month, 1),
-    label: String(y) + "-" + String(mo),
+    label: `${y}年${mo}月`,
   };
+}
+
+function getMonthDayCount(year, month) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function makeComparablePeriodEnd(year, month, day) {
+  const safeDay = Math.min(day, getMonthDayCount(year, month));
+  return new Date(Date.UTC(year, month - 1, safeDay + 1)).toISOString().slice(0, 10);
 }
 async function getAnalysisRecords(query) {
   const rows = [];
@@ -1049,6 +1184,7 @@ async function getAnalysisRecords(query) {
     offset += page.length;
   }
 }
+
 async function getAnalysis(openid, data = {}) {
   const ledger = await getLedgerForUser(openid, data.ledgerId);
   if (!ledger) return ok({ noLedger: true });
@@ -1060,46 +1196,76 @@ async function getAnalysis(openid, data = {}) {
   if (range.start) query.date = _.gte(range.start).and(_.lt(range.end));
   const records = await getAnalysisRecords(query);
   let previousRecords = [];
-  if (mode === "month") {
+  const currentMonthRange = getCurrentMonthRange();
+  const isCurrentMonth = mode === "month" && range.start === currentMonthRange.start;
+  const isCurrentYear =
+    mode === "year" && Number(range.start.slice(0, 4)) === currentMonthRange.year;
+  if (mode === "month" && records.length) {
     const prev = addMonth(range.year, range.month, -1),
       prevStart = makeDateText(prev.year, prev.month, 1);
     previousRecords = await getAnalysisRecords({
       ledgerId: ledger._id,
-      date: _.gte(prevStart).and(_.lt(range.start)),
+      date: _.gte(prevStart).and(
+        _.lt(
+          isCurrentMonth
+            ? makeComparablePeriodEnd(prev.year, prev.month, currentMonthRange.day)
+            : range.start
+        )
+      ),
     });
   }
-  if (mode === "year") {
+  if (mode === "year" && records.length) {
     const year = Number(range.start.slice(0, 4));
     previousRecords = await getAnalysisRecords({
       ledgerId: ledger._id,
-      date: _.gte(String(year - 1) + "-01-01").and(_.lt(range.start)),
+      date: _.gte(String(year - 1) + "-01-01").and(
+        _.lt(
+          isCurrentYear
+            ? makeComparablePeriodEnd(
+                year - 1,
+                currentMonthRange.month,
+                currentMonthRange.day
+              )
+            : range.start
+        )
+      ),
     });
   }
-  let income = 0,
-    expense = 0;
-  const trend = {},
-    categories = {},
+  const analysisEnd = mode === "month" ? range.end : "";
+  const analysisDayCount =
+    mode === "month"
+      ? isCurrentMonth
+        ? currentMonthRange.day
+        : Math.max(
+            1,
+            Math.round(
+              (new Date(`${analysisEnd}T00:00:00Z`) -
+                new Date(`${range.start}T00:00:00Z`)) /
+                86400000
+            )
+          )
+      : 0;
+  const overview = summarizeAnalysisRecords(records);
+  const previousOverview = summarizeAnalysisRecords(previousRecords);
+  const expense = overview.expense;
+  const categories = {},
+    incomeCategories = {},
+    accounts = {},
     members = {},
     dailyExpense = {};
   records.forEach((record) => {
     const amount = Number(record.amount || 0),
-      isIncome = record.type === "income",
-      key =
-        mode === "month"
-          ? record.date
-          : mode === "year"
-            ? record.date.slice(0, 7)
-            : record.date.slice(0, 4);
-    income += isIncome ? amount : 0;
-    expense += isIncome ? 0 : amount;
-    trend[key] = trend[key] || { label: key, income: 0, expense: 0 };
-    trend[key][isIncome ? "income" : "expense"] += amount;
-    const name = record.parentCategory || record.categoryName || "Other";
-    if (!isIncome) {
-      categories[name] = (categories[name] || 0) + amount;
-      members[record.ownerOpenid] = (members[record.ownerOpenid] || 0) + amount;
-      dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount;
+      isIncome = record.type === "income";
+    const name = record.parentCategory || record.categoryName || "其他";
+    if (isIncome) {
+      incomeCategories[name] = (incomeCategories[name] || 0) + amount;
+      return;
     }
+    const account = String(record.account || "未设置账户");
+    categories[name] = (categories[name] || 0) + amount;
+    accounts[account] = (accounts[account] || 0) + amount;
+    members[record.ownerOpenid] = (members[record.ownerOpenid] || 0) + amount;
+    dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount;
   });
   const categoryList = Object.keys(categories)
     .map((name) => ({
@@ -1108,15 +1274,31 @@ async function getAnalysis(openid, data = {}) {
       rate: expense ? Math.round((categories[name] * 100) / expense) : 0,
     }))
     .sort((a, b) => b.amount - a.amount);
+  const incomeCategoryList = Object.keys(incomeCategories)
+    .map((name) => ({
+      name,
+      amount: roundAnalysisMoney(incomeCategories[name]),
+      rate: overview.income
+        ? Math.round((incomeCategories[name] * 100) / overview.income)
+        : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+  const accountList = Object.keys(accounts)
+    .map((name) => ({
+      name,
+      amount: roundAnalysisMoney(accounts[name]),
+      rate: expense ? Math.round((accounts[name] * 100) / expense) : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
   const previousCategory = {};
   previousRecords.forEach((record) => {
-    const name = record.parentCategory || record.categoryName || "Other",
+    const name = record.parentCategory || record.categoryName || "其他",
       key = (record.type === "income" ? "income:" : "expense:") + name;
     previousCategory[key] = (previousCategory[key] || 0) + Number(record.amount || 0);
   });
   const currentCategory = {};
   records.forEach((record) => {
-    const name = record.parentCategory || record.categoryName || "Other",
+    const name = record.parentCategory || record.categoryName || "其他",
       key = (record.type === "income" ? "income:" : "expense:") + name;
     currentCategory[key] = (currentCategory[key] || 0) + Number(record.amount || 0);
   });
@@ -1184,21 +1366,12 @@ async function getAnalysis(openid, data = {}) {
           " \u662f\u7d2f\u8ba1\u652f\u51fa\u6700\u9ad8\u7684\u4e00\u5929\uff0c\u5171 \u00a5" +
           money(dailyExpense[peakDate])
       );
-    const incomeByCategory = {};
-    records.forEach((record) => {
-      if (record.type === "income") {
-        const name = record.parentCategory || record.categoryName || "Other";
-        incomeByCategory[name] = (incomeByCategory[name] || 0) + Number(record.amount || 0);
-      }
-    });
-    const topIncome = Object.keys(incomeByCategory).sort(
-      (a, b) => incomeByCategory[b] - incomeByCategory[a]
-    )[0];
+    const topIncome = incomeCategoryList[0];
     if (topIncome && insights.length < 3)
       insights.push(
-        topIncome +
+        topIncome.name +
           "\u662f\u6700\u4e3b\u8981\u7684\u6536\u5165\u6765\u6e90\uff0c\u7d2f\u8ba1 \u00a5" +
-          money(incomeByCategory[topIncome])
+          money(topIncome.amount)
       );
   }
   if (!insights.length)
@@ -1217,19 +1390,36 @@ async function getAnalysis(openid, data = {}) {
     mode,
     range,
     overview: {
-      income,
-      expense,
-      balance: Number((income - expense).toFixed(2)),
-      recordCount: records.length,
-      saveRate: income ? Math.round(((income - expense) * 100) / income) : 0,
+      ...overview,
+      dayCount: analysisDayCount,
+      dailyExpense:
+        mode === "month"
+          ? roundAnalysisMoney(expense / Math.max(1, analysisDayCount))
+          : 0,
     },
-    trend: Object.keys(trend)
-      .sort()
-      .map((key) => trend[key]),
+    previousOverview,
+    comparison: getAnalysisComparison(overview, previousOverview, mode !== "all"),
+    budget: {
+      enabled: isCurrentMonth && Boolean(ledger.budgetEnabled),
+      amount: isCurrentMonth ? Number(ledger.monthlyBudget || 0) : 0,
+      spent: expense,
+      remaining:
+        isCurrentMonth ? roundAnalysisMoney(Number(ledger.monthlyBudget || 0) - expense) : 0,
+      rate:
+        isCurrentMonth && Number(ledger.monthlyBudget || 0)
+          ? Math.round((expense * 100) / Number(ledger.monthlyBudget || 0))
+          : 0,
+    },
+    trend: makeAnalysisTrendBuckets(mode, range, records),
     categories: categoryList,
+    categoryChart: collapseAnalysisRanking(categoryList),
+    incomeCategories: incomeCategoryList,
+    incomeCategoryChart: collapseAnalysisRanking(incomeCategoryList),
+    accounts: accountList,
     members: Object.keys(members)
       .map((id) => ({
-        name: (users[id] || {}).nickName || (id === openid ? "Me" : "Member"),
+        openid: id,
+        name: (users[id] || {}).nickName || (id === openid ? "我" : "成员"),
         amount: Number(members[id].toFixed(2)),
         rate: expense ? Math.round((members[id] * 100) / expense) : 0,
       }))
@@ -1258,6 +1448,7 @@ async function updateBudget(openid, data = {}) {
     .collection("ledgers")
     .doc(ledger._id)
     .update({ data: { budgetEnabled, monthlyBudget, updatedAt: now() } });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok({ ledger: { ...ledger, budgetEnabled, monthlyBudget } });
 }
 
@@ -1281,6 +1472,7 @@ async function updateQuickAmounts(openid, data = {}) {
     .collection("ledgers")
     .doc(ledger._id)
     .update({ data: { quickAmountsEnabled, quickAmounts, updatedAt: now() } });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok({ ledger: { ...ledger, quickAmountsEnabled, quickAmounts } });
 }
 function normalizePaymentAccounts(values) {
@@ -1300,6 +1492,7 @@ async function updateAccounts(openid, data = {}) {
     .collection("ledgers")
     .doc(ledger._id)
     .update({ data: { accounts, accountsConfigured: true, updatedAt: now() } });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok({ ledger: { ...ledger, accounts, accountsConfigured: true } });
 }
 async function createLedgerInviteToken(openid, data = {}) {
@@ -1319,6 +1512,7 @@ async function createLedgerInviteToken(openid, data = {}) {
       updatedAt: now(),
     },
   });
+  await bumpLedgerSyncRevision(ledger._id);
   return ok({ token, mode });
 }
 
@@ -1350,6 +1544,7 @@ async function joinLedgerByInviteToken(openid, data = {}) {
             data: {
               members: [...(ledger.members || []), { openid, role: "member", joinedAt: now() }],
               memberOpenids: toUniqueOpenids([...(ledger.memberOpenids || []), openid]),
+              syncRevision: _.inc(1),
               updatedAt: now(),
             },
           });
@@ -1361,6 +1556,7 @@ async function joinLedgerByInviteToken(openid, data = {}) {
             data: {
               viewers: [...(ledger.viewers || []), { openid, joinedAt: now() }],
               viewerOpenids: toUniqueOpenids([...(ledger.viewerOpenids || []), openid]),
+              syncRevision: _.inc(1),
               updatedAt: now(),
             },
           });
@@ -1394,6 +1590,7 @@ async function joinLedger(openid, data = {}) {
       data: {
         members: _.push([{ openid, role: "member", joinedAt: new Date() }]),
         memberOpenids: _.push([openid]),
+        syncRevision: _.inc(1),
         updatedAt: now(),
       },
     });
@@ -1416,6 +1613,7 @@ async function joinReadonlyLedger(openid, data = {}) {
       data: {
         viewers: _.push([{ openid, joinedAt: new Date() }]),
         viewerOpenids: _.push([openid]),
+        syncRevision: _.inc(1),
         updatedAt: now(),
       },
     });
@@ -1556,6 +1754,7 @@ async function resetDatabase(openid, data = {}) {
   const user = await getUser(openid);
   if (user && user._id) {
     const remainingLedgers = await listLedgersForUser(openid);
+    await Promise.all(remainingLedgers.map((ledger) => bumpLedgerSyncRevision(ledger._id)));
     const currentLedger = remainingLedgers[0] || null;
     await db
       .collection("users")
@@ -1780,6 +1979,7 @@ async function saveCategory(openid, data = {}) {
         .collection("categories")
         .where({ ledgerId: ledger._id, parentId: category._id })
         .update({ data: { parentName: name, updatedAt: now() } });
+    await bumpLedgerSyncRevision(ledger._id);
     return ok();
   }
   const level = data.level === "parent" ? "parent" : "child";
@@ -1810,6 +2010,7 @@ async function saveCategory(openid, data = {}) {
   });
   if (level === "parent")
     await addDefaultChild(ledger._id, { _id: addResult._id, type, name, icon }, openid);
+  await bumpLedgerSyncRevision(ledger._id);
   return ok();
 }
 async function getOtherDefaultChild(ledger, type, openid) {
@@ -1881,6 +2082,7 @@ async function removeCategory(openid, data = {}) {
       status: "complete",
       completedAt: now(),
     });
+    await bumpLedgerSyncRevision(ledger._id);
   }
   return ok({ operationId: operation._id });
 }
@@ -1892,7 +2094,9 @@ async function execute(operation, openid, payload = {}) {
     resetDatabase,
     updateProfile,
     createLedger,
+    updateLedger,
     listLedgers,
+    syncLedgers,
     listCategories,
     saveCategory,
     removeCategory,

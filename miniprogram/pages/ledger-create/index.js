@@ -1,5 +1,4 @@
 const app = getApp();
-const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 const ledgerTypes = [
   {
@@ -82,7 +81,7 @@ Page({
     }
     this.setData({ saving: true });
     try {
-      const payload = await ledgerService.createLedger({
+      const payload = await ledgerStore.createLedger({
         type: this.data.selectedType,
         name,
         remark,
@@ -95,7 +94,6 @@ Page({
       if (app.globalData.user)
         app.globalData.user.currentLedgerId = payload.ledgerId || ledger._id || "";
       app.persistAuthState();
-      await ledgerStore.refreshLedgers();
       this.setData({
         createdLedger: ledger,
         createdLedgerId: payload.ledgerId || ledger._id || "",

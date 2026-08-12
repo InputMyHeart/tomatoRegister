@@ -34,6 +34,8 @@ Component({
     recordCount: 0,
     ledgerCount: 0,
     readonly: false,
+    syncing: false,
+    lastSyncedText: "尚未同步",
     currentLedger: {
       id: "",
       name: "我家账本",
@@ -45,11 +47,18 @@ Component({
   lifetimes: {
     attached() {
       this.syncAuthState();
+      this.setData({ lastSyncedText: this.formatSyncedAt(ledgerStore.getLastSyncedAt()) });
       this.refreshHeroData();
     },
   },
 
   methods: {
+    formatSyncedAt(value) {
+      if (!value) return "尚未同步";
+      const date = new Date(value);
+      return `上次同步 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    },
+
     syncAuthState() {
       const { user, currentLedger, stats } = app.globalData;
       if (!user) {
@@ -93,6 +102,26 @@ Component({
         console.error("refresh profile hero failed", error);
       } finally {
         this.refreshingHero = false;
+      }
+    },
+
+    refreshAfterSync() {
+      this.syncAuthState();
+      this.refreshHeroData();
+    },
+
+    async syncData() {
+      if (this.data.syncing) return;
+      this.setData({ syncing: true });
+      try {
+        const result = await ledgerStore.syncLedgers({ force: true });
+        await this.refreshHeroData();
+        this.setData({ lastSyncedText: this.formatSyncedAt(result.syncedAt || Date.now()) });
+        wx.showToast({ title: result.changed ? "已同步最新数据" : "数据已是最新", icon: "success" });
+      } catch (error) {
+        wx.showToast({ title: error.message || "同步失败", icon: "none" });
+      } finally {
+        this.setData({ syncing: false });
       }
     },
 
@@ -190,7 +219,7 @@ Component({
       try {
         await profileService.resetDatabase();
         await app.loginWithWechat({ force: true });
-        await ledgerStore.refreshLedgers();
+        await ledgerStore.syncLedgers({ force: true });
         wx.reLaunch({ url: "/pages/index/index" });
         wx.showToast({ title: "已清空", icon: "success" });
       } catch (error) {

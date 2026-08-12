@@ -17,6 +17,8 @@ App({
 
   authRequest: null,
   authVerifiedInSession: false,
+  ledgerSyncTimer: null,
+  ledgerSyncActive: false,
 
   onLaunch() {
     if (!wx.cloud) {
@@ -39,6 +41,38 @@ App({
         showCancel: false,
       });
     }
+  },
+
+  onShow() {
+    this.startLedgerAutoSync();
+  },
+
+  onHide() {
+    this.stopLedgerAutoSync();
+  },
+
+  startLedgerAutoSync() {
+    this.stopLedgerAutoSync();
+    this.ledgerSyncActive = true;
+    const run = async () => {
+      if (this.globalData.loggedIn) {
+        try {
+          await ledgerStore.syncLedgers();
+        } catch (error) {
+          console.warn("automatic ledger sync failed", error);
+        }
+      }
+      if (this.ledgerSyncActive) {
+        this.ledgerSyncTimer = setTimeout(run, ledgerStore.DEFAULT_SYNC_INTERVAL_MS);
+      }
+    };
+    run();
+  },
+
+  stopLedgerAutoSync() {
+    this.ledgerSyncActive = false;
+    if (this.ledgerSyncTimer) clearTimeout(this.ledgerSyncTimer);
+    this.ledgerSyncTimer = null;
   },
 
   restoreAuthState() {
@@ -91,6 +125,7 @@ App({
         this.globalData.loggedIn = true;
         this.authVerifiedInSession = true;
         this.persistAuthState();
+        this.startLedgerAutoSync();
         return auth;
       })
       .catch((error) => {
@@ -122,6 +157,7 @@ App({
     this.globalData.loggedIn = false;
     this.authVerifiedInSession = false;
     this.authRequest = null;
+    this.stopLedgerAutoSync();
     wx.removeStorageSync("tomatoLedgerAuth");
   },
 });
