@@ -391,8 +391,7 @@ async function updateLedger(openid, data = {}) {
     return fail("账本名称需为1-8个字符", "INVALID_LEDGER_NAME");
 
   const remark = String(data.remark || "").trim();
-  if (Array.from(remark).length > 80)
-    return fail("账本备注最多 80 个字", "INVALID_LEDGER_REMARK");
+  if (Array.from(remark).length > 80) return fail("账本备注最多 80 个字", "INVALID_LEDGER_REMARK");
 
   if (name === String(ledger.name || "").trim() && remark === String(ledger.remark || "").trim())
     return ok({ changed: false, ledger });
@@ -546,7 +545,9 @@ async function syncLedgers(openid, data = {}) {
     (
       await db
         .collection("ledgers")
-        .where(_.or([{ ownerOpenid: openid }, { memberOpenids: openid }, { viewerOpenids: openid }]))
+        .where(
+          _.or([{ ownerOpenid: openid }, { memberOpenids: openid }, { viewerOpenids: openid }])
+        )
         .field({ _id: true, syncRevision: true })
         .get()
     ).data || [];
@@ -554,7 +555,10 @@ async function syncLedgers(openid, data = {}) {
     revisionRows
       .filter((ledger) => !Number(ledger.syncRevision))
       .map((ledger) =>
-        db.collection("ledgers").doc(ledger._id).update({ data: { syncRevision: 1 } })
+        db
+          .collection("ledgers")
+          .doc(ledger._id)
+          .update({ data: { syncRevision: 1 } })
       )
   );
   const revisions = getLedgerRevisionMap(revisionRows);
@@ -1132,28 +1136,61 @@ async function getDashboard(openid, data = {}) {
   });
 }
 
-function getAnalysisRange(mode, anchor) {
-  if (mode === "all") return { start: "", end: "", label: "全部时间" };
+function isAnalysisDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))) return false;
+  const [year, month, day] = String(value).split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() + 1 === month && date.getUTCDate() === day
+  );
+}
+
+function addAnalysisDays(dateText, delta) {
+  const date = new Date(`${dateText}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + delta);
+  return date.toISOString().slice(0, 10);
+}
+
+function getAnalysisRange(mode, anchor, customStart, customEnd) {
+  const current = getCurrentMonthRange();
+  const today = makeDateText(current.year, current.month, current.day);
+  if (mode === "all") return { start: "", end: "", label: "\u5168\u90e8\u65f6\u95f4" };
   if (mode === "year") {
-    const y = Number(anchor) || new Date().getFullYear();
+    const year = Number(anchor) || current.year;
     return {
-      start: String(y) + "-01-01",
-      end: String(y + 1) + "-01-01",
-      label: `${y}年`,
+      start: String(year) + "-01-01",
+      end: String(year + 1) + "-01-01",
+      label: `${year}\u5e74`,
     };
   }
-  const c = getCurrentMonthRange(),
-    m = /^(\d{4})-(\d{1,2})$/.exec(String(anchor || ""));
-  if (!m) return { ...c, label: `${c.year}年${c.month}月` };
-  const y = Number(m[1]),
-    mo = Number(m[2]),
-    n = addMonth(y, mo, 1);
+  if (mode === "calendar") {
+    const start = isAnalysisDate(anchor) ? anchor : today;
+    return {
+      start,
+      end: addAnalysisDays(start, 1),
+      label: start,
+    };
+  }
+  if (mode === "custom") {
+    const start = isAnalysisDate(customStart) ? customStart : current.start;
+    const endInclusive = isAnalysisDate(customEnd) && customEnd >= start ? customEnd : today;
+    return {
+      start,
+      end: addAnalysisDays(endInclusive, 1),
+      label: `${start} \u81f3 ${endInclusive}`,
+    };
+  }
+  const match = /^(\d{4})-(\d{1,2})$/.exec(String(anchor || ""));
+  if (!match) return { ...current, label: `${current.year}\u5e74${current.month}\u6708` };
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const next = addMonth(year, month, 1);
   return {
-    year: y,
-    month: mo,
-    start: makeDateText(y, mo, 1),
-    end: makeDateText(n.year, n.month, 1),
-    label: `${y}年${mo}月`,
+    year,
+    month,
+    start: makeDateText(year, month, 1),
+    end: makeDateText(next.year, next.month, 1),
+    label: `${year}\u5e74${month}\u6708`,
   };
 }
 
@@ -1190,8 +1227,10 @@ async function getAnalysis(openid, data = {}) {
   if (!ledger) return ok({ noLedger: true });
   const role = getLedgerRole(openid, ledger);
   assertReadable(role);
-  const mode = ["month", "year", "all"].includes(data.mode) ? data.mode : "month";
-  const range = getAnalysisRange(mode, data.anchor);
+  const mode = ["month", "year", "calendar", "custom", "all"].includes(data.mode)
+    ? data.mode
+    : "month";
+  const range = getAnalysisRange(mode, data.anchor, data.customStart, data.customEnd);
   const query = { ledgerId: ledger._id };
   if (range.start) query.date = _.gte(range.start).and(_.lt(range.end));
   const records = await getAnalysisRecords(query);
@@ -1221,30 +1260,37 @@ async function getAnalysis(openid, data = {}) {
       date: _.gte(String(year - 1) + "-01-01").and(
         _.lt(
           isCurrentYear
-            ? makeComparablePeriodEnd(
-                year - 1,
-                currentMonthRange.month,
-                currentMonthRange.day
-              )
+            ? makeComparablePeriodEnd(year - 1, currentMonthRange.month, currentMonthRange.day)
             : range.start
         )
       ),
     });
   }
-  const analysisEnd = mode === "month" ? range.end : "";
-  const analysisDayCount =
-    mode === "month"
-      ? isCurrentMonth
-        ? currentMonthRange.day
-        : Math.max(
-            1,
-            Math.round(
-              (new Date(`${analysisEnd}T00:00:00Z`) -
-                new Date(`${range.start}T00:00:00Z`)) /
-                86400000
-            )
+  if (["calendar", "custom"].includes(mode) && records.length) {
+    const periodDays = Math.max(
+      1,
+      Math.round(
+        (new Date(`${range.end}T00:00:00Z`) - new Date(`${range.start}T00:00:00Z`)) / 86400000
+      )
+    );
+    const previousStart = addAnalysisDays(range.start, -periodDays);
+    previousRecords = await getAnalysisRecords({
+      ledgerId: ledger._id,
+      date: _.gte(previousStart).and(_.lt(range.start)),
+    });
+  }
+  const hasDailyRange = ["month", "calendar", "custom"].includes(mode);
+  const analysisEnd = hasDailyRange ? range.end : "";
+  const analysisDayCount = hasDailyRange
+    ? mode === "month" && isCurrentMonth
+      ? currentMonthRange.day
+      : Math.max(
+          1,
+          Math.round(
+            (new Date(`${analysisEnd}T00:00:00Z`) - new Date(`${range.start}T00:00:00Z`)) / 86400000
           )
-      : 0;
+        )
+    : 0;
   const overview = summarizeAnalysisRecords(records);
   const previousOverview = summarizeAnalysisRecords(previousRecords);
   const expense = overview.expense;
@@ -1278,9 +1324,7 @@ async function getAnalysis(openid, data = {}) {
     .map((name) => ({
       name,
       amount: roundAnalysisMoney(incomeCategories[name]),
-      rate: overview.income
-        ? Math.round((incomeCategories[name] * 100) / overview.income)
-        : 0,
+      rate: overview.income ? Math.round((incomeCategories[name] * 100) / overview.income) : 0,
     }))
     .sort((a, b) => b.amount - a.amount);
   const accountList = Object.keys(accounts)
@@ -1378,6 +1422,24 @@ async function getAnalysis(openid, data = {}) {
     insights.push(
       "\u8fd9\u6bb5\u65f6\u95f4\u8fd8\u6ca1\u6709\u8db3\u591f\u7684\u8bb0\u5f55\u53ef\u4ee5\u5206\u6790"
     );
+  const comparison = getAnalysisComparison(overview, previousOverview, mode !== "all");
+  const insightGroups = { up: [], down: [], neutral: [...insights] };
+  if (comparison.enabled) {
+    const labels = {
+      income: "\u6536\u5165",
+      expense: "\u652f\u51fa",
+      balance: "\u7ed3\u4f59",
+    };
+    Object.keys(labels).forEach((metric) => {
+      const item = comparison[metric];
+      if (!item || item.direction === "flat") return;
+      const direction = item.direction === "up" ? "up" : "down";
+      const amount = money(Math.abs(item.delta));
+      insightGroups[direction].push(
+        `${labels[metric]}${direction === "up" ? "\u4e0a\u5347" : "\u4e0b\u964d"} \u00a5${amount}`
+      );
+    });
+  }
   const users = await getUsersByOpenids(Object.keys(members));
   return ok({
     ledger: {
@@ -1392,19 +1454,18 @@ async function getAnalysis(openid, data = {}) {
     overview: {
       ...overview,
       dayCount: analysisDayCount,
-      dailyExpense:
-        mode === "month"
-          ? roundAnalysisMoney(expense / Math.max(1, analysisDayCount))
-          : 0,
+      dailyExpense: hasDailyRange ? roundAnalysisMoney(expense / Math.max(1, analysisDayCount)) : 0,
     },
     previousOverview,
-    comparison: getAnalysisComparison(overview, previousOverview, mode !== "all"),
+    comparison,
+    insightGroups,
     budget: {
       enabled: isCurrentMonth && Boolean(ledger.budgetEnabled),
       amount: isCurrentMonth ? Number(ledger.monthlyBudget || 0) : 0,
       spent: expense,
-      remaining:
-        isCurrentMonth ? roundAnalysisMoney(Number(ledger.monthlyBudget || 0) - expense) : 0,
+      remaining: isCurrentMonth
+        ? roundAnalysisMoney(Number(ledger.monthlyBudget || 0) - expense)
+        : 0,
       rate:
         isCurrentMonth && Number(ledger.monthlyBudget || 0)
           ? Math.round((expense * 100) / Number(ledger.monthlyBudget || 0))

@@ -461,3 +461,140 @@
   border-radius: 50%;
   background: var(--tl-color-primary);
 }
+
+/* Analysis filters use horizontal scroll so five range modes remain readable. */
+.analysis-filter-panel {
+  width: 100%;
+  margin: 0 0 20rpx;
+  padding: 0;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.segmented {
+  display: inline-flex;
+  min-width: 100%;
+  gap: 8rpx;
+}
+
+.seg-item {
+  min-width: 110rpx;
+}
+
+.custom-range {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  margin: -8rpx 0 20rpx;
+  padding: 12rpx 20rpx;
+  border: 1rpx solid rgba(240, 68, 47, 0.12);
+  border-radius: var(--tl-radius-control);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.custom-date-picker {
+  display: flex;
+  gap: 8rpx;
+  color: var(--tl-color-text);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
+}
+
+.custom-date-label,
+.custom-range-divider {
+  color: var(--tl-color-text-tertiary);
+  font-weight: var(--tl-font-weight-regular);
+}
+
+.insight-card {
+  margin-top: 0;
+}
+
+.insight-group + .insight-group {
+  margin-top: 12rpx;
+}
+
+.insight-group-title {
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+  font-weight: var(--tl-font-weight-bold);
+}
+
+.insight-group-up .insight-group-title {
+  color: var(--tl-color-income);
+}
+
+.insight-group-up .insight-mark {
+  background: var(--tl-color-income);
+}
+
+.insight-group-down .insight-group-title {
+  color: var(--tl-color-expense);
+}
+
+.insight-group-down .insight-mark {
+  background: var(--tl-color-expense);
+}
+
+.section-head {
+  margin-top: 28rpx;
+}
+
+.chart-card {
+  margin-top: 0;
+}
+
+.analysis-chart-canvas,
+#analysis-chart {
+  height: 360rpx;
+}
+
+.data-panel {
+  height: 360rpx;
+  margin-top: 20rpx;
+  padding: 28rpx;
+}
+
+.data-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.data-panel-count {
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+}
+
+.data-panel-scroll {
+  height: 250rpx;
+  margin-top: 18rpx;
+}
+
+.trend-data-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 0 0 14rpx;
+  border-bottom: 1rpx solid var(--tl-color-divider);
+}
+
+.trend-data-item + .trend-data-item {
+  margin-top: 16rpx;
+}
+
+.trend-data-label {
+  flex: 0 0 auto;
+  color: var(--tl-color-text-secondary);
+  font-size: var(--tl-font-body-sm);
+  font-weight: var(--tl-font-weight-bold);
+}
+
+.trend-data-values {
+  display: flex;
+  gap: 12rpx;
+  color: var(--tl-color-text-tertiary);
+  font-size: var(--tl-font-caption);
+}

@@ -31,19 +31,22 @@ function summarizeRecords(records = []) {
 
 function makeComparison(current, previous, enabled) {
   const metrics = ["income", "expense", "balance", "recordCount"];
-  return metrics.reduce((result, metric) => {
-    const currentValue = Number(current[metric] || 0);
-    const previousValue = Number(previous[metric] || 0);
-    const delta = roundMoney(currentValue - previousValue);
-    result[metric] = {
-      current: currentValue,
-      previous: previousValue,
-      delta,
-      rate: previousValue ? Math.round((delta * 100) / Math.abs(previousValue)) : null,
-      direction: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
-    };
-    return result;
-  }, { enabled: Boolean(enabled) });
+  return metrics.reduce(
+    (result, metric) => {
+      const currentValue = Number(current[metric] || 0);
+      const previousValue = Number(previous[metric] || 0);
+      const delta = roundMoney(currentValue - previousValue);
+      result[metric] = {
+        current: currentValue,
+        previous: previousValue,
+        delta,
+        rate: previousValue ? Math.round((delta * 100) / Math.abs(previousValue)) : null,
+        direction: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
+      };
+      return result;
+    },
+    { enabled: Boolean(enabled) }
+  );
 }
 
 function makeTrendBuckets(mode, range, records = []) {
@@ -51,14 +54,18 @@ function makeTrendBuckets(mode, range, records = []) {
   const ensureBucket = (key, label) => {
     buckets[key] = buckets[key] || { key, label, income: 0, expense: 0, balance: 0 };
   };
-  if (mode === "month") {
+  if (["month", "calendar", "custom"].includes(mode)) {
     const days = Math.round(
       (new Date(`${range.end}T00:00:00Z`) - new Date(`${range.start}T00:00:00Z`)) /
         (24 * 60 * 60 * 1000)
     );
-    for (let day = 1; day <= days; day += 1) {
-      const key = `${range.start.slice(0, 8)}${String(day).padStart(2, "0")}`;
-      ensureBucket(key, `${day}日`);
+    for (let day = 0; day < days; day += 1) {
+      const key = new Date(
+        new Date(`${range.start}T00:00:00Z`).getTime() + day * 24 * 60 * 60 * 1000
+      )
+        .toISOString()
+        .slice(0, 10);
+      ensureBucket(key, `${Number(key.slice(8, 10))}\u65e5`);
     }
   } else if (mode === "year") {
     const year = range.start.slice(0, 4);
@@ -70,22 +77,19 @@ function makeTrendBuckets(mode, range, records = []) {
     const years = records.map((record) => Number(record.date.slice(0, 4))).filter(Number.isFinite);
     const firstYear = Math.min(...years);
     const lastYear = Math.max(...years);
-    for (let year = firstYear; year <= lastYear; year += 1)
-      ensureBucket(String(year), `${year}年`);
+    for (let year = firstYear; year <= lastYear; year += 1) ensureBucket(String(year), `${year}年`);
   }
   records.forEach((record) => {
-    const key =
-      mode === "month"
-        ? record.date
-        : mode === "year"
-          ? record.date.slice(0, 7)
-          : record.date.slice(0, 4);
-    const label =
-      mode === "month"
-        ? `${Number(record.date.slice(8, 10))}日`
-        : mode === "year"
-          ? `${Number(record.date.slice(5, 7))}月`
-          : `${key}年`;
+    const key = ["month", "calendar", "custom"].includes(mode)
+      ? record.date
+      : mode === "year"
+        ? record.date.slice(0, 7)
+        : record.date.slice(0, 4);
+    const label = ["month", "calendar", "custom"].includes(mode)
+      ? `${Number(record.date.slice(8, 10))}日`
+      : mode === "year"
+        ? `${Number(record.date.slice(5, 7))}月`
+        : `${key}年`;
     ensureBucket(key, label);
     const amount = Number(record.amount || 0);
     buckets[key][record.type === "income" ? "income" : "expense"] += amount;
@@ -112,4 +116,10 @@ function collapseRanking(rows = [], limit = 5) {
   ];
 }
 
-module.exports = { collapseRanking, makeComparison, makeTrendBuckets, roundMoney, summarizeRecords };
+module.exports = {
+  collapseRanking,
+  makeComparison,
+  makeTrendBuckets,
+  roundMoney,
+  summarizeRecords,
+};

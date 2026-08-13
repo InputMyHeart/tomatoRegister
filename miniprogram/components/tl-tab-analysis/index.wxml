@@ -1,5 +1,5 @@
 <view class="tab-panel analysis-page">
-  <scroll-view class="analysis-scroll" scroll-y="{{true}}" show-scrollbar="{{false}}">
+  <scroll-view class="analysis-scroll" scroll-y="{{true}}" enhanced="{{true}}" enable-flex="{{true}}" show-scrollbar="{{false}}">
     <view class="page-content">
       <view class="analysis-header fade-up">
         <view class="analysis-toolbar">
@@ -8,7 +8,7 @@
             <tl-icon name="arrow-down-s-line" size="28" color="#f0442f">
             </tl-icon>
           </view>
-          <view class="month-switcher {{mode === 'all' ? 'is-static' : ''}}">
+          <view wx:if="{{mode !== 'custom'}}" class="month-switcher {{mode === 'all' ? 'is-static' : ''}}">
             <view wx:if="{{mode !== 'all'}}" class="month-nav" data-delta="-1" bindtap="shift">
               <tl-icon name="arrow-left-s-line" size="38" color="#f0442f">
               </tl-icon>
@@ -20,15 +20,31 @@
             </view>
           </view>
         </view>
-        <view class="analysis-filter-panel">
+        <scroll-view class="analysis-filter-panel" scroll-x="{{true}}" show-scrollbar="{{false}}">
           <view class="segmented">
             <view class="seg-item {{mode === 'month' ? 'active' : ''}}" data-mode="month" bindtap="switchMode">月度</view>
             <view class="seg-item {{mode === 'year' ? 'active' : ''}}" data-mode="year" bindtap="switchMode">年度</view>
+            <view class="seg-item {{mode === 'calendar' ? 'active' : ''}}" data-mode="calendar" bindtap="switchMode">日历</view>
+            <view class="seg-item {{mode === 'custom' ? 'active' : ''}}" data-mode="custom" bindtap="switchMode">自定义</view>
             <view class="seg-item {{mode === 'all' ? 'active' : ''}}" data-mode="all" bindtap="switchMode">全部</view>
           </view>
+        </scroll-view>
+        <view wx:if="{{mode === 'custom'}}" class="custom-range">
+          <picker mode="date" value="{{customStart}}" end="{{customEnd}}" bindchange="changeCustomStart">
+            <view class="custom-date-picker">
+              <text class="custom-date-label">开始</text>
+              <text>{{customStart}}</text>
+            </view>
+          </picker>
+          <text class="custom-range-divider">至</text>
+          <picker mode="date" value="{{customEnd}}" start="{{customStart}}" bindchange="changeCustomEnd">
+            <view class="custom-date-picker">
+              <text class="custom-date-label">结束</text>
+              <text>{{customEnd}}</text>
+            </view>
+          </picker>
         </view>
       </view>
-
       <tl-skeleton wx:if="{{loading}}" variant="analysis">
       </tl-skeleton>
       <tl-empty-state wx:elif="{{error}}" variant="error" title="分析数据加载失败" description="请检查网络后重新加载">
@@ -38,70 +54,42 @@
       </tl-empty-state>
       <tl-empty-state wx:elif="{{!hasRecords}}" title="这个时段还没有记录" description="换一个时间范围，或者先记下第一笔收支">
       </tl-empty-state>
-
       <block wx:else>
-        <view class="overview-card card fade-up">
-          <view class="overview-head">
-            <view>
-              <text class="overview-kicker">{{mode === 'all' ? '历史累计' : '现金流概览'}}</text>
-              <view class="overview-title">{{mode === 'all' ? '账本成立至今' : rangeLabel}}</view>
-            </view>
-            <view class="save-badge {{overview.saveRateAvailable && overview.saveRate < 0 ? 'is-negative' : ''}}">{{overview.saveRateText}}</view>
-          </view>
-          <view class="main-balance">
-            <text class="balance-label">{{mode === 'all' ? '累计结余' : '本期结余'}}</text>
-            <text class="balance-value {{overview.balance < 0 ? 'is-negative' : ''}}">¥{{overview.balanceText}}</text>
-            <text wx:if="{{comparison.enabled}}" class="balance-compare">{{comparisonLabel}} {{balanceCompareText}}</text>
-          </view>
-          <view class="money-grid">
-            <view class="money-cell income-cell">
-              <text>收入</text>
-              <text>¥{{overview.incomeText}}</text>
-              <text wx:if="{{comparison.enabled}}" class="metric-compare">{{comparisonLabel}} {{incomeCompareText}}</text>
-            </view>
-            <view class="money-cell expense-cell">
-              <text>支出</text>
-              <text>¥{{overview.expenseText}}</text>
-              <text wx:if="{{comparison.enabled}}" class="metric-compare">{{comparisonLabel}} {{expenseCompareText}}</text>
-            </view>
-            <view class="money-cell">
-              <text>记录</text>
-              <text>{{overview.recordCount}} 笔</text>
-              <text wx:if="{{mode === 'month'}}" class="metric-compare">日均 ¥{{overview.dailyExpenseText}}</text>
-            </view>
-          </view>
-        </view>
-
-        <view wx:if="{{budget.enabled}}" class="budget-card card fade-up">
+        <view wx:if="{{hasInsights}}" class="insight-card card fade-up">
           <view class="card-heading-row">
-            <view>
-              <text class="section-kicker">预算执行</text>
-              <view class="card-title">本月已用 {{budget.rate}}%</view>
+            <text class="section-kicker">本期洞察</text>
+            <tl-icon name="lightbulb-line" size="36" color="#f0442f">
+            </tl-icon>
+          </view>
+          <view class="insight-list">
+            <view wx:if="{{insightGroups.up.length}}" class="insight-group insight-group-up">
+              <text class="insight-group-title">上升</text>
+              <view wx:for="{{insightGroups.up}}" wx:key="*this" class="insight-item">
+                <view class="insight-mark">
+                </view>
+                <text>{{item}}</text>
+              </view>
             </view>
-            <text class="budget-state {{budget.remaining < 0 ? 'is-over' : ''}}">{{budget.remaining < 0 ? '超出' : '剩余'}} ¥{{budget.remainingText}}</text>
-          </view>
-          <tl-budget-progress enabled="{{true}}" budget="{{budget.amount}}" expense="{{budget.spent}}">
-          </tl-budget-progress>
-          <view class="budget-meta">
-            <text>已支出 ¥{{budget.spentText}}</text>
-            <text>预算 ¥{{budget.amountText}}</text>
-          </view>
-        </view>
-
-        <view class="quick-metrics fade-up">
-          <view class="quick-metric card">
-            <text>单笔平均支出</text>
-            <text>¥{{overview.averageExpenseText}}</text>
-          </view>
-          <view class="quick-metric card">
-            <text>最大单笔支出</text>
-            <text>¥{{overview.largestExpenseText}}</text>
+            <view wx:if="{{insightGroups.down.length}}" class="insight-group insight-group-down">
+              <text class="insight-group-title">下降</text>
+              <view wx:for="{{insightGroups.down}}" wx:key="*this" class="insight-item">
+                <view class="insight-mark">
+                </view>
+                <text>{{item}}</text>
+              </view>
+            </view>
+            <view wx:if="{{insightGroups.neutral.length}}" class="insight-group">
+              <text class="insight-group-title">重点</text>
+              <view wx:for="{{insightGroups.neutral}}" wx:key="*this" class="insight-item">
+                <view class="insight-mark">
+                </view>
+                <text>{{item}}</text>
+              </view>
+            </view>
           </view>
         </view>
-
         <view class="section-head fade-up">
           <text class="section-kicker">数据分析</text>
-          <view class="section-title">从不同角度看账本</view>
         </view>
         <scroll-view class="chart-switcher" scroll-x="{{true}}" show-scrollbar="{{false}}">
           <view class="chart-tabs">
@@ -112,65 +100,49 @@
             <view wx:if="{{ledgerType === 'shared'}}" class="chart-tab {{activeChart === 'member' ? 'is-active' : ''}}" data-chart="member" bindtap="switchChart">成员录入</view>
           </view>
         </scroll-view>
-
         <view class="chart-card card fade-up">
-          <view class="chart-heading">
-            <view>
-              <view class="card-title">{{chartTitle}}</view>
-              <view class="chart-subtitle">{{chartSubtitle}}</view>
-            </view>
-            <view class="touch-hint">
-              <tl-icon name="cursor-line" size="26" color="#9a8278">
-              </tl-icon>
-              <text>轻触看详情</text>
-            </view>
-          </view>
+          <view class="card-title">{{chartTitle}}</view>
           <view wx:if="{{hasChartData}}" class="analysis-chart-canvas">
-            <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}" bind:init="onChartInit" bind:initerror="onChartInitError">
+            <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}" bind:init="onChartInit" bind:initerror="onChartInitError" force-use-old-canvas="true">
             </ec-canvas>
           </view>
           <view wx:else class="empty-copy">这个维度暂时没有可展示的数据</view>
         </view>
-
-        <view wx:if="{{activeChart !== 'trend' && activeRanking.length}}" class="ranking-card card fade-up">
-          <view class="card-title">金额排行</view>
-          <view class="ranking-list">
-            <view wx:for="{{activeRanking}}" wx:key="name" class="ranking-item">
-              <view class="ranking-main">
-                <text class="ranking-index">{{item.rank}}</text>
-                <text class="ranking-name">{{item.name}}</text>
-                <text class="ranking-rate">{{item.rate}}%</text>
-                <text class="ranking-amount">¥{{item.amountText}}</text>
-              </view>
-              <view class="ranking-track">
-                <view class="ranking-bar" style="{{item.barStyle}}">
+        <view wx:if="{{hasDetailRows}}" class="data-panel card fade-up">
+          <view class="data-panel-heading">
+            <text class="card-title">对应数据</text>
+            <text class="data-panel-count">{{activeDetailRows.length}} 项</text>
+          </view>
+          <scroll-view class="data-panel-scroll" scroll-y="{{true}}" show-scrollbar="{{false}}">
+            <view wx:if="{{activeChart === 'trend'}}">
+              <view wx:for="{{activeDetailRows}}" wx:key="key" class="trend-data-item">
+                <text class="trend-data-label">{{item.label}}</text>
+                <view class="trend-data-values">
+                  <text>收 ¥{{item.incomeText}}</text>
+                  <text>支 ¥{{item.expenseText}}</text>
+                  <text>余 ¥{{item.balanceText}}</text>
                 </view>
               </view>
             </view>
-          </view>
-        </view>
-
-        <view wx:if="{{insights.length}}" class="insight-card card fade-up">
-          <view class="card-heading-row">
-            <view>
-              <text class="section-kicker">本期洞察</text>
-              <view class="card-title">值得留意</view>
-            </view>
-            <tl-icon name="lightbulb-line" size="38" color="#f0442f">
-            </tl-icon>
-          </view>
-          <view class="insight-list">
-            <view wx:for="{{insights}}" wx:key="*this" class="insight-item">
-              <view class="insight-mark">
+            <view wx:else class="ranking-list">
+              <view wx:for="{{activeDetailRows}}" wx:key="name" class="ranking-item">
+                <view class="ranking-main">
+                  <text class="ranking-index">{{item.rank}}</text>
+                  <text class="ranking-name">{{item.name}}</text>
+                  <text class="ranking-rate">{{item.rate}}%</text>
+                  <text class="ranking-amount">¥{{item.amountText}}</text>
+                </view>
+                <view class="ranking-track">
+                  <view class="ranking-bar" style="{{item.barStyle}}">
+                  </view>
+                </view>
               </view>
-              <text>{{item}}</text>
             </view>
-          </view>
+          </scroll-view>
         </view>
       </block>
     </view>
   </scroll-view>
-
   <tl-view-ledger-switcher visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" viewing-id="{{ledgerId}}" title="切换账本分析" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
   </tl-view-ledger-switcher>
 </view>

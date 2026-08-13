@@ -19,6 +19,22 @@ function monthAnchor() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function dateAnchor() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function shiftDate(anchor, delta) {
+  const date = new Date(`${anchor}T00:00:00`);
+  date.setDate(date.getDate() + delta);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function customRangeDefaults() {
+  const end = dateAnchor();
+  return { start: `${end.slice(0, 8)}01`, end };
+}
+
 function isCurrentMonthAnchor(anchor) {
   return anchor === monthAnchor();
 }
@@ -58,10 +74,44 @@ function decorateRanking(rows = []) {
   }));
 }
 
+function decorateTrend(rows = []) {
+  return rows.map((item) => ({
+    ...item,
+    incomeText: formatDisplayMoney(item.income),
+    expenseText: formatDisplayMoney(item.expense),
+    balanceText: formatDisplayMoney(item.balance),
+  }));
+}
+
+function getDetailRows(data, chartType) {
+  if (chartType === "trend") return decorateTrend(data.trend || []);
+  const rows =
+    chartType === "category"
+      ? data.categories
+      : chartType === "income"
+        ? data.incomeCategories
+        : getRanking({ data }, chartType);
+  return decorateRanking(rows || []);
+}
+
+function decorateInsightGroups(data = {}) {
+  const groups = data.insightGroups || {};
+  return {
+    up: Array.isArray(groups.up) ? groups.up : [],
+    down: Array.isArray(groups.down) ? groups.down : [],
+    neutral: Array.isArray(groups.neutral)
+      ? groups.neutral
+      : Array.isArray(data.insights)
+        ? data.insights
+        : [],
+  };
+}
+
 function decorate(data = {}) {
   const overview = data.overview || {};
   const budget = data.budget || {};
   const categoryChart = data.categoryChart || data.categories || [];
+  const insightGroups = decorateInsightGroups(data);
   const saveRateText = overview.saveRateAvailable ? `储蓄率 ${overview.saveRate}%` : "暂无收入";
   return {
     ...data,
@@ -89,6 +139,7 @@ function decorate(data = {}) {
     incomeCategoryChart: data.incomeCategoryChart || data.incomeCategories || [],
     accounts: decorateRanking(data.accounts || []),
     members: decorateRanking(data.members || []),
+    insightGroups,
     insights: data.insights || [],
   };
 }
@@ -114,7 +165,8 @@ function getPieOption(page, chartType) {
       trigger: "item",
       triggerOn: "click",
       confine: true,
-      formatter: (params) => `${params.name}\n${formatTooltipAmount(params.value)} · ${params.percent}%`,
+      formatter: (params) =>
+        `${params.name}\n${formatTooltipAmount(params.value)} · ${params.percent}%`,
     },
     series: [
       {
@@ -257,6 +309,8 @@ Component({
     ledgerOptions: [],
     mode: "month",
     anchor: "",
+    customStart: "",
+    customEnd: "",
     rangeLabel: "",
     activeChart: "trend",
     chartTitle: CHART_META.trend.title,
@@ -285,6 +339,10 @@ Component({
     accounts: [],
     members: [],
     activeRanking: [],
+    activeDetailRows: [],
+    hasDetailRows: false,
+    hasInsights: false,
+    insightGroups: { up: [], down: [], neutral: [] },
     insights: [],
   },
 
@@ -355,6 +413,10 @@ Component({
         ledgerName: ledger.name || "分析账本",
         ledgerType: ledger.type || "personal",
         anchor: monthAnchor(),
+        ...(() => {
+          const range = customRangeDefaults();
+          return { customStart: range.start, customEnd: range.end };
+        })(),
         noLedger: !ledger._id,
       });
       if (ledger._id) return this.loadAnalysis();
@@ -368,6 +430,8 @@ Component({
         ledgerId: this.data.ledgerId,
         mode: this.data.mode,
         anchor: this.data.anchor,
+        customStart: this.data.customStart,
+        customEnd: this.data.customEnd,
       };
       this.disposeChart();
       this.setData({ loading: true, error: false, noLedger: false, hasChartData: false });
@@ -383,6 +447,7 @@ Component({
             ? "trend"
             : this.data.activeChart;
         const meta = CHART_META[chartType];
+        const activeDetailRows = getDetailRows(result, chartType);
         const nextData = {
           ...result,
           loading: false,
@@ -405,6 +470,11 @@ Component({
           expenseCompareText: comparisonText(result.comparison, "expense"),
           balanceCompareText: comparisonText(result.comparison, "balance"),
           comparisonLabel: comparisonLabel(request.mode, request.anchor),
+          activeDetailRows,
+          hasDetailRows: activeDetailRows.length > 0,
+          hasInsights:
+            Object.values(result.insightGroups || {}).some((items) => items.length) ||
+            result.insights.length > 0,
         };
         this.setData(nextData, () => this.renderChart());
       } catch (error) {
@@ -454,10 +524,39 @@ Component({
 
     switchMode(event) {
       const mode = event.currentTarget.dataset.mode;
-      if (mode === this.data.mode) return;
-      const anchor =
-        mode === "month" ? monthAnchor() : mode === "year" ? String(new Date().getFullYear()) : "";
-      this.setData({ mode, anchor });
+      if (!["month", "year", "calendar", "custom", "all"].includes(mode) || mode === this.data.mode)
+        return;
+      const customRange = customRangeDefaults();
+      const nextData = {
+        mode,
+        anchor:
+          mode === "month"
+            ? monthAnchor()
+            : mode === "year"
+              ? String(new Date().getFullYear())
+              : mode === "calendar"
+                ? dateAnchor()
+                : "",
+      };
+      if (mode === "custom") {
+        nextData.customStart = this.data.customStart || customRange.start;
+        nextData.customEnd = this.data.customEnd || customRange.end;
+      }
+      this.setData(nextData);
+      this.loadAnalysis();
+    },
+
+    changeCustomStart(event) {
+      const customStart = event.detail.value;
+      const customEnd = customStart > this.data.customEnd ? customStart : this.data.customEnd;
+      this.setData({ customStart, customEnd });
+      this.loadAnalysis();
+    },
+
+    changeCustomEnd(event) {
+      const customEnd = event.detail.value;
+      const customStart = customEnd < this.data.customStart ? customEnd : this.data.customStart;
+      this.setData({ customStart, customEnd });
       this.loadAnalysis();
     },
 
@@ -471,6 +570,8 @@ Component({
         });
       } else if (this.data.mode === "year") {
         this.setData({ anchor: String(Number(this.data.anchor) + delta) });
+      } else if (this.data.mode === "calendar") {
+        this.setData({ anchor: shiftDate(this.data.anchor, delta) });
       }
       this.loadAnalysis();
     },
@@ -480,6 +581,7 @@ Component({
       if (!CHART_META[activeChart] || activeChart === this.data.activeChart) return;
       const meta = CHART_META[activeChart];
       const nextData = { ...this.data, activeChart };
+      const detailRows = getDetailRows(nextData, activeChart);
       const ranking =
         activeChart === "category"
           ? nextData.categories
@@ -493,6 +595,8 @@ Component({
           chartSubtitle: meta.subtitle,
           hasChartData: hasChartData(nextData, activeChart),
           activeRanking: decorateRanking(ranking),
+          activeDetailRows: detailRows,
+          hasDetailRows: detailRows.length > 0,
         },
         () => this.renderChart()
       );
