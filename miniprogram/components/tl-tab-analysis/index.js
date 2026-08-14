@@ -24,12 +24,6 @@ function dateAnchor() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function shiftDate(anchor, delta) {
-  const date = new Date(`${anchor}T00:00:00`);
-  date.setDate(date.getDate() + delta);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
 function customRangeDefaults() {
   const end = dateAnchor();
   return { start: `${end.slice(0, 8)}01`, end };
@@ -92,6 +86,71 @@ function getDetailRows(data, chartType) {
         ? data.incomeCategories
         : getRanking({ data }, chartType);
   return decorateRanking(rows || []);
+}
+
+function shiftMonth(anchor, delta) {
+  const [year, month] = String(anchor || monthAnchor())
+    .split("-")
+    .map(Number);
+  const date = new Date(year, month - 1 + delta, 1);
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+}
+
+function getCalendarSelectedDate(anchor, selectedDate) {
+  if (String(selectedDate || "").startsWith(anchor + "-")) return selectedDate;
+  const today = dateAnchor();
+  return today.startsWith(anchor + "-") ? today : anchor + "-01";
+}
+
+function decorateCalendar(data = {}, selectedDate) {
+  const range = data.range || {};
+  const anchor = range.start ? range.start.slice(0, 7) : monthAnchor();
+  const selected = getCalendarSelectedDate(anchor, selectedDate);
+  const summaries = (data.calendarDays || []).reduce((result, item) => {
+    result[item.date] = item;
+    return result;
+  }, {});
+  const recordsByDate = (data.calendarRecords || []).reduce((result, item) => {
+    result[item.date] = result[item.date] || [];
+    result[item.date].push({
+      ...item,
+      amountText: formatDisplayMoney(item.amount),
+      categoryText: item.categoryName || "\u5176\u4ed6",
+      typeLabel: item.type === "income" ? "\u6536\u5165" : "\u652f\u51fa",
+    });
+    return result;
+  }, {});
+  const firstDay = new Date(anchor + "-01T00:00:00").getDay();
+  const days = new Date(Number(anchor.slice(0, 4)), Number(anchor.slice(5, 7)), 0).getDate();
+  const cells = Array.from({ length: firstDay }, (_, index) => ({
+    key: "blank-" + index,
+    blank: true,
+  }));
+  for (let day = 1; day <= days; day += 1) {
+    const date = anchor + "-" + String(day).padStart(2, "0");
+    const item = summaries[date] || {};
+    cells.push({
+      key: date,
+      date,
+      day,
+      isStriped: Math.floor((firstDay + day - 1) / 7) % 2 === 1,
+      incomeText: item.income ? formatDisplayMoney(item.income) : "",
+      expenseText: item.expense ? formatDisplayMoney(item.expense) : "",
+      hasIncome: Number(item.income || 0) > 0,
+      hasExpense: Number(item.expense || 0) > 0,
+      hasRecords: Number(item.recordCount || 0) > 0,
+      isActive: date === selected,
+      isToday: date === dateAnchor(),
+    });
+  }
+  return {
+    calendarAnchor: anchor,
+    selectedCalendarDate: selected,
+    calendarCells: cells,
+    calendarRecordsByDate: recordsByDate,
+    selectedCalendarRecords: recordsByDate[selected] || [],
+    selectedCalendarDateLabel: selected,
+  };
 }
 
 function decorateInsightGroups(data = {}) {
@@ -308,6 +367,16 @@ Component({
     ledgerType: "personal",
     ledgerOptions: [],
     mode: "month",
+    modeOptions: [
+      { value: "month", label: "\u6708\u5ea6" },
+      { value: "year", label: "\u5e74\u5ea6" },
+      { value: "calendar", label: "\u65e5\u5386" },
+      { value: "custom", label: "\u81ea\u5b9a\u4e49" },
+      { value: "all", label: "\u5168\u90e8" },
+    ],
+    modeIndex: 0,
+    modeLabel: "\u6708\u5ea6",
+    isModeSheetVisible: false,
     anchor: "",
     customStart: "",
     customEnd: "",
@@ -344,6 +413,12 @@ Component({
     hasInsights: false,
     insightGroups: { up: [], down: [], neutral: [] },
     insights: [],
+    calendarAnchor: "",
+    selectedCalendarDate: "",
+    selectedCalendarDateLabel: "",
+    calendarCells: [],
+    calendarRecordsByDate: {},
+    selectedCalendarRecords: [],
   },
 
   lifetimes: {
@@ -448,8 +523,13 @@ Component({
             : this.data.activeChart;
         const meta = CHART_META[chartType];
         const activeDetailRows = getDetailRows(result, chartType);
+        const calendarData =
+          request.mode === "calendar"
+            ? decorateCalendar(result, this.data.selectedCalendarDate)
+            : {};
         const nextData = {
           ...result,
+          ...calendarData,
           loading: false,
           ledgerName: result.ledger.name,
           ledgerType: result.ledger.type,
@@ -457,7 +537,7 @@ Component({
           activeChart: chartType,
           chartTitle: meta.title,
           chartSubtitle: meta.subtitle,
-          hasRecords: Number(result.overview.recordCount || 0) > 0,
+          hasRecords: request.mode === "calendar" || Number(result.overview.recordCount || 0) > 0,
           hasChartData: hasChartData(result, chartType),
           activeRanking: decorateRanking(
             chartType === "category"
@@ -522,20 +602,44 @@ Component({
       this.loadAnalysis();
     },
 
+    openModeSheet() {
+      this.setData({ isModeSheetVisible: true });
+    },
+
+    closeModeSheet() {
+      this.setData({ isModeSheetVisible: false });
+    },
+
+    chooseMode(event) {
+      this.closeModeSheet();
+      this.setAnalysisMode(event.currentTarget.dataset.mode);
+    },
+
     switchMode(event) {
-      const mode = event.currentTarget.dataset.mode;
-      if (!["month", "year", "calendar", "custom", "all"].includes(mode) || mode === this.data.mode)
+      this.setAnalysisMode(event.currentTarget.dataset.mode);
+    },
+
+    selectMode(event) {
+      const option = this.data.modeOptions[Number(event.detail.value)];
+      if (option) this.setAnalysisMode(option.value);
+    },
+
+    setAnalysisMode(mode) {
+      if (!this.data.modeOptions.some((item) => item.value === mode) || mode === this.data.mode)
         return;
       const customRange = customRangeDefaults();
       const nextData = {
         mode,
+        activeChart: mode === "month" ? "trend" : this.data.activeChart,
+        modeIndex: this.data.modeOptions.findIndex((item) => item.value === mode),
+        modeLabel: this.data.modeOptions.find((item) => item.value === mode).label,
         anchor:
           mode === "month"
             ? monthAnchor()
             : mode === "year"
               ? String(new Date().getFullYear())
               : mode === "calendar"
-                ? dateAnchor()
+                ? monthAnchor()
                 : "",
       };
       if (mode === "custom") {
@@ -571,9 +675,23 @@ Component({
       } else if (this.data.mode === "year") {
         this.setData({ anchor: String(Number(this.data.anchor) + delta) });
       } else if (this.data.mode === "calendar") {
-        this.setData({ anchor: shiftDate(this.data.anchor, delta) });
+        this.setData({ anchor: shiftMonth(this.data.anchor, delta), selectedCalendarDate: "" });
       }
       this.loadAnalysis();
+    },
+
+    selectCalendarDay(event) {
+      const selectedCalendarDate = event.currentTarget.dataset.date;
+      if (!selectedCalendarDate) return;
+      this.setData({
+        selectedCalendarDate,
+        selectedCalendarDateLabel: selectedCalendarDate,
+        selectedCalendarRecords: this.data.calendarRecordsByDate[selectedCalendarDate] || [],
+        calendarCells: this.data.calendarCells.map((item) => ({
+          ...item,
+          isActive: item.date === selectedCalendarDate,
+        })),
+      });
     },
 
     switchChart(event) {

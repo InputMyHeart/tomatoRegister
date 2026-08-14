@@ -1164,11 +1164,16 @@ function getAnalysisRange(mode, anchor, customStart, customEnd) {
     };
   }
   if (mode === "calendar") {
-    const start = isAnalysisDate(anchor) ? anchor : today;
+    const match = /^(\d{4})-(\d{1,2})$/.exec(String(anchor || ""));
+    const year = match ? Number(match[1]) : current.year;
+    const month = match ? Number(match[2]) : current.month;
+    const nextMonth = addMonth(year, month, 1);
     return {
-      start,
-      end: addAnalysisDays(start, 1),
-      label: start,
+      year,
+      month,
+      start: makeDateText(year, month, 1),
+      end: makeDateText(nextMonth.year, nextMonth.month, 1),
+      label: `${year}\u5e74${month}\u6708`,
     };
   }
   if (mode === "custom") {
@@ -1472,6 +1477,55 @@ async function getAnalysis(openid, data = {}) {
           : 0,
     },
     trend: makeAnalysisTrendBuckets(mode, range, records),
+    calendarDays:
+      mode === "calendar"
+        ? Object.keys(
+            records.reduce((result, record) => {
+              const item = result[record.date] || {
+                date: record.date,
+                income: 0,
+                expense: 0,
+                recordCount: 0,
+              };
+              item[record.type === "income" ? "income" : "expense"] += Number(record.amount || 0);
+              item.recordCount += 1;
+              result[record.date] = item;
+              return result;
+            }, {})
+          )
+            .sort()
+            .map((date) => {
+              const item = records
+                .filter((record) => record.date === date)
+                .reduce(
+                  (result, record) => {
+                    result[record.type === "income" ? "income" : "expense"] += Number(
+                      record.amount || 0
+                    );
+                    result.recordCount += 1;
+                    return result;
+                  },
+                  { date, income: 0, expense: 0, recordCount: 0 }
+                );
+              return {
+                ...item,
+                income: roundAnalysisMoney(item.income),
+                expense: roundAnalysisMoney(item.expense),
+              };
+            })
+        : [],
+    calendarRecords:
+      mode === "calendar"
+        ? records.map((record) => ({
+            _id: record._id,
+            date: record.date,
+            type: record.type,
+            amount: Number(record.amount || 0),
+            categoryName: record.parentCategory || record.categoryName || "\u5176\u4ed6",
+            account: record.account || "",
+            note: record.note || "",
+          }))
+        : [],
     categories: categoryList,
     categoryChart: collapseAnalysisRanking(categoryList),
     incomeCategories: incomeCategoryList,

@@ -75,6 +75,7 @@ page {
 
   /* Semantic typography */
   --tl-font-caption: 22rpx;
+  --tl-font-caption-compact: 18rpx;
   --tl-font-body-sm: 24rpx;
   --tl-font-body: 28rpx;
   --tl-font-heading: 32rpx;
