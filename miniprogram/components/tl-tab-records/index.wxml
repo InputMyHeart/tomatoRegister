@@ -28,15 +28,15 @@
         <view class="month-brief">
           <view>
             <text class="brief-label">收入</text>
-            <text class="brief-income">¥{{visibleIncome}}</text>
+            <text class="brief-income">¥{{monthIncome}}</text>
           </view>
           <view>
             <text class="brief-label">支出</text>
-            <text class="brief-expense">¥{{visibleExpense}}</text>
+            <text class="brief-expense">¥{{monthExpense}}</text>
           </view>
           <view>
             <text class="brief-label">共</text>
-            <text class="brief-count">{{visibleCount}} 笔</text>
+            <text class="brief-count">{{monthRecordCount}} 笔</text>
           </view>
         </view>
       </view>

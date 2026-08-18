@@ -59,6 +59,8 @@ wx.cloud.callFunction({
 { ok: false, error: { code, message } }
 ```
 
+`record/list` 在按日期范围查询时会返回 `rangeSummary`（完整范围的 `income`、`expense`）和 `rangeRecordCount`；它们不受分页游标影响。
+
 不要重新引入旧的 `action + data` 调用协议。
 
 ## 本地启动

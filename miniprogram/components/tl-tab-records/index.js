@@ -82,22 +82,12 @@ function buildView(records, activeType) {
     group.records.push(record);
   });
 
-  const visibleIncome = visibleRecords
-    .filter((item) => item.type === "income")
-    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const visibleExpense = visibleRecords
-    .filter((item) => item.type === "expense")
-    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
-
   return {
     recordGroups: groups.map((group) => ({
       ...group,
       income: formatDisplayMoney(group.income),
       expense: formatDisplayMoney(group.expense),
     })),
-    visibleIncome: formatDisplayMoney(visibleIncome),
-    visibleExpense: formatDisplayMoney(visibleExpense),
-    visibleCount: visibleRecords.length,
     hasRecords: visibleRecords.length > 0,
   };
 }
@@ -121,6 +111,9 @@ Component({
     nextCursor: null,
     historyRecordCount: 0,
     rangeRecordCount: 0,
+    monthIncome: "0",
+    monthExpense: "0",
+    monthRecordCount: 0,
     latestRecordDate: "",
     latestRecordMonthLabel: "",
     isError: false,
@@ -174,7 +167,16 @@ Component({
       this.setData(
         append
           ? { loadingMore: true }
-          : { loading: true, isError: false, records: [], nextCursor: null, hasMore: false }
+          : {
+              loading: true,
+              isError: false,
+              records: [],
+              nextCursor: null,
+              hasMore: false,
+              monthIncome: "0",
+              monthExpense: "0",
+              monthRecordCount: 0,
+            }
       );
       try {
         const data = await recordService.listRecords({
@@ -201,6 +203,9 @@ Component({
           hasMore: Boolean(data.hasMore),
           historyRecordCount: Number(data.historyRecordCount || 0),
           rangeRecordCount: Number(data.rangeRecordCount || 0),
+          monthIncome: formatDisplayMoney((data.rangeSummary || {}).income),
+          monthExpense: formatDisplayMoney((data.rangeSummary || {}).expense),
+          monthRecordCount: Number(data.rangeRecordCount || 0),
           latestRecordDate,
           latestRecordMonthLabel,
           readonly: Boolean(data.readonly),

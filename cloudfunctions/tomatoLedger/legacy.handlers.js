@@ -11,6 +11,7 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
 const _ = db.command;
+const $ = db.command.aggregate;
 const defaultAvatarUrl = "/images/brand/tomato-ledger-logo-256-transparent.png";
 const SCHEMA_VERSION = 1;
 const OTHER_CATEGORY_SORT = 9999999999999;
@@ -913,18 +914,33 @@ async function listRecords(openid, data = {}) {
   const historyQuery = { ledgerId: ledger._id };
   const rangeQuery = { ledgerId: ledger._id };
   if (data.start && data.end) rangeQuery.date = _.gte(data.start).and(_.lt(data.end));
-  const [historyCountResult, rangeCountResult, latestRecordResult] = await Promise.all([
-    db.collection("records").where(historyQuery).count(),
-    db.collection("records").where(rangeQuery).count(),
-    db
-      .collection("records")
-      .where(historyQuery)
-      .orderBy("date", "desc")
-      .orderBy("createdAt", "desc")
-      .orderBy("_id", "desc")
-      .limit(1)
-      .get(),
-  ]);
+  const [historyCountResult, rangeCountResult, rangeSummaryResult, latestRecordResult] =
+    await Promise.all([
+      db.collection("records").where(historyQuery).count(),
+      db.collection("records").where(rangeQuery).count(),
+      db
+        .collection("records")
+        .aggregate()
+        .match(rangeQuery)
+        .group({ _id: "$type", total: $.sum("$amount") })
+        .end(),
+      db
+        .collection("records")
+        .where(historyQuery)
+        .orderBy("date", "desc")
+        .orderBy("createdAt", "desc")
+        .orderBy("_id", "desc")
+        .limit(1)
+        .get(),
+    ]);
+  const rangeSummary = (rangeSummaryResult.list || []).reduce(
+    (summary, item) => {
+      if (item._id === "income") summary.income = roundAnalysisMoney(item.total);
+      if (item._id === "expense") summary.expense = roundAnalysisMoney(item.total);
+      return summary;
+    },
+    { income: 0, expense: 0 }
+  );
   const result = await db
     .collection("records")
     .where(query)
@@ -946,6 +962,7 @@ async function listRecords(openid, data = {}) {
     hasMore,
     historyRecordCount: historyCountResult.total || 0,
     rangeRecordCount: rangeCountResult.total || 0,
+    rangeSummary,
     latestRecordDate: ((latestRecordResult.data || [])[0] || {}).date || "",
     ledger: {
       _id: ledger._id,
