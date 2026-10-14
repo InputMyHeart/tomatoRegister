@@ -51,8 +51,7 @@ Page({
     const target = targets[this.data.activeTab];
     if (!target) return;
     const component = this.selectComponent(target[0]);
-    if (component && typeof component[target[1]] === "function")
-      component[target[1]](syncResult);
+    if (component && typeof component[target[1]] === "function") component[target[1]](syncResult);
   },
 
   switchTab(event) {

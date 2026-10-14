@@ -1,5 +1,6 @@
 const app = getApp();
 const recordService = require("../../services/record.service");
+const feedback = require("../../services/feedback-ui");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
 Page({
   data: {
@@ -16,7 +17,7 @@ Page({
     const ledger = app.globalData.currentLedger || {};
     if (!app.globalData.loggedIn) return wx.reLaunch({ url: "/pages/login/index" });
     if (ledger.readonly) {
-      wx.showToast({ title: "访客不能导入账单", icon: "none" });
+      feedback.showToast({ type: "warning", message: "访客不能导入账单" });
       setTimeout(() => wx.navigateBack(), 300);
       return;
     }
@@ -39,16 +40,17 @@ Page({
     this.setData({ accountIndex: Number(event.detail.value) });
   },
   async downloadTemplate() {
+    const loadingId = feedback.showLoading({ message: "正在准备模板…" });
     try {
-      wx.showLoading({ title: "正在准备模板" });
       const data = await recordService.getImportTemplate();
+      feedback.updateLoading(loadingId, { message: "正在下载模板…" });
       const download = await wx.downloadFile({ url: data.url });
       if (download.statusCode !== 200) throw new Error("模板下载失败");
       await wx.openDocument({ filePath: download.tempFilePath, fileType: "xlsx", showMenu: true });
     } catch (error) {
-      wx.showToast({ title: error.message || "模板下载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "模板下载失败" });
     } finally {
-      wx.hideLoading();
+      feedback.hideLoading(loadingId);
     }
   },
   async chooseAndImport() {
@@ -96,7 +98,7 @@ Page({
         resultDateText: range,
       });
     } catch (error) {
-      wx.showToast({ title: error.message || "导入失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "导入失败" });
     } finally {
       this.setData({ uploading: false });
     }

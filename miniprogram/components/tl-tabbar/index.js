@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 
 const leftTabs = [
@@ -90,17 +91,20 @@ Component({
     handleRecord() {
       const reason = this.getRecordDisabledReason();
       if (reason === "noLedger") {
-        wx.showToast({ title: "\u6682\u65e0\u53ef\u7528\u7684\u8d26\u672c", icon: "none" });
+        feedback.showToast({
+          type: "warning",
+          message: "\u6682\u65e0\u53ef\u7528\u7684\u8d26\u672c",
+        });
         this.updateRecordDisabledReason();
         return;
       }
       if (reason === "readonly") {
-        wx.showToast({ title: "访客不能记账", icon: "none" });
+        feedback.showToast({ type: "warning", message: "访客不能记账" });
         this.updateRecordDisabledReason();
         return;
       }
       if (reason) {
-        wx.showToast({ title: "\u8bf7\u7a0d\u540e\u518d\u8bd5", icon: "none" });
+        feedback.showToast({ type: "warning", message: "\u8bf7\u7a0d\u540e\u518d\u8bd5" });
         this.updateRecordDisabledReason();
         return;
       }

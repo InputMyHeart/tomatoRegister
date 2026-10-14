@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerStore = require("../../services/ledger.store");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
@@ -26,7 +27,7 @@ Page({
         readonly: Boolean(ledger.readonly),
       });
     } catch (error) {
-      wx.showToast({ title: error.message || "账户加载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "账户加载失败" });
     } finally {
       this.loading = false;
     }
@@ -47,7 +48,7 @@ Page({
       this.setData({ accounts });
       return true;
     } catch (error) {
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
       return false;
     } finally {
       this.setData({ saving: false });
@@ -59,7 +60,7 @@ Page({
     const account = this.data.accounts[index];
     if (!account) return;
     if (this.data.accounts.length <= 1) {
-      wx.showToast({ title: "请至少保留一个账户", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请至少保留一个账户" });
       return;
     }
     const result = await new Promise((resolve) => {
@@ -84,11 +85,11 @@ Page({
       success: async (res) => {
         if (!res.confirm) return;
         const name = String(res.content || "").trim();
-        if (!name) return wx.showToast({ title: "请输入账户名称", icon: "none" });
+        if (!name) return feedback.showToast({ type: "warning", message: "请输入账户名称" });
         if (Array.from(name).length > 12)
-          return wx.showToast({ title: "账户名称最多 12 个字符", icon: "none" });
+          return feedback.showToast({ type: "warning", message: "账户名称最多 12 个字符" });
         if (this.data.accounts.includes(name))
-          return wx.showToast({ title: "该账户已存在", icon: "none" });
+          return feedback.showToast({ type: "warning", message: "该账户已存在" });
         await this.saveAccounts([...this.data.accounts, name]);
       },
     });

@@ -1,0 +1,7 @@
+<view wx:if="{{visible}}" class="tl-loading-mask" catchtap="stopTap">
+  <view class="tl-loading-panel">
+    <view class="tl-loading-spinner">
+    </view>
+    <text class="tl-loading-message">{{message}}</text>
+  </view>
+</view>

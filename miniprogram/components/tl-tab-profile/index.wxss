@@ -191,7 +191,6 @@
   align-items: center;
 }
 
-.function-row.last,
 .function-row:last-child {
   border-bottom: none;
 }
@@ -226,14 +225,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.danger-icon {
-  background: var(--tl-color-danger-soft);
-}
-
-.danger-title {
-  color: var(--tl-color-danger);
 }
 
 .tool-icon tl-icon,

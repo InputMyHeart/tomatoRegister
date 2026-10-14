@@ -147,6 +147,7 @@ loading → error / empty / ready
 统一要求：
 
 - Loading 时不得提前渲染 Ready 内容，避免骨架与真实元素同时出现。
+- 全局阻断式 Loading 仅用于必须等待的流程；文案由调用方传入，可在流程中更新。
 - 骨架只覆盖将被真实内容替换的区域，不模拟 Tabbar、Navbar 等稳定壳层。
 - 状态切换不得改变页面壳层和底部区域的位置。
 - 页面级、模块级和按钮级 Loading 必须明确归属，避免多套 Spinner 同时出现。
@@ -169,23 +170,39 @@ loading → error / empty / ready
 - Bottom Sheet 打开时覆盖页面底部能力，并自行处理遮罩、面板和安全区。
 - 居中 Dialog 不属于底部能力，不因安全区额外抬高。
 - 浮层通过遮罩、背景和边框建立层级，不使用阴影。
+- Toast 使用 success / warning / error / info 语义；warning 使用暖橙色，只提示可继续但需注意的情况。
 - 数字键盘属于特殊领域交互，由 `tl-record-form` 保持内部事件闭环。
 
 ### 公共组件边界
 
-| 组件              | 负责内容                                                  |
-| ----------------- | --------------------------------------------------------- |
-| `tl-container`    | 页面内容壳层及普通页面安全区                              |
-| `tl-skeleton`     | 页面或模块首次加载骨架，不包含稳定的 Navbar / Tabbar 壳层 |
-| `tl-empty-state`  | Empty 与可重试 Error 的通用呈现                           |
-| `tl-button`       | 主、次、危险、文字按钮及 Loading / Disabled 状态          |
-| `tl-page-actions` | 非 Tab 页固定操作及底部安全区                             |
-| `tl-bottom-sheet` | 底部弹层、遮罩和底部安全区                                |
-| `tl-dialog`       | 居中结果、确认或提示浮层                                  |
-| `tl-tabbar`       | Tab 导航、中央记账入口及 Tab 页底部安全区                 |
-| `tl-record-form`  | 记账领域表单、金额输入、数字键盘及提交联动                |
+| 组件               | 负责内容                                                  |
+| ------------------ | --------------------------------------------------------- |
+| `tl-container`     | 页面内容壳层及普通页面安全区                              |
+| `tl-skeleton`      | 页面或模块首次加载骨架，不包含稳定的 Navbar / Tabbar 壳层 |
+| `tl-empty-state`   | Empty 与可重试 Error 的通用呈现                           |
+| `tl-button`        | 主、次、危险、文字按钮及 Loading / Disabled 状态          |
+| `tl-page-actions`  | 非 Tab 页固定操作及底部安全区                             |
+| `tl-bottom-sheet`  | 底部弹层、遮罩和底部安全区                                |
+| `tl-dialog`        | 居中结果、确认或提示浮层                                  |
+| `tl-loading`       | 必须暂时阻断操作的全局处理状态，文案可更新                |
+| `tl-toast`         | 全局短提示，支持 success / warning / error / info         |
+| `tl-feedback-host` | 在页面壳层挂载 Loading 与 Toast，由统一服务驱动           |
+| `tl-tabbar`        | Tab 导航、中央记账入口及 Tab 页底部安全区                 |
+| `tl-record-form`   | 记账领域表单、金额输入、数字键盘及提交联动                |
 
 页面负责业务数据和事件，不重复实现上述通用视觉、定位或安全区能力。公共组件之间不直接访问页面数据，通过属性和事件保持单向交互。
+
+全局反馈通过 `services/feedback-ui` 调用。阻断式 Loading 返回标识，调用方在 `finally` 中按标识关闭；流程文案变化时使用 `updateLoading`。Toast 接受 `type` 与 `message`，新提示替换当前提示。
+
+```javascript
+const loadingId = feedback.showLoading({ message: "正在准备数据…" });
+try {
+  feedback.updateLoading(loadingId, { message: "正在下载数据…" });
+} finally {
+  feedback.hideLoading(loadingId);
+}
+feedback.showToast({ type: "warning", message: "部分数据未导入" });
+```
 
 ## 页面类型应用
 
@@ -236,7 +253,7 @@ loading → error / empty / ready
 
 ## 自动检查与视觉回归
 
-- `npm run ui:check`：检查阴影、渐变、页面级固定定位、安全区、私有 Spinner、硬编码字号/圆角、未定义 Token 和 WXML 标签闭合；存量允许清单必须保持为 0。
+- `npm run ui:check`：检查阴影、渐变、页面级固定定位、安全区、私有 Spinner、原生 Toast/Loading 调用、硬编码字号/圆角、未定义 Token 和 WXML 标签闭合；存量允许清单必须保持为 0。
 - `npm run visual:check`：将关键页面截图与已确认基线对比，发现非预期视觉变化时失败。
 - `npm run visual:update`：只在视觉变更已人工确认后更新基线，不用它掩盖差异。
 - 视觉脚本依赖微信开发者工具开启“设置 → 安全设置 → 服务端口”；工具路径不同时通过 `TL_WECHAT_CLI` 指定。

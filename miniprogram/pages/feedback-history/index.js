@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const feedbackService = require("../../services/feedback.service");
 
@@ -35,7 +36,7 @@ Page({
       this.setData({ feedbacks, loading: false });
     } catch (error) {
       this.setData({ loading: false, isError: true });
-      wx.showToast({ title: error.message || "加载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "加载失败" });
     }
   },
   previewImage(event) {

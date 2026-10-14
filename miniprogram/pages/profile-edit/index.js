@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 
 const defaultAvatar = "/images/brand/tomato-ledger-logo-256-transparent.png";
@@ -57,7 +58,7 @@ Page({
   async saveProfile() {
     const nickName = this.data.nickName.trim();
     if (!nickName) {
-      wx.showToast({ title: "请输入昵称", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请输入昵称" });
       return;
     }
 
@@ -68,7 +69,7 @@ Page({
         avatarUrl,
         nickName,
       });
-      wx.showToast({ title: "已保存", icon: "success" });
+      feedback.showToast({ type: "success", message: "已保存" });
       setTimeout(() => {
         if (getCurrentPages().length > 1) {
           wx.navigateBack();
@@ -77,7 +78,7 @@ Page({
         wx.reLaunch({ url: "/pages/index/index?tab=profile" });
       }, 350);
     } catch (error) {
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
     } finally {
       this.setData({ saving: false });
     }

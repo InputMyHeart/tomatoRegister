@@ -1,0 +1,4 @@
+<tl-loading visible="{{loadingVisible}}" message="{{loadingMessage}}">
+</tl-loading>
+<tl-toast visible="{{toastVisible}}" type="{{toastType}}" message="{{toastMessage}}">
+</tl-toast>

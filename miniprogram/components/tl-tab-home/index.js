@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
@@ -238,6 +239,7 @@ Component({
           typeTag,
           typeClass: item.type === "shared" ? "shared" : "personal",
           roleTag,
+          memberCount: Array.isArray(item.memberOpenids) ? item.memberOpenids.length : 0,
           roleClass: role === "owner" ? "owner" : role === "readonly" ? "visitor" : "member",
           canManage: role === "owner",
           isCurrent: id === this.data.ledgerId,
@@ -326,7 +328,10 @@ Component({
           isLedgerSwitcherVisible: false,
           isSwitchingLedger: false,
         });
-        wx.showToast({ title: "\u5207\u6362\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5", icon: "none" });
+        feedback.showToast({
+          type: "error",
+          message: "\u5207\u6362\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5",
+        });
       }
     },
 
@@ -346,7 +351,7 @@ Component({
 
     goRecordEdit() {
       if (this.data.readonly) {
-        wx.showToast({ title: "访客不能记账", icon: "none" });
+        feedback.showToast({ type: "warning", message: "访客不能记账" });
         return;
       }
       if (!this.data.ledgerId) {

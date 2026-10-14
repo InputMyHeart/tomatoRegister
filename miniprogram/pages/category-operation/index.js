@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const categoryService = require("../../services/category.service");
 Page({
@@ -11,6 +12,7 @@ Page({
     items: [],
     parentName: "",
     showEditor: false,
+    saving: false,
     editingItem: null,
     draftName: "",
     draftIcon: "",
@@ -70,6 +72,7 @@ Page({
     });
   },
   closeEditor() {
+    if (this.data.saving) return;
     this.setData({ showEditor: false });
   },
   noop() {},
@@ -88,26 +91,34 @@ Page({
     this.setData({ draftIcon: icon });
   },
   async saveEditor() {
+    if (this.data.saving) return;
     const name = this.data.draftName.trim();
     if (!name) {
-      wx.showToast({ title: "请输入分类名称", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请输入分类名称" });
       return;
     }
     if (!this.data.draftIcon) {
-      wx.showToast({ title: "请选择图标", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请选择图标" });
       return;
     }
-    await categoryService.saveCategory({
-      ledgerId: this.data.ledgerId,
-      categoryId: this.data.editingItem && this.data.editingItem._id,
-      type: this.data.type,
-      level: this.data.level,
-      parentId: this.data.parentId,
-      name,
-      icon: this.data.draftIcon,
-    });
-    this.setData({ showEditor: false });
-    this.load();
+    this.setData({ saving: true });
+    try {
+      await categoryService.saveCategory({
+        ledgerId: this.data.ledgerId,
+        categoryId: this.data.editingItem && this.data.editingItem._id,
+        type: this.data.type,
+        level: this.data.level,
+        parentId: this.data.parentId,
+        name,
+        icon: this.data.draftIcon,
+      });
+      this.setData({ showEditor: false });
+      await this.load();
+    } catch (error) {
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
+    } finally {
+      this.setData({ saving: false });
+    }
   },
   async remove(e) {
     if (this.data.role !== "owner") return;
@@ -118,7 +129,7 @@ Page({
         (child) => child._id !== item._id && !child.isDefaultChild
       );
       if (hasOtherChildren) {
-        wx.showToast({ title: "请先删除该分类下其他自定义分类", icon: "none" });
+        feedback.showToast({ type: "warning", message: "请先删除该分类下其他自定义分类" });
         return;
       }
     }

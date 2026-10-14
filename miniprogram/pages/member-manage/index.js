@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const { resolveAvatarUrls } = require("../../utils/avatar");
@@ -75,22 +76,22 @@ Page({
       confirmColor: "#f0442f",
       success: async (result) => {
         if (!result.confirm) return;
-        wx.showLoading({ title: "正在移除" });
+        const loadingId = feedback.showLoading({ message: "正在移除" });
         try {
           await ledgerStore.removeLedgerMember(openid, this.data.ledgerId);
-          wx.showToast({ title: "已移除", icon: "success" });
+          feedback.showToast({ type: "success", message: "已移除" });
           this.loadMembers();
         } catch (error) {
-          wx.showToast({ title: error.message || "移除失败", icon: "none" });
+          feedback.showToast({ type: "error", message: error.message || "移除失败" });
         } finally {
-          wx.hideLoading();
+          feedback.hideLoading(loadingId);
         }
       },
     });
   },
   async inviteLedger() {
     if (!this.data.canManage) return;
-    wx.showLoading({ title: "准备分享" });
+    const loadingId = feedback.showLoading({ message: "准备分享" });
     try {
       const options = await Promise.all(
         getShareOptions(this.data.ledger).map(async (item) => {
@@ -104,9 +105,9 @@ Page({
       );
       this.setData({ shareSheetVisible: true, shareOptions: options, shareMode: options[0].mode });
     } catch (error) {
-      wx.showToast({ title: error.message || "分享准备失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "分享准备失败" });
     } finally {
-      wx.hideLoading();
+      feedback.hideLoading(loadingId);
     }
   },
   closeShareSheet() {

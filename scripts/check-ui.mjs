@@ -43,6 +43,22 @@ function collectViolations() {
   const violations = [];
   const styleFiles = walk(UI_ROOT, [".wxss"]);
   const templateFiles = walk(UI_ROOT, [".wxml"]);
+  const scriptFiles = walk(UI_ROOT, [".js"]);
+  for (const file of scriptFiles) {
+    const source = fs.readFileSync(file, "utf8");
+    for (const match of source.matchAll(
+      /wx\.(?:showToast|hideToast|showLoading|hideLoading)\s*\(/g
+    )) {
+      addViolation(
+        violations,
+        "native-feedback",
+        file,
+        source,
+        match.index,
+        "Toast 和 Loading 必须通过 services/feedback-ui 调用"
+      );
+    }
+  }
   const tokenDefinitions = new Set();
   const tokenUses = [];
 

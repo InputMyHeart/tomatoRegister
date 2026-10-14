@@ -8,8 +8,4 @@ function updateProfile(profile) {
   return callApi("auth/profile/update", profile);
 }
 
-function resetDatabase() {
-  return callApi("auth/database/reset", { confirm: "RESET_TOMATO_LEDGER_DATABASE" });
-}
-
-module.exports = { login, updateProfile, resetDatabase };
+module.exports = { login, updateProfile };

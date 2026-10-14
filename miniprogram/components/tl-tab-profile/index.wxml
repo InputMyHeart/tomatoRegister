@@ -131,23 +131,9 @@
               </tl-icon>
             </view>
           </view>
-          <view class="function-row last danger-row" bindtap="resetDatabase">
-            <view class="function-icon danger-icon">
-              <tl-icon name="delete-bin-line" size="30" color="#c55249">
-              </tl-icon>
-            </view>
-            <view class="function-main">
-              <view class="function-title danger-title">重置数据</view>
-              <view class="function-tip">清空所有账本、分类、记录和邀请数据</view>
-            </view>
-            <view class="function-arrow">
-              <tl-icon name="arrow-right-s-line" size="32" color="#c55249">
-              </tl-icon>
-            </view>
-          </view>
         </view>
       </view>
-      <tl-button class="logout-button" variant="danger" block="{{true}}" bind:tap="logout">退出账号</tl-button>
+      <tl-button class="logout-button" variant="primary" block="{{true}}" bind:tap="logout">退出账号</tl-button>
     </view>
   </scroll-view>
 </view>

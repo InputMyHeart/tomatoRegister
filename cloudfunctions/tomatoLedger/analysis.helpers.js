@@ -104,6 +104,29 @@ function makeTrendBuckets(mode, range, records = []) {
     }));
 }
 
+function makeRecentYearTrend(currentYear, records = [], yearCount = 5) {
+  const safeCurrentYear = Number(currentYear);
+  const safeYearCount = Math.max(1, Number(yearCount) || 5);
+  if (!Number.isInteger(safeCurrentYear)) return [];
+  const firstYear = safeCurrentYear - safeYearCount + 1;
+  const buckets = {};
+  for (let year = firstYear; year <= safeCurrentYear; year += 1) {
+    buckets[year] = { key: String(year), label: String(year), income: 0, expense: 0 };
+  }
+  records.forEach((record) => {
+    const year = Number(String(record.date || "").slice(0, 4));
+    if (!buckets[year]) return;
+    const metric = record.type === "income" ? "income" : "expense";
+    buckets[year][metric] += Number(record.amount || 0);
+  });
+  return Object.values(buckets).map((item) => ({
+    ...item,
+    income: roundMoney(item.income),
+    expense: roundMoney(item.expense),
+    balance: roundMoney(item.income - item.expense),
+  }));
+}
+
 function collapseRanking(rows = [], limit = 5) {
   if (rows.length <= limit) return rows;
   const visible = rows.slice(0, limit);
@@ -119,6 +142,7 @@ function collapseRanking(rows = [], limit = 5) {
 module.exports = {
   collapseRanking,
   makeComparison,
+  makeRecentYearTrend,
   makeTrendBuckets,
   roundMoney,
   summarizeRecords,

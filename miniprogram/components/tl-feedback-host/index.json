@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "tl-loading": "/components/tl-loading/index",
+    "tl-toast": "/components/tl-toast/index"
+  }
+}

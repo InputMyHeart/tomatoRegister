@@ -72,8 +72,6 @@ wx.cloud.callFunction({
 5. 安装并部署 `cloudfunctions/tomatoLedger`：右键云函数，选择“上传并部署：云端安装依赖”。
 6. 编译小程序并登录。
 
-云函数会按需创建业务集合。`resetDatabase` 是破坏性测试工具，不能在生产环境调用。
-
 ## 测试与生产环境
 
 环境配置在 [miniprogram/config/cloud-env.js](./miniprogram/config/cloud-env.js)：

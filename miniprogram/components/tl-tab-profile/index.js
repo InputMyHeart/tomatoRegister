@@ -1,6 +1,6 @@
 const app = getApp();
-const profileService = require("../../services/profile.service");
 const ledgerStore = require("../../services/ledger.store");
+const feedback = require("../../services/feedback-ui");
 const { getId } = require("../../utils/mapper");
 
 function normalizeCreatedAt(value) {
@@ -117,9 +117,12 @@ Component({
         const result = await ledgerStore.syncLedgers({ force: true });
         await this.refreshHeroData();
         this.setData({ lastSyncedText: this.formatSyncedAt(result.syncedAt || Date.now()) });
-        wx.showToast({ title: result.changed ? "已同步最新数据" : "数据已是最新", icon: "success" });
+        feedback.showToast({
+          type: "success",
+          message: result.changed ? "已同步最新数据" : "数据已是最新",
+        });
       } catch (error) {
-        wx.showToast({ title: error.message || "同步失败", icon: "none" });
+        feedback.showToast({ type: "error", message: error.message || "同步失败" });
       } finally {
         this.setData({ syncing: false });
       }
@@ -143,7 +146,7 @@ Component({
           if (!res.confirm) return;
           app.logout();
           wx.reLaunch({ url: "/pages/login/index" });
-          wx.showToast({ title: "已退出", icon: "none" });
+          feedback.showToast({ type: "info", message: "已退出" });
         },
       });
     },
@@ -186,50 +189,22 @@ Component({
 
     importBill() {
       if (this.data.readonly) {
-        wx.showToast({ title: "访客不能导入账单", icon: "none" });
+        feedback.showToast({ type: "warning", message: "访客不能导入账单" });
         return;
       }
       wx.navigateTo({ url: "/pages/record-import/index" });
     },
 
     exportBill() {
-      wx.showToast({ title: "导出账单入口已预留", icon: "none" });
+      feedback.showToast({ type: "info", message: "导出账单入口已预留" });
     },
 
     feedback() {
       wx.navigateTo({ url: "/pages/feedback/index" });
     },
 
-    resetDatabase() {
-      wx.showModal({
-        title: "重置数据库",
-        content:
-          "此操作会删除你创建的个人账本及其分类，并清空你自己创建的记录；共享账本和其他成员的数据不会受到影响。确定继续吗？",
-        confirmText: "清空",
-        confirmColor: "#c55249",
-        success: (res) => {
-          if (!res.confirm) return;
-          this.confirmResetDatabase();
-        },
-      });
-    },
-
-    async confirmResetDatabase() {
-      wx.showLoading({ title: "清空中" });
-      try {
-        await profileService.resetDatabase();
-        await app.loginWithWechat({ force: true });
-        await ledgerStore.syncLedgers({ force: true });
-        wx.reLaunch({ url: "/pages/index/index" });
-        wx.showToast({ title: "已清空", icon: "success" });
-      } catch (error) {
-        wx.showToast({ title: error.message || "重置失败", icon: "none" });
-      } finally {
-        wx.hideLoading();
-      }
-    },
     viewChangelog() {
-      wx.showToast({ title: "更新日志入口已预留", icon: "none" });
+      feedback.showToast({ type: "info", message: "更新日志入口已预留" });
     },
   },
 });

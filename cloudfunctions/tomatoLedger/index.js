@@ -15,7 +15,6 @@ const db = cloud.database();
 const routes = {
   "auth/login": auth.login,
   "auth/profile/update": auth.updateProfile,
-  "auth/database/reset": auth.resetDatabase,
   "ledger/create": ledger.create,
   "ledger/update": ledger.update,
   "ledger/list": ledger.list,

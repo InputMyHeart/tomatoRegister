@@ -34,6 +34,8 @@ npm run visual:check
 ## UI 与状态
 
 - [ ] Loading、Empty、Error、Ready 互斥，不闪现初始化业务数据。
+- [ ] 全局 Toast 的 success / warning / error / info 文案、颜色和图标正确；页面跳转后短提示正常消失。
+- [ ] 下载模板、删除账本、移除成员和准备分享时，全局 Loading 文案正确，成功或失败后均关闭遮罩。
 - [ ] 首屏 Loading 只显示骨架和稳定壳层，不提前显示 Ready 内容或底部业务元素。
 - [ ] Tabbar、页面操作栏和 Bottom Sheet 不遮挡滚动内容。
 - [ ] 每个页面只有一个底部安全区负责人；刘海屏底部安全区、长文本和窄屏布局正常。
@@ -47,4 +49,3 @@ npm run visual:check
 - [ ] `production.id` 已配置，且同名 `tomatoLedger` 已部署到生产环境。
 - [ ] 生产集合、索引和安全规则已核对。
 - [ ] 仓库中没有测试数据、用户数据或生产密钥。
-- [ ] 未调用或暴露 `resetDatabase`。

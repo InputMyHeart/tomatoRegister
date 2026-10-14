@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerStore = require("../../services/ledger.store");
 const ledgerTypes = [
@@ -69,14 +70,14 @@ Page({
     const remark = this.data.remark.trim();
     const monthlyBudget = Number(this.data.monthlyBudget);
     if (Array.from(name).length < 1 || Array.from(name).length > 8) {
-      wx.showToast({ title: "账本名称需为1-8个字符", icon: "none" });
+      feedback.showToast({ type: "warning", message: "账本名称需为1-8个字符" });
       return;
     }
     if (
       this.data.budgetEnabled &&
       (!Number.isFinite(monthlyBudget) || monthlyBudget < 1 || monthlyBudget > 999999)
     ) {
-      wx.showToast({ title: "预算金额需为1-999999", icon: "none" });
+      feedback.showToast({ type: "warning", message: "预算金额需为1-999999" });
       return;
     }
     this.setData({ saving: true });
@@ -100,7 +101,7 @@ Page({
         resultVisible: true,
       });
     } catch (error) {
-      wx.showToast({ title: error.message || "创建失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "创建失败" });
     } finally {
       this.setData({ saving: false });
     }

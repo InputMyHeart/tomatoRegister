@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
@@ -78,11 +79,11 @@ Page({
         })),
       });
       if (hasMemberLoadFailure) {
-        wx.showToast({ title: "部分成员头像加载失败", icon: "none" });
+        feedback.showToast({ type: "warning", message: "部分成员头像加载失败" });
       }
     } catch (error) {
       console.warn("ledger list load failed", error);
-      wx.showToast({ title: "账本加载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: "账本加载失败" });
     } finally {
       this.setData({ loading: false });
     }
@@ -120,11 +121,11 @@ Page({
     const remark = String(this.data.editRemark || "").trim();
     if (!ledgerId) return;
     if (Array.from(name).length < 1 || Array.from(name).length > 8) {
-      wx.showToast({ title: "账本名称需为1-8个字符", icon: "none" });
+      feedback.showToast({ type: "warning", message: "账本名称需为1-8个字符" });
       return;
     }
     if (Array.from(remark).length > 80) {
-      wx.showToast({ title: "账本备注最多 80 个字", icon: "none" });
+      feedback.showToast({ type: "warning", message: "账本备注最多 80 个字" });
       return;
     }
     const editingLedger = this.data.ledgers.find((item) => item.id === ledgerId);
@@ -134,16 +135,14 @@ Page({
       remark === String(editingLedger.remark || "").trim()
     ) {
       this.closeEditDialog();
-      wx.showToast({ title: "内容没有变化", icon: "none" });
+      feedback.showToast({ type: "info", message: "内容没有变化" });
       return;
     }
 
     this.setData({ editSaving: true });
     try {
       const data = await ledgerStore.updateLedger({ ledgerId, name, remark });
-      const cachedLedger = ledgerStore
-        .getCachedLedgers()
-        .find((item) => getId(item) === ledgerId);
+      const cachedLedger = ledgerStore.getCachedLedgers().find((item) => getId(item) === ledgerId);
       const normalized = normalizeLedger(cachedLedger || data.ledger, app.globalData.openid);
       this.setData({
         ledgers: this.data.ledgers.map((item) =>
@@ -162,9 +161,9 @@ Page({
         editName: "",
         editRemark: "",
       });
-      wx.showToast({ title: "账本已更新", icon: "success" });
+      feedback.showToast({ type: "success", message: "账本已更新" });
     } catch (error) {
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
     } finally {
       this.setData({ editSaving: false });
     }
@@ -180,18 +179,18 @@ Page({
       confirmColor: "#d9483b",
       success: async (result) => {
         if (!result.confirm) return;
-        wx.showLoading({ title: "正在删除" });
+        const loadingId = feedback.showLoading({ message: "正在删除" });
         try {
           const data = await ledgerStore.deleteLedger(ledgerId);
           if (app.globalData.user) app.globalData.user.currentLedgerId = data.currentLedgerId || "";
           app.globalData.currentLedger = data.currentLedger || null;
           app.persistAuthState();
           await this.loadLedgers();
-          wx.showToast({ title: "已删除", icon: "success" });
+          feedback.showToast({ type: "success", message: "已删除" });
         } catch (error) {
-          wx.showToast({ title: error.message || "删除失败", icon: "none" });
+          feedback.showToast({ type: "error", message: error.message || "删除失败" });
         } finally {
-          wx.hideLoading();
+          feedback.hideLoading(loadingId);
         }
       },
     });

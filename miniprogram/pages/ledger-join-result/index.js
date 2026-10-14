@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
@@ -163,7 +164,7 @@ Page({
       }
       wx.reLaunch({ url: "/pages/index/index" });
     } catch (_error) {
-      wx.showToast({ title: "切换账本失败", icon: "none" });
+      feedback.showToast({ type: "error", message: "切换账本失败" });
       this.setData({ activating: false });
     }
   },

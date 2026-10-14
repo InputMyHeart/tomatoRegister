@@ -25,6 +25,8 @@ page {
   --tl-color-expense: #f0442f;
   --tl-color-danger: #d9483b;
   --tl-color-danger-soft: #fff1ef;
+  --tl-color-warning: #b56a13;
+  --tl-color-warning-soft: #fff3e0;
   --tl-color-text: #312522;
   --tl-color-text-secondary: #6f625d;
   --tl-color-text-tertiary: #9a8278;
@@ -105,6 +107,8 @@ page {
   --tl-z-overlay: 90;
   --tl-z-keyboard: 100;
   --tl-z-keyboard-action: 110;
+  --tl-z-feedback-loading: 120;
+  --tl-z-feedback-toast: 130;
 
   /* Motion */
   --tl-duration-fast: 180ms;

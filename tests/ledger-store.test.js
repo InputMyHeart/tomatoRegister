@@ -59,9 +59,7 @@ test("forced ledger refresh retries after an in-flight stale request", async () 
   assert.deepEqual(await forcedRefresh, [{ _id: "fresh", name: "新账本" }]);
   assert.equal(callCount, 2);
   assert.deepEqual(app.globalData.ledgers, [{ _id: "fresh", name: "新账本" }]);
-  assert.deepEqual(storage.tomatoLedgerLedgerCache.ledgers, [
-    { _id: "fresh", name: "新账本" },
-  ]);
+  assert.deepEqual(storage.tomatoLedgerLedgerCache.ledgers, [{ _id: "fresh", name: "新账本" }]);
 });
 
 test("ledger reads fetch only when no scoped cache record exists", async () => {

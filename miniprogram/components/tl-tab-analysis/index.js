@@ -11,8 +11,211 @@ const CHART_META = {
   income: { title: "收入来源", subtitle: "各类收入在本期收入中的占比" },
   account: { title: "支付账户", subtitle: "支出按所选支付账户汇总" },
   member: { title: "成员录入支出", subtitle: "按记录创建者汇总，不代表实际付款人" },
+  monthTrend: {
+    title: "\u6d88\u8d39\u8d70\u52bf",
+    subtitle: "\u6bcf\u65e5\u6d88\u8d39\u53d8\u5316",
+  },
+  monthRatio: {
+    title: "\u652f\u51fa\u5360\u6bd4",
+    subtitle: "\u5404\u7c7b\u652f\u51fa\u5728\u672c\u6708\u7684\u5360\u6bd4",
+  },
+  yearCashflow: {
+    title: "\u6708\u5ea6\u6536\u652f",
+    subtitle: "12 \u4e2a\u6708\u7684\u6536\u5165\u4e0e\u652f\u51fa",
+  },
+  yearBalance: {
+    title: "\u7ed3\u4f59\u8d8b\u52bf",
+    subtitle: "\u5305\u62ec\u5f53\u524d\u5e74\u7684\u6700\u8fd1 5 \u5e74\u7ed3\u4f59",
+  },
+  yearRatio: {
+    title: "\u5168\u5e74\u652f\u51fa\u5360\u6bd4",
+    subtitle: "\u5404\u7c7b\u652f\u51fa\u7684\u5360\u6bd4",
+  },
 };
 const CHART_COLORS = ["#f0442f", "#ff8e67", "#f5b04e", "#25a66a", "#6f9ceb", "#9b7de5"];
+
+function defaultChartForMode(mode) {
+  if (mode === "month") return "monthTrend";
+  if (mode === "year") return "yearCashflow";
+  return "trend";
+}
+
+const ANALYSIS_CHART_TYPES = [
+  "monthTrend",
+  "monthRatio",
+  "yearCashflow",
+  "yearBalance",
+  "yearRatio",
+];
+const MONTHLY_TOP_RECORDS = [
+  {
+    categoryText: "购物 · 数码设备",
+    categoryIcon: "computer-line",
+    amountText: "860",
+    account: "微信支付",
+    timeText: "8 月 15 日",
+    noteText: "显示器支架",
+  },
+  {
+    categoryText: "家居 · 厨房用品",
+    categoryIcon: "home-8-line",
+    amountText: "560",
+    account: "支付宝",
+    timeText: "8 月 5 日",
+    noteText: "购置厨房收纳",
+  },
+  {
+    categoryText: "餐饮 · 聚餐",
+    categoryIcon: "restaurant-2-line",
+    amountText: "316",
+    account: "微信支付",
+    timeText: "8 月 13 日",
+    noteText: "朋友聚餐",
+  },
+  {
+    categoryText: "购物 · 日用百货",
+    categoryIcon: "shopping-bag-3-line",
+    amountText: "238",
+    account: "支付宝",
+    timeText: "8 月 9 日",
+    noteText: "补充日用品",
+  },
+  {
+    categoryText: "餐饮 · 正餐",
+    categoryIcon: "restaurant-2-line",
+    amountText: "194",
+    account: "微信支付",
+    timeText: "8 月 16 日",
+    noteText: "周末晚餐",
+  },
+  {
+    categoryText: "交通 · 网约车",
+    categoryIcon: "taxi-line",
+    amountText: "172",
+    account: "微信支付",
+    timeText: "8 月 8 日",
+    noteText: "下班打车",
+  },
+  {
+    categoryText: "餐饮 · 快餐",
+    categoryIcon: "restaurant-2-line",
+    amountText: "128",
+    account: "微信支付",
+    timeText: "8 月 2 日",
+    noteText: "工作日午餐",
+  },
+  {
+    categoryText: "购物 · 日用百货",
+    categoryIcon: "shopping-bag-3-line",
+    amountText: "96",
+    account: "支付宝",
+    timeText: "8 月 17 日",
+    noteText: "购置生活用品",
+  },
+  {
+    categoryText: "餐饮 · 早餐",
+    categoryIcon: "restaurant-2-line",
+    amountText: "86",
+    account: "现金",
+    timeText: "8 月 1 日",
+    noteText: "上班路上早餐",
+  },
+  {
+    categoryText: "餐饮 · 快餐",
+    categoryIcon: "restaurant-2-line",
+    amountText: "48",
+    account: "微信支付",
+    timeText: "8 月 20 日",
+    noteText: "工作日午餐",
+  },
+];
+
+const YEAR_RANKINGS = {
+  expense: [
+    {
+      rank: 1,
+      name: "餐饮",
+      amountText: "18,620",
+      countText: "共 186 笔",
+      changeText: "↓ 8.4%",
+      changeClass: "is-down",
+    },
+    {
+      rank: 2,
+      name: "居住",
+      amountText: "14,400",
+      countText: "共 12 笔",
+      changeText: "→ 0.6%",
+      changeClass: "is-flat",
+    },
+    {
+      rank: 3,
+      name: "购物",
+      amountText: "11,860",
+      countText: "共 72 笔",
+      changeText: "↑ 18.2%",
+      changeClass: "is-up",
+    },
+    {
+      rank: 4,
+      name: "交通",
+      amountText: "8,420",
+      countText: "共 108 笔",
+      changeText: "↓ 5.1%",
+      changeClass: "is-down",
+    },
+    {
+      rank: 5,
+      name: "娱乐",
+      amountText: "6,260",
+      countText: "共 39 笔",
+      changeText: "↑ 12.7%",
+      changeClass: "is-up",
+    },
+    {
+      rank: 6,
+      name: "其他",
+      amountText: "8,600",
+      countText: "共 64 笔",
+      changeText: "↓ 3.3%",
+      changeClass: "is-down",
+    },
+  ],
+  income: [
+    {
+      rank: 1,
+      name: "工资",
+      amountText: "57,600",
+      countText: "共 8 笔",
+      changeText: "↑ 6.8%",
+      changeClass: "is-up",
+    },
+    {
+      rank: 2,
+      name: "奖金",
+      amountText: "4,800",
+      countText: "共 3 笔",
+      changeText: "↑ 20.0%",
+      changeClass: "is-up",
+    },
+    {
+      rank: 3,
+      name: "兼职",
+      amountText: "1,240",
+      countText: "共 11 笔",
+      changeText: "↓ 4.6%",
+      changeClass: "is-down",
+    },
+    {
+      rank: 4,
+      name: "理财",
+      amountText: "500",
+      countText: "共 5 笔",
+      changeText: "→ 0.0%",
+      changeClass: "is-flat",
+    },
+  ],
+};
 
 function monthAnchor() {
   const date = new Date();
@@ -22,6 +225,14 @@ function monthAnchor() {
 function dateAnchor() {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatAnalysisRangeLabel(mode, anchor, fallback = "") {
+  if ((mode === "month" || mode === "calendar") && /^\d{4}-\d{2}$/.test(anchor)) {
+    return `${anchor.slice(0, 4)}年${anchor.slice(5, 7)}月`;
+  }
+  if (mode === "year" && /^\d{4}$/.test(anchor)) return `${anchor}年`;
+  return fallback;
 }
 
 function customRangeDefaults() {
@@ -77,6 +288,20 @@ function decorateTrend(rows = []) {
   }));
 }
 
+function decorateTopExpenseRecords(records = []) {
+  return records.map((item) => ({
+    ...item,
+    categoryText: item.categoryName || "其他",
+    categoryIcon: item.categoryIcon || "bill-line",
+    amountText: formatDisplayMoney(item.amount),
+    account: item.account || "未设置账户",
+    timeText: item.date
+      ? `${Number(item.date.slice(5, 7))} 月 ${Number(item.date.slice(8, 10))} 日`
+      : "",
+    noteText: item.note || "未填写备注",
+  }));
+}
+
 function getDetailRows(data, chartType) {
   if (chartType === "trend") return decorateTrend(data.trend || []);
   const rows =
@@ -102,6 +327,38 @@ function getCalendarSelectedDate(anchor, selectedDate) {
   return today.startsWith(anchor + "-") ? today : anchor + "-01";
 }
 
+function formatCalendarDateLabel(date) {
+  if (!date) return "";
+  const parsed = new Date(date + "T00:00:00");
+  const days = [
+    "\u5468\u65e5",
+    "\u5468\u4e00",
+    "\u5468\u4e8c",
+    "\u5468\u4e09",
+    "\u5468\u56db",
+    "\u5468\u4e94",
+    "\u5468\u516d",
+  ];
+  return (
+    Number(date.slice(5, 7)) +
+    " \u6708 " +
+    Number(date.slice(8, 10)) +
+    " \u65e5 \u00b7 " +
+    days[parsed.getDay()]
+  );
+}
+
+function summarizeCalendarRecords(records = []) {
+  return records.reduce(
+    (summary, item) => {
+      summary[item.type] += amount(item.amount);
+      summary.count += 1;
+      return summary;
+    },
+    { income: 0, expense: 0, count: 0 }
+  );
+}
+
 function decorateCalendar(data = {}, selectedDate) {
   const range = data.range || {};
   const anchor = range.start ? range.start.slice(0, 7) : monthAnchor();
@@ -117,6 +374,10 @@ function decorateCalendar(data = {}, selectedDate) {
       amountText: formatDisplayMoney(item.amount),
       categoryText: item.categoryName || "\u5176\u4ed6",
       typeLabel: item.type === "income" ? "\u6536\u5165" : "\u652f\u51fa",
+      iconName: item.categoryIcon || (item.type === "income" ? "wallet-3-line" : "bill-line"),
+      metaText: item.account || "\u672a\u8bbe\u7f6e\u8d26\u6237",
+      noteText: item.note || "",
+      hasNote: Boolean(item.note),
     });
     return result;
   }, {});
@@ -134,8 +395,8 @@ function decorateCalendar(data = {}, selectedDate) {
       date,
       day,
       isStriped: Math.floor((firstDay + day - 1) / 7) % 2 === 1,
-      incomeText: item.income ? formatDisplayMoney(item.income) : "",
-      expenseText: item.expense ? formatDisplayMoney(item.expense) : "",
+      incomeText: formatDisplayMoney(item.income),
+      expenseText: formatDisplayMoney(item.expense),
       hasIncome: Number(item.income || 0) > 0,
       hasExpense: Number(item.expense || 0) > 0,
       hasRecords: Number(item.recordCount || 0) > 0,
@@ -143,13 +404,20 @@ function decorateCalendar(data = {}, selectedDate) {
       isToday: date === dateAnchor(),
     });
   }
+  const selectedRecords = recordsByDate[selected] || [];
+  const selectedSummary = summarizeCalendarRecords(selectedRecords);
   return {
     calendarAnchor: anchor,
     selectedCalendarDate: selected,
     calendarCells: cells,
     calendarRecordsByDate: recordsByDate,
-    selectedCalendarRecords: recordsByDate[selected] || [],
-    selectedCalendarDateLabel: selected,
+    selectedCalendarRecords: selectedRecords,
+    selectedCalendarDateLabel: formatCalendarDateLabel(selected),
+    selectedCalendarSummary: {
+      incomeText: formatDisplayMoney(selectedSummary.income),
+      expenseText: formatDisplayMoney(selectedSummary.expense),
+      count: selectedSummary.count,
+    },
   };
 }
 
@@ -347,15 +615,302 @@ function getTrendOption(page) {
   };
 }
 
+function getMonthlyExpenseTrendOption(page) {
+  const trend = page.data.trend || [];
+  const expenses = trend.map((item) => amount(item.expense));
+  const expenseDays = expenses.map((value) => (value > 0 ? value : null));
+  return {
+    color: ["#f0442f"],
+    animationDuration: 350,
+    tooltip: {
+      trigger: "axis",
+      triggerOn: "click",
+      confine: true,
+      formatter: (params) =>
+        params[0].axisValue + "\n消费 " + formatTooltipAmount(params[0].value || 0),
+    },
+    grid: { top: 28, right: 18, bottom: 28, left: 10, containLabel: true },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: "#eadbd4" } },
+      axisLabel: { color: "#9a8278", fontSize: 9, interval: 4 },
+      data: trend.map((item) => item.label),
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#9a8278", fontSize: 9 },
+      splitLine: { lineStyle: { color: "#f4e9e4", type: "dashed" } },
+    },
+    series: [
+      {
+        name: "消费",
+        type: "line",
+        smooth: false,
+        symbol: "circle",
+        showSymbol: false,
+        lineStyle: { width: 3 },
+        itemStyle: { color: "#f0442f" },
+        data: expenseDays,
+        markPoint: {
+          symbolSize: 42,
+          label: { color: "#ffffff", fontSize: 9, formatter: "{b}" },
+          data: [
+            { type: "min", name: "最低", itemStyle: { color: "#25a66a" } },
+            { type: "max", name: "最高", itemStyle: { color: "#f0442f" } },
+          ],
+        },
+      },
+    ],
+  };
+}
+
 function getChartOption(page) {
   const chartType = page.data.activeChart;
+  if (chartType === "monthTrend") return getMonthlyExpenseTrendOption(page);
+  if (chartType === "monthRatio") return getPieOption(page, "category");
+  if (chartType === "yearCashflow") return getAnalysisShowcaseChartOption(page, "year-cashflow");
+  if (chartType === "yearBalance") return getAnalysisShowcaseChartOption(page, "year-balance");
+  if (chartType === "yearRatio") return getAnalysisShowcaseChartOption(page, "year-ratio");
   if (["category", "income"].includes(chartType)) return getPieOption(page, chartType);
   if (["account", "member"].includes(chartType)) return getBarOption(page, chartType);
   return getTrendOption(page);
 }
 
+function getShowcaseChartOption(page, key) {
+  const base = {
+    animationDuration: 350,
+    grid: { top: 20, right: 14, bottom: 26, left: 10, containLabel: true },
+    xAxis: {
+      type: "category",
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: "#eadbd4" } },
+      axisLabel: { color: "#9a8278", fontSize: 9 },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#9a8278", fontSize: 9 },
+      splitLine: { lineStyle: { color: "#f4e9e4", type: "dashed" } },
+    },
+  };
+  if (key === "month-category") return getPieOption(page, "category");
+  if (key === "month-budget") {
+    return {
+      ...base,
+      color: ["#f0442f", "#ffe1d6"],
+      grid: { top: 12, right: 12, bottom: 14, left: 62, containLabel: true },
+      xAxis: { type: "value", max: 100, show: false },
+      yAxis: {
+        type: "category",
+        data: ["餐饮", "购物", "交通"],
+        axisTick: { show: false },
+        axisLine: { show: false },
+        axisLabel: { color: "#6f625d", fontSize: 10 },
+      },
+      series: [
+        {
+          type: "bar",
+          stack: "budget",
+          barWidth: 14,
+          itemStyle: { borderRadius: [8, 0, 0, 8] },
+          data: [92, 98, 78],
+        },
+        {
+          type: "bar",
+          stack: "budget",
+          barWidth: 14,
+          itemStyle: { borderRadius: [0, 8, 8, 0] },
+          data: [8, 2, 22],
+        },
+      ],
+    };
+  }
+  if (key === "year-category") {
+    return {
+      ...base,
+      color: ["#f0442f"],
+      xAxis: { ...base.xAxis, data: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月"] },
+      series: [
+        {
+          type: "line",
+          smooth: true,
+          symbol: "circle",
+          symbolSize: 5,
+          lineStyle: { width: 3 },
+          areaStyle: { color: "rgba(240, 68, 47, 0.08)" },
+          data: [420, 680, 760, 520, 980, 2860, 1040, 1700],
+        },
+      ],
+    };
+  }
+  if (key === "calendar-week") {
+    return {
+      ...base,
+      color: ["#f0442f"],
+      xAxis: { ...base.xAxis, data: ["第 1 周", "第 2 周", "第 3 周", "第 4 周"] },
+      series: [
+        {
+          type: "bar",
+          barWidth: 24,
+          itemStyle: { borderRadius: [8, 8, 0, 0] },
+          data: [680, 896, 1548, 1258],
+        },
+      ],
+    };
+  }
+  return getBarOption(page, "category");
+}
+
+function getAnalysisShowcaseChartOption(page, key) {
+  const trend = page.data.trend || [];
+  const base = {
+    animationDuration: 350,
+    grid: { top: 20, right: 14, bottom: 26, left: 10, containLabel: true },
+    xAxis: {
+      type: "category",
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: "#eadbd4" } },
+      axisLabel: { color: "#9a8278", fontSize: 9 },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#9a8278", fontSize: 9 },
+      splitLine: { lineStyle: { color: "#f4e9e4", type: "dashed" } },
+    },
+  };
+  if (key === "month-ratio") {
+    return {
+      color: ["#f0442f", "#25a66a"],
+      animationDuration: 350,
+      tooltip: {
+        trigger: "item",
+        triggerOn: "click",
+        confine: true,
+        formatter: "{b}\n\u00a5{c} \u00b7 {d}%",
+      },
+      legend: {
+        bottom: 0,
+        data: ["\u652f\u51fa", "\u6536\u5165"],
+        textStyle: { color: "#8f766d", fontSize: 10 },
+      },
+      series: [
+        {
+          type: "pie",
+          radius: ["52%", "72%"],
+          center: ["50%", "44%"],
+          itemStyle: { borderColor: "#fffaf7", borderWidth: 3 },
+          label: { color: "#6e5a52", fontSize: 10, formatter: "{b}\n{d}%" },
+          data: [
+            { name: "\u652f\u51fa", value: amount(page.data.overview.expense) },
+            { name: "\u6536\u5165", value: amount(page.data.overview.income) },
+          ],
+        },
+      ],
+    };
+  }
+  if (key === "year-ratio") return getPieOption(page, "category");
+  if (key === "year-cashflow") {
+    const expenseValues = trend.map((item) => amount(item.expense)).filter((value) => value > 0);
+    const maxExpense = expenseValues.length ? Math.max(...expenseValues) : null;
+    const minExpense = expenseValues.length ? Math.min(...expenseValues) : null;
+    const expenseData = trend.map((item) => {
+      const value = amount(item.expense);
+      const color =
+        value > 0 && value === maxExpense
+          ? "#f5b04e"
+          : value > 0 && value === minExpense
+            ? "#6f9ceb"
+            : "#f0442f";
+      return { value, itemStyle: { color, borderRadius: [6, 6, 0, 0] } };
+    });
+    return {
+      ...base,
+      color: ["#25a66a", "#f0442f"],
+      tooltip: {
+        trigger: "axis",
+        triggerOn: "click",
+        confine: true,
+        axisPointer: { type: "shadow" },
+      },
+      legend: {
+        top: 0,
+        data: ["\u6536\u5165", "\u652f\u51fa"],
+        textStyle: { color: "#8f766d", fontSize: 10 },
+      },
+      grid: { top: 58, right: 14, bottom: 26, left: 10, containLabel: true },
+      xAxis: { ...base.xAxis, data: trend.map((item) => item.label) },
+      series: [
+        {
+          name: "\u6536\u5165",
+          type: "bar",
+          barWidth: 12,
+          itemStyle: { borderRadius: [6, 6, 0, 0] },
+          data: trend.map((item) => amount(item.income)),
+        },
+        {
+          name: "\u652f\u51fa",
+          type: "bar",
+          barWidth: 12,
+          barGap: "20%",
+          data: expenseData,
+        },
+      ],
+    };
+  }
+  if (key === "year-balance") {
+    const recentYearTrend = page.data.recentYearTrend || [];
+    return {
+      ...base,
+      color: ["#f0442f"],
+      tooltip: {
+        trigger: "axis",
+        triggerOn: "click",
+        confine: true,
+        axisPointer: { type: "shadow" },
+        formatter: (params) =>
+          params[0].axisValue + "\n\u7ed3\u4f59 " + formatTooltipAmount(params[0].value),
+      },
+      grid: { top: 24, right: 14, bottom: 54, left: 10, containLabel: true },
+      xAxis: {
+        ...base.xAxis,
+        axisLabel: {
+          ...base.xAxis.axisLabel,
+          interval: 0,
+          rotate: 35,
+          margin: 14,
+        },
+        data: recentYearTrend.map((item) => item.label),
+      },
+      series: [
+        {
+          name: "\u7ed3\u4f59",
+          type: "bar",
+          barWidth: 30,
+          data: recentYearTrend.map((item) => {
+            const value = amount(item.balance);
+            return {
+              value,
+              itemStyle: {
+                color: value < 0 ? "#6f9ceb" : "#f0442f",
+                borderRadius: value < 0 ? [0, 0, 6, 6] : [6, 6, 0, 0],
+              },
+            };
+          }),
+        },
+      ],
+    };
+  }
+  if (key === "all-category") return getPieOption(page, "category");
+  return getShowcaseChartOption(page, key);
+}
 function hasChartData(data, activeChart) {
-  if (activeChart === "trend")
+  if (activeChart === "yearBalance") {
+    return (data.recentYearTrend || []).some(
+      (item) => amount(item.income) !== 0 || amount(item.expense) !== 0
+    );
+  }
+  if (activeChart === "trend" || ANALYSIS_CHART_TYPES.includes(activeChart))
     return Boolean(data.overview && Number(data.overview.recordCount || 0) > 0);
   return Boolean(getRanking({ data }, activeChart).length);
 }
@@ -371,8 +926,6 @@ Component({
       { value: "month", label: "\u6708\u5ea6" },
       { value: "year", label: "\u5e74\u5ea6" },
       { value: "calendar", label: "\u65e5\u5386" },
-      { value: "custom", label: "\u81ea\u5b9a\u4e49" },
-      { value: "all", label: "\u5168\u90e8" },
     ],
     modeIndex: 0,
     modeLabel: "\u6708\u5ea6",
@@ -381,9 +934,9 @@ Component({
     customStart: "",
     customEnd: "",
     rangeLabel: "",
-    activeChart: "trend",
-    chartTitle: CHART_META.trend.title,
-    chartSubtitle: CHART_META.trend.subtitle,
+    activeChart: "monthTrend",
+    chartTitle: CHART_META.monthTrend.title,
+    chartSubtitle: CHART_META.monthTrend.subtitle,
     hasChartData: false,
     hasRecords: false,
     ec: { disableTouch: false },
@@ -398,6 +951,7 @@ Component({
     incomeCompareText: "",
     expenseCompareText: "",
     balanceCompareText: "",
+    balanceComparisonText: "",
     comparisonLabel: "",
     budget: {},
     trend: [],
@@ -419,12 +973,19 @@ Component({
     calendarCells: [],
     calendarRecordsByDate: {},
     selectedCalendarRecords: [],
+    monthlyTopRecords: MONTHLY_TOP_RECORDS.slice(0, 5),
+    yearRankingType: "expense",
+    yearRankingRows: YEAR_RANKINGS.expense,
+    isQuestionDialogVisible: false,
+    questionDialogTitle: "",
+    questionDialogContent: "",
   },
 
   lifetimes: {
     attached() {
       this.isAttached = true;
       this.chart = null;
+      this.showcaseCharts = {};
       this.analysisRequestId = 0;
       this.bootstrap();
     },
@@ -432,6 +993,7 @@ Component({
       this.isAttached = false;
       this.analysisRequestId += 1;
       this.disposeChart();
+      this.disposeShowcaseCharts();
     },
   },
 
@@ -509,6 +1071,7 @@ Component({
         customEnd: this.data.customEnd,
       };
       this.disposeChart();
+      this.disposeShowcaseCharts();
       this.setData({ loading: true, error: false, noLedger: false, hasChartData: false });
       try {
         const result = decorate(await ledgerService.getAnalysis(request));
@@ -533,7 +1096,7 @@ Component({
           loading: false,
           ledgerName: result.ledger.name,
           ledgerType: result.ledger.type,
-          rangeLabel: result.range.label,
+          rangeLabel: formatAnalysisRangeLabel(request.mode, request.anchor, result.range.label),
           activeChart: chartType,
           chartTitle: meta.title,
           chartSubtitle: meta.subtitle,
@@ -549,12 +1112,18 @@ Component({
           incomeCompareText: comparisonText(result.comparison, "income"),
           expenseCompareText: comparisonText(result.comparison, "expense"),
           balanceCompareText: comparisonText(result.comparison, "balance"),
+          balanceComparisonText: comparisonText(result.comparison, "balance")
+            ? `· ${comparisonLabel(request.mode, request.anchor)} ${comparisonText(result.comparison, "balance")}`
+            : "",
           comparisonLabel: comparisonLabel(request.mode, request.anchor),
           activeDetailRows,
           hasDetailRows: activeDetailRows.length > 0,
           hasInsights:
             Object.values(result.insightGroups || {}).some((items) => items.length) ||
             result.insights.length > 0,
+          monthlyTopRecords: decorateTopExpenseRecords(result.topExpenseRecords || []),
+          yearRankingRows:
+            this.data.yearRankingType === "income" ? result.incomeCategories : result.categories,
         };
         this.setData(nextData, () => this.renderChart());
       } catch (error) {
@@ -610,6 +1179,39 @@ Component({
       this.setData({ isModeSheetVisible: false });
     },
 
+    openQuestionDialog(event) {
+      const question = event.currentTarget.dataset.question;
+      const contentByQuestion = {
+        "month-chart": {
+          title: "图表分析说明",
+          content: "可切换查看本月每日消费走势，或各分类支出在本月消费中的占比。",
+        },
+        "month-top": {
+          title: "本月消费 Top 5 说明",
+          content: "按单笔支出金额从高到低展示本月金额最高的 5 笔消费记录。",
+        },
+        "year-chart": {
+          title: "图表分析说明",
+          content: "可切换查看全年月度收支、近年结余趋势，以及各分类支出在全年消费中的占比。",
+        },
+        "year-ranking": {
+          title: "分类排名说明",
+          content: "按分类汇总全年收入或支出并按金额排序；变化幅度用于对比上一年同期。",
+        },
+      };
+      const dialog = contentByQuestion[question];
+      if (!dialog) return;
+      this.setData({
+        isQuestionDialogVisible: true,
+        questionDialogTitle: dialog.title,
+        questionDialogContent: dialog.content,
+      });
+    },
+
+    closeQuestionDialog() {
+      this.setData({ isQuestionDialogVisible: false });
+    },
+
     chooseMode(event) {
       this.closeModeSheet();
       this.setAnalysisMode(event.currentTarget.dataset.mode);
@@ -630,7 +1232,7 @@ Component({
       const customRange = customRangeDefaults();
       const nextData = {
         mode,
-        activeChart: mode === "month" ? "trend" : this.data.activeChart,
+        activeChart: defaultChartForMode(mode),
         modeIndex: this.data.modeOptions.findIndex((item) => item.value === mode),
         modeLabel: this.data.modeOptions.find((item) => item.value === mode).label,
         anchor:
@@ -680,13 +1282,29 @@ Component({
       this.loadAnalysis();
     },
 
+    switchYearRanking(event) {
+      const type = event.currentTarget.dataset.type;
+      if (!["expense", "income"].includes(type) || type === this.data.yearRankingType) return;
+      this.setData({
+        yearRankingType: type,
+        yearRankingRows: type === "income" ? this.data.incomeCategories : this.data.categories,
+      });
+    },
+
     selectCalendarDay(event) {
       const selectedCalendarDate = event.currentTarget.dataset.date;
       if (!selectedCalendarDate) return;
+      const selectedRecords = this.data.calendarRecordsByDate[selectedCalendarDate] || [];
+      const selectedSummary = summarizeCalendarRecords(selectedRecords);
       this.setData({
         selectedCalendarDate,
-        selectedCalendarDateLabel: selectedCalendarDate,
-        selectedCalendarRecords: this.data.calendarRecordsByDate[selectedCalendarDate] || [],
+        selectedCalendarDateLabel: formatCalendarDateLabel(selectedCalendarDate),
+        selectedCalendarRecords: selectedRecords,
+        selectedCalendarSummary: {
+          incomeText: formatDisplayMoney(selectedSummary.income),
+          expenseText: formatDisplayMoney(selectedSummary.expense),
+          count: selectedSummary.count,
+        },
         calendarCells: this.data.calendarCells.map((item) => ({
           ...item,
           isActive: item.date === selectedCalendarDate,
@@ -757,6 +1375,29 @@ Component({
       if (component && typeof component.setChart === "function") component.setChart(chart);
     },
 
+    onShowcaseChartInit(event) {
+      const detail = event.detail || {};
+      const key = event.currentTarget.dataset.chartKey;
+      const canvas = detail.canvas;
+      const width = Number(detail.width || 0);
+      const height = Number(detail.height || 0);
+      if (!this.isAttached || this.data.loading || !key || !canvas || !width || !height) return;
+      this.showcaseCharts = this.showcaseCharts || {};
+      if (this.showcaseCharts[key]) this.showcaseCharts[key].dispose();
+      const chart = echarts.init(canvas, null, {
+        width,
+        height,
+        devicePixelRatio: Math.min(Number(detail.dpr || detail.canvasDpr || 1), 2),
+      });
+      canvas.setChart(chart);
+      chart.setOption(getAnalysisShowcaseChartOption(this, key), true);
+      this.showcaseCharts[key] = chart;
+    },
+
+    disposeShowcaseCharts() {
+      Object.values(this.showcaseCharts || {}).forEach((chart) => chart.dispose());
+      this.showcaseCharts = {};
+    },
     onChartInitError() {
       if (!this.isAttached || this.data.loading || !this.data.hasChartData) return;
       console.warn("analysis chart initialization failed");

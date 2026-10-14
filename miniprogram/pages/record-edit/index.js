@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const recordService = require("../../services/record.service");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
@@ -155,7 +156,7 @@ Page({
       });
       this.setAmountExpression(String(record.amount || ""));
     } catch (error) {
-      wx.showToast({ title: error.message || "记录加载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "记录加载失败" });
       setTimeout(() => wx.navigateBack(), 500);
     }
   },
@@ -252,11 +253,11 @@ Page({
     try {
       await recordService.deleteRecord(this.data.recordId);
       app.globalData.recordsNeedRefresh = true;
-      wx.showToast({ title: "已删除", icon: "success" });
+      feedback.showToast({ type: "success", message: "已删除" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {
       console.warn("deleteRecord failed", error);
-      wx.showToast({ title: error.message || "删除失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "删除失败" });
     } finally {
       this.setData({ deleting: false });
     }
@@ -269,9 +270,9 @@ Page({
     this.setData({ tags: finalTags, tagInput: "" });
     const result = evaluateAmountExpression(this.data.amount);
     if (!result.valid) {
-      wx.showToast({
-        title: getAmountValidationMessage(this.data.type, result),
-        icon: "none",
+      feedback.showToast({
+        type: "warning",
+        message: getAmountValidationMessage(this.data.type, result),
       });
       return;
     }
@@ -296,11 +297,11 @@ Page({
       if (this.data.isEditing) await recordService.updateRecord(payload);
       else await recordService.createRecord(payload);
       app.globalData.recordsNeedRefresh = true;
-      wx.showToast({ title: this.data.isEditing ? "已保存" : "已记账", icon: "success" });
+      feedback.showToast({ type: "success", message: this.data.isEditing ? "已保存" : "已记账" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {
       console.warn("saveRecord failed", error);
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
     } finally {
       this.setData({ saving: false });
     }

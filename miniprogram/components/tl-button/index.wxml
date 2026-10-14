@@ -1,4 +1,4 @@
-<button class="tl-button tl-button--{{variant}} tl-button--{{size}} {{block ? 'is-block' : ''}}" disabled="{{disabled || loading}}" bindtap="handleTap">
+<button class="tl-button tl-button--{{variant}} tl-button--{{size}} {{block ? 'is-block' : ''}}" disabled="{{disabled || loading}}" catchtap="handleTap">
   <view wx:if="{{loading}}" class="tl-button__content">
     <view class="tl-button__spinner">
     </view>

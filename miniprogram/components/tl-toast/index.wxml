@@ -1,0 +1,7 @@
+<view wx:if="{{visible}}" class="tl-toast tl-toast--{{type}}">
+  <view class="tl-toast-icon">
+    <tl-icon name="{{iconName}}" size="30" color="currentColor">
+    </tl-icon>
+  </view>
+  <text class="tl-toast-message">{{message}}</text>
+</view>

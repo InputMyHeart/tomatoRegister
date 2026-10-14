@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
@@ -40,7 +41,7 @@ Page({
       try {
         await app.loginWithWechat({ force: true });
       } catch (error) {
-        wx.showToast({ title: error.message || "登录状态已失效", icon: "none" });
+        feedback.showToast({ type: "error", message: error.message || "登录状态已失效" });
         return;
       }
     }
@@ -81,7 +82,7 @@ Page({
       }
       wx.reLaunch({ url: "/pages/index/index" });
     } catch (error) {
-      wx.showToast({ title: error.message || "登录失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "登录失败" });
       this.setData({ loggingIn: false });
     }
   },

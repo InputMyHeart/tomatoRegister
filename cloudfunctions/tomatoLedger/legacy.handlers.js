@@ -2,6 +2,7 @@ const cloud = require("wx-server-sdk");
 const {
   collapseRanking: collapseAnalysisRanking,
   makeComparison: getAnalysisComparison,
+  makeRecentYearTrend: makeAnalysisRecentYearTrend,
   makeTrendBuckets: makeAnalysisTrendBuckets,
   roundMoney: roundAnalysisMoney,
   summarizeRecords: summarizeAnalysisRecords,
@@ -1261,6 +1262,15 @@ async function getAnalysis(openid, data = {}) {
   const isCurrentMonth = mode === "month" && range.start === currentMonthRange.start;
   const isCurrentYear =
     mode === "year" && Number(range.start.slice(0, 4)) === currentMonthRange.year;
+  let recentYearRecords = [];
+  if (mode === "year") {
+    recentYearRecords = await getAnalysisRecords({
+      ledgerId: ledger._id,
+      date: _.gte(String(currentMonthRange.year - 4) + "-01-01").and(
+        _.lt(String(currentMonthRange.year + 1) + "-01-01")
+      ),
+    });
+  }
   if (mode === "month" && records.length) {
     const prev = addMonth(range.year, range.month, -1),
       prevStart = makeDateText(prev.year, prev.month, 1);
@@ -1324,7 +1334,7 @@ async function getAnalysis(openid, data = {}) {
   records.forEach((record) => {
     const amount = Number(record.amount || 0),
       isIncome = record.type === "income";
-    const name = record.parentCategory || record.categoryName || "其他";
+    const name = record.categoryName || record.parentCategory || "其他";
     if (isIncome) {
       incomeCategories[name] = (incomeCategories[name] || 0) + amount;
       return;
@@ -1336,6 +1346,7 @@ async function getAnalysis(openid, data = {}) {
     dailyExpense[record.date] = (dailyExpense[record.date] || 0) + amount;
   });
   const categoryList = Object.keys(categories)
+    .filter((name) => Number(categories[name]) > 0)
     .map((name) => ({
       name,
       amount: Number(categories[name].toFixed(2)),
@@ -1343,6 +1354,7 @@ async function getAnalysis(openid, data = {}) {
     }))
     .sort((a, b) => b.amount - a.amount);
   const incomeCategoryList = Object.keys(incomeCategories)
+    .filter((name) => Number(incomeCategories[name]) > 0)
     .map((name) => ({
       name,
       amount: roundAnalysisMoney(incomeCategories[name]),
@@ -1358,13 +1370,13 @@ async function getAnalysis(openid, data = {}) {
     .sort((a, b) => b.amount - a.amount);
   const previousCategory = {};
   previousRecords.forEach((record) => {
-    const name = record.parentCategory || record.categoryName || "其他",
+    const name = record.categoryName || record.parentCategory || "其他",
       key = (record.type === "income" ? "income:" : "expense:") + name;
     previousCategory[key] = (previousCategory[key] || 0) + Number(record.amount || 0);
   });
   const currentCategory = {};
   records.forEach((record) => {
-    const name = record.parentCategory || record.categoryName || "其他",
+    const name = record.categoryName || record.parentCategory || "其他",
       key = (record.type === "income" ? "income:" : "expense:") + name;
     currentCategory[key] = (currentCategory[key] || 0) + Number(record.amount || 0);
   });
@@ -1494,6 +1506,8 @@ async function getAnalysis(openid, data = {}) {
           : 0,
     },
     trend: makeAnalysisTrendBuckets(mode, range, records),
+    recentYearTrend:
+      mode === "year" ? makeAnalysisRecentYearTrend(currentMonthRange.year, recentYearRecords) : [],
     calendarDays:
       mode === "calendar"
         ? Object.keys(
@@ -1542,6 +1556,22 @@ async function getAnalysis(openid, data = {}) {
             account: record.account || "",
             note: record.note || "",
           }))
+        : [],
+    topExpenseRecords:
+      mode === "month"
+        ? records
+            .filter((record) => record.type === "expense")
+            .sort((left, right) => Number(right.amount || 0) - Number(left.amount || 0))
+            .slice(0, 5)
+            .map((record) => ({
+              _id: record._id,
+              date: record.date,
+              amount: roundAnalysisMoney(record.amount),
+              categoryName: record.parentCategory || record.categoryName || "其他",
+              categoryIcon: record.categoryIcon || "",
+              account: record.account || "",
+              note: record.note || "",
+            }))
         : [],
     categories: categoryList,
     categoryChart: collapseAnalysisRanking(categoryList),
@@ -1848,55 +1878,6 @@ async function deleteByQuery(collectionName, query) {
   return deleted;
 }
 
-async function resetDatabase(openid, data = {}) {
-  if (!openid)
-    return fail(
-      "\u5fae\u4fe1\u767b\u5f55\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5",
-      "OPENID_MISSING"
-    );
-  if (data.confirm !== "RESET_TOMATO_LEDGER_DATABASE") {
-    return fail("\u7f3a\u5c11\u6570\u636e\u5e93\u91cd\u7f6e\u786e\u8ba4", "RESET_CONFIRM_REQUIRED");
-  }
-
-  // Shared ledgers and their categories belong to all participants, so resetting one
-  // user must never delete them. Only personal ledgers owned by the caller are removed.
-  const personalLedgers =
-    (await db.collection("ledgers").where({ ownerOpenid: openid, type: "personal" }).get()).data ||
-    [];
-  const deleted = {
-    records: await deleteByQuery("records", { ownerOpenid: openid }),
-    categories: 0,
-    ledgers: 0,
-    ledgerInvites: 0,
-    ledgerOperations: await deleteByQuery("ledgerOperations", { ownerOpenid: openid }),
-  };
-
-  for (const ledger of personalLedgers) {
-    deleted.categories += await deleteByQuery("categories", { ledgerId: ledger._id });
-    deleted.ledgerInvites += await deleteByQuery("ledgerInvites", { ledgerId: ledger._id });
-    try {
-      await db.collection("ledgers").doc(ledger._id).remove();
-      deleted.ledgers += 1;
-    } catch (error) {
-      const message = String((error && (error.errMsg || error.message)) || "");
-      if (!message.includes("does not exist")) throw error;
-    }
-  }
-
-  const user = await getUser(openid);
-  if (user && user._id) {
-    const remainingLedgers = await listLedgersForUser(openid);
-    await Promise.all(remainingLedgers.map((ledger) => bumpLedgerSyncRevision(ledger._id)));
-    const currentLedger = remainingLedgers[0] || null;
-    await db
-      .collection("users")
-      .doc(user._id)
-      .update({
-        data: { currentLedgerId: currentLedger ? currentLedger._id : "", updatedAt: now() },
-      });
-  }
-  return ok({ deleted });
-}
 const categoryTreeDefaults = {
   expense: [
     [
@@ -2223,7 +2204,6 @@ async function execute(operation, openid, payload = {}) {
   await ensureCollections();
   const handlers = {
     login,
-    resetDatabase,
     updateProfile,
     createLedger,
     updateLedger,

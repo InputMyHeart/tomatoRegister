@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const { formatDisplayMoney } = require("../../utils/money");
 const { formatDateLabel } = require("../../utils/date");
@@ -291,7 +292,7 @@ Component({
 
     goRecordEdit() {
       if (this.data.readonly) {
-        wx.showToast({ title: "访客不能记账", icon: "none" });
+        feedback.showToast({ type: "warning", message: "访客不能记账" });
         return;
       }
       wx.navigateTo({

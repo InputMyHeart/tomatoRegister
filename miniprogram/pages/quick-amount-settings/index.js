@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerStore = require("../../services/ledger.store");
 const DEFAULT_AMOUNTS = [18, 32, 68, 128];
@@ -39,7 +40,7 @@ Page({
         readonly: Boolean(ledger.readonly),
       });
     } catch (error) {
-      wx.showToast({ title: error.message || "账本加载失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "账本加载失败" });
     } finally {
       this.loadingLedger = false;
     }
@@ -52,10 +53,10 @@ Page({
   },
   addAmount() {
     if (this.data.amounts.length >= 5)
-      return wx.showToast({ title: "最多添加 5 个金额", icon: "none" });
+      return feedback.showToast({ type: "warning", message: "最多添加 5 个金额" });
     const value = this.data.inputAmount;
     if (!validAmount(value))
-      return wx.showToast({ title: "请输入 0.01-999999 的金额", icon: "none" });
+      return feedback.showToast({ type: "warning", message: "请输入 0.01-999999 的金额" });
     this.setData({ amounts: [...this.data.amounts, String(Number(value))], inputAmount: "" });
   },
   removeAmount(event) {
@@ -66,14 +67,15 @@ Page({
     });
   },
   async save() {
-    if (this.data.readonly) return wx.showToast({ title: "访客不能设置快捷金额", icon: "none" });
+    if (this.data.readonly)
+      return feedback.showToast({ type: "warning", message: "访客不能设置快捷金额" });
     if (this.data.saving) return;
     const amounts = this.data.amounts.map(Number);
     if (
       this.data.quickAmountsEnabled &&
       (!amounts.length || amounts.some((value) => !validAmount(value)))
     )
-      return wx.showToast({ title: "请设置 1-5 个有效金额", icon: "none" });
+      return feedback.showToast({ type: "warning", message: "请设置 1-5 个有效金额" });
     this.setData({ saving: true });
     try {
       const data = await ledgerStore.updateQuickAmounts({
@@ -86,10 +88,10 @@ Page({
         ...(data.ledger || {}),
       };
       app.persistAuthState();
-      wx.showToast({ title: "已保存", icon: "success" });
+      feedback.showToast({ type: "success", message: "已保存" });
       setTimeout(() => wx.navigateBack(), 500);
     } catch (error) {
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
     } finally {
       this.setData({ saving: false });
     }

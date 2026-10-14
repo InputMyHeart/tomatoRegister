@@ -45,6 +45,7 @@
     "tl-page-actions": "/components/tl-page-actions/index",
     "tl-bottom-sheet": "/components/tl-bottom-sheet/index",
     "tl-skeleton": "/components/tl-skeleton/index",
-    "tl-dialog": "/components/tl-dialog/index"
+    "tl-dialog": "/components/tl-dialog/index",
+    "tl-feedback-host": "/components/tl-feedback-host/index"
   }
 }

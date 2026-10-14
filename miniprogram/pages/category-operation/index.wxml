@@ -33,7 +33,7 @@
         <view class="icon-helper">{{draftIcon?'更换图标':'选择图标（必选）'}}</view>
         <input class="name-input" value="{{draftName}}" placeholder="请输入分类名称" bindinput="bindNameInput"/>
         <view class="name-count">{{draftName.length}}/6</view>
-        <tl-button block="{{true}}" bind:tap="saveEditor">保存</tl-button>
+        <tl-button block="{{true}}" loading="{{saving}}" loading-text="保存中..." bind:tap="saveEditor">保存</tl-button>
       </view>
     </tl-bottom-sheet>
   </tl-container>

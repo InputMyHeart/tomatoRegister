@@ -14,5 +14,6 @@ test("cloud entrypoint exposes required route protocol", () => {
     "invite/join-token",
   ])
     assert.match(source, new RegExp('"' + route + '"'));
+  assert.doesNotMatch(source, /"auth\/database\/reset"/);
   assert.doesNotMatch(source, /event\.action|event\.type/);
 });

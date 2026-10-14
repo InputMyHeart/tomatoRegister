@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const {
   evaluateAmountExpression,
   getAmountValidationMessage,
@@ -76,9 +77,9 @@ Component({
         return true;
       }
       if (result.text || showInvalidPrompt) {
-        wx.showToast({
-          title: getAmountValidationMessage(this.data.type, result),
-          icon: "none",
+        feedback.showToast({
+          type: "warning",
+          message: getAmountValidationMessage(this.data.type, result),
         });
       }
       return false;

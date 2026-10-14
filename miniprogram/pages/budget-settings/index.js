@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const ledgerStore = require("../../services/ledger.store");
 
@@ -45,12 +46,12 @@ Page({
 
   async saveBudget() {
     if (this.data.readonly) {
-      wx.showToast({ title: "访客不能设置预算", icon: "none" });
+      feedback.showToast({ type: "warning", message: "访客不能设置预算" });
       return;
     }
     if (this.data.saving) return;
     if (this.data.budgetEnabled && !isValidBudget(this.data.monthlyBudget)) {
-      wx.showToast({ title: "预算金额需为 1-999999，最多两位小数", icon: "none" });
+      feedback.showToast({ type: "warning", message: "预算金额需为 1-999999，最多两位小数" });
       return;
     }
     this.setData({ saving: true });
@@ -75,10 +76,10 @@ Page({
           await previousPage.loadDashboard(ledger._id);
         }
       }
-      wx.showToast({ title: "已保存", icon: "success" });
+      feedback.showToast({ type: "success", message: "已保存" });
       setTimeout(() => wx.navigateBack(), 650);
     } catch (error) {
-      wx.showToast({ title: error.message || "保存失败", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "保存失败" });
     } finally {
       this.setData({ saving: false });
     }

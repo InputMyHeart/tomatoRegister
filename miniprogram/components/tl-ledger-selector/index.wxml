@@ -8,7 +8,7 @@
       <view class="tl-ledger-selector__title-row">
         <text class="tl-ledger-selector__name">{{item.displayName || item.name}}</text>
       </view>
-      <text class="tl-ledger-selector__meta">{{item.roleTag}} · {{item.memberCount || 1}} 人</text>
+      <text class="tl-ledger-selector__meta">{{item.roleTag}} · {{item.memberCount}} 人</text>
     </view>
     <text class="tl-ledger-selector__tag">{{item.typeTag}}</text>
   </view>

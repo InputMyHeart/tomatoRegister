@@ -3,16 +3,15 @@ const assert = require("node:assert/strict");
 const {
   collapseRanking,
   makeComparison,
+  makeRecentYearTrend,
   makeTrendBuckets,
   summarizeRecords,
 } = require("../cloudfunctions/tomatoLedger/analysis.helpers");
 
 test("monthly analysis fills leap-year days and keeps zero buckets", () => {
-  const trend = makeTrendBuckets(
-    "month",
-    { start: "2024-02-01", end: "2024-03-01" },
-    [{ date: "2024-02-29", type: "expense", amount: 88.5 }]
-  );
+  const trend = makeTrendBuckets("month", { start: "2024-02-01", end: "2024-03-01" }, [
+    { date: "2024-02-29", type: "expense", amount: 88.5 },
+  ]);
 
   assert.equal(trend.length, 29);
   assert.deepEqual(trend[0], {
@@ -27,11 +26,9 @@ test("monthly analysis fills leap-year days and keeps zero buckets", () => {
 });
 
 test("yearly and all-time analysis fill stable time buckets", () => {
-  const yearly = makeTrendBuckets(
-    "year",
-    { start: "2026-01-01", end: "2027-01-01" },
-    [{ date: "2026-08-13", type: "income", amount: 100 }]
-  );
+  const yearly = makeTrendBuckets("year", { start: "2026-01-01", end: "2027-01-01" }, [
+    { date: "2026-08-13", type: "income", amount: 100 },
+  ]);
   assert.equal(yearly.length, 12);
   assert.equal(yearly[7].income, 100);
 
@@ -43,6 +40,23 @@ test("yearly and all-time analysis fill stable time buckets", () => {
     allTime.map((item) => item.key),
     ["2022", "2023", "2024"]
   );
+});
+
+test("recent year trend always includes current year and the previous four years", () => {
+  const trend = makeRecentYearTrend(2026, [
+    { date: "2021-12-31", type: "income", amount: 999 },
+    { date: "2022-01-01", type: "income", amount: 100 },
+    { date: "2022-02-01", type: "expense", amount: 40 },
+    { date: "2026-08-23", type: "expense", amount: 25.5 },
+  ]);
+
+  assert.deepEqual(
+    trend.map((item) => item.label),
+    ["2022", "2023", "2024", "2025", "2026"]
+  );
+  assert.equal(trend[0].balance, 60);
+  assert.equal(trend[1].balance, 0);
+  assert.equal(trend[4].balance, -25.5);
 });
 
 test("analysis overview and comparison handle expense-only periods", () => {

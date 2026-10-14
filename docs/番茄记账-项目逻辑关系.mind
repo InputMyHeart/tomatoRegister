@@ -102,7 +102,7 @@
         <node TEXT="ledger.store：账本列表本地缓存与刷新"/>
         <node TEXT="record.service：记录 CRUD 与列表"/>
         <node TEXT="category.service：分类查询、保存、删除"/>
-        <node TEXT="profile.service：登录、资料更新、仅测试用数据库重置"/>
+        <node TEXT="profile.service：登录、资料更新"/>
         <node TEXT="feedback.service：反馈提交与历史"/>
       </node>
       <node TEXT="工具层（utils）">
@@ -186,7 +186,6 @@
         <node TEXT="记录参数校验与账本访问校验"/>
         <node TEXT="邀请领取原子性"/>
         <node TEXT="删除账本、分类迁移：标记进行中 → 分批处理 → 完成确认；可重试"/>
-        <node TEXT="resetDatabase 仅测试环境，不能向生产用户暴露"/>
       </node>
     </node>
     <node TEXT="验证与维护" POSITION="left">

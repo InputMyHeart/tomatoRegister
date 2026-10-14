@@ -1,3 +1,4 @@
+const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const feedbackService = require("../../services/feedback.service");
 
@@ -43,7 +44,7 @@ Page({
       this.setData({ images, imageCount: images.length });
     } catch (error) {
       if (!String(error.errMsg || error.message || "").includes("cancel")) {
-        wx.showToast({ title: "选择图片失败", icon: "none" });
+        feedback.showToast({ type: "error", message: "选择图片失败" });
       }
     }
   },
@@ -73,11 +74,11 @@ Page({
   async submitFeedback() {
     const content = this.data.content.trim();
     if (!content) {
-      wx.showToast({ title: "请填写反馈内容", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请填写反馈内容" });
       return;
     }
     if (!this.data.type) {
-      wx.showToast({ title: "请选择反馈类型", icon: "none" });
+      feedback.showToast({ type: "warning", message: "请选择反馈类型" });
       return;
     }
     if (Array.from(content).length > MAX_CONTENT_LENGTH || this.data.saving) return;
@@ -87,7 +88,7 @@ Page({
       await feedbackService.createFeedback({ content, type: this.data.type, images });
       wx.redirectTo({ url: "/pages/feedback-history/index" });
     } catch (error) {
-      wx.showToast({ title: error.message || "提交失败，请重试", icon: "none" });
+      feedback.showToast({ type: "error", message: error.message || "提交失败，请重试" });
     } finally {
       this.setData({ saving: false });
     }

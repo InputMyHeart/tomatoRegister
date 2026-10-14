@@ -1,3 +1,5 @@
 <view class="tl-container {{safeArea ? 'has-safe-area' : ''}}">
   <slot />
+  <tl-feedback-host>
+  </tl-feedback-host>
 </view>

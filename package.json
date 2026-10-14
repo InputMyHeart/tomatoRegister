@@ -13,7 +13,7 @@
     "visual:check": "node scripts/visual-regression.mjs",
     "visual:update": "node scripts/visual-regression.mjs --update",
     "check": "npm run format:check && npm run lint && npm run ui:check",
-    "test": "node --test tests/money.test.js tests/amount-expression.test.js tests/mapper.test.js tests/cloud-route.test.js tests/cloud-env.test.js tests/ledger-store.test.js tests/analysis-helpers.test.js",
+    "test": "node --test tests/money.test.js tests/amount-expression.test.js tests/mapper.test.js tests/tl-button.test.js tests/category-operation.test.js tests/feedback-ui.test.js tests/cloud-route.test.js tests/cloud-env.test.js tests/ledger-store.test.js tests/analysis-helpers.test.js",
     "cloud:check": "node scripts/check-cloud.mjs",
     "verify": "npm run check && npm run test && npm run cloud:check"
   },
