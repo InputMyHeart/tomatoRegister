@@ -91,8 +91,7 @@
         <node TEXT="tl-navbar：统一导航与返回首页"/>
         <node TEXT="tl-tabbar：主导航、快速记账、分类入口"/>
         <node TEXT="tl-record-form：记录新增/编辑表单"/>
-        <node TEXT="tl-ledger-selector / tl-view-ledger-switcher：账本切换"/>
-        <node TEXT="tl-member-list：成员展示"/>
+        <node TEXT="tl-ledger-switcher：统一账本选择界面"/>
         <node TEXT="tl-category-tree：分类层级"/>
         <node TEXT="tl-budget-progress / tl-empty-state / tl-icon"/>
       </node>

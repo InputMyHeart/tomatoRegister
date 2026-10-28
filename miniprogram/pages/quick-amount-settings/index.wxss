@@ -78,7 +78,7 @@
   line-height: 1;
   border-radius: var(--tl-radius-xs);
   color: var(--tl-color-text-inverse);
-  background: #f0442f;
+  background: var(--tl-color-primary);
   font-size: var(--tl-font-body-sm);
 }
 .default-link {

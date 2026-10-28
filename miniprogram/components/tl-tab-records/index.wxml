@@ -4,17 +4,17 @@
       <view class="records-toolbar fade-up">
         <view class="ledger-chip" bindtap="switchLedger">
           <text class="ledger-name">{{ledgerName}}</text>
-          <tl-icon name="arrow-down-s-line" size="28" color="#f0442f">
+          <tl-icon name="arrow-down-s-line" size="28" colorKey="primary">
           </tl-icon>
         </view>
         <view class="month-switcher">
           <view class="month-nav" bindtap="prevMonth">
-            <tl-icon name="arrow-left-s-line" size="38" color="#f0442f">
+            <tl-icon name="arrow-left-s-line" size="38" colorKey="primary">
             </tl-icon>
           </view>
           <view class="month-text">{{monthLabel}}</view>
           <view class="month-nav" bindtap="nextMonth">
-            <tl-icon name="arrow-right-s-line" size="38" color="#f0442f">
+            <tl-icon name="arrow-right-s-line" size="38" colorKey="primary">
             </tl-icon>
           </view>
         </view>
@@ -25,7 +25,7 @@
           <view class="seg-item {{activeType === 'expense' ? 'active' : ''}}" data-type="expense" bindtap="switchType">支出</view>
           <view class="seg-item {{activeType === 'income' ? 'active' : ''}}" data-type="income" bindtap="switchType">收入</view>
         </view>
-        <view class="month-brief">
+        <view class="month-brief" wx:if="{{!loading && !isError}}">
           <view>
             <text class="brief-label">收入</text>
             <text class="brief-income">¥{{monthIncome}}</text>
@@ -61,7 +61,7 @@
           </view>
           <view class="record-row" wx:for="{{item.records}}" wx:for-item="record" wx:key="id" data-id="{{record.id}}" bindtap="openRecord">
             <view class="category-mark {{record.type}}">
-              <tl-icon name="{{record.categoryIcon}}" size="32" color="{{record.type === 'income' ? '#2f9d68' : '#f0442f'}}">
+              <tl-icon name="{{record.categoryIcon}}" size="32" colorKey="{{record.type === 'income' ? 'incomeOld' : 'primary'}}">
               </tl-icon>
             </view>
             <view class="record-main">
@@ -94,6 +94,6 @@
       </view>
     </view>
   </scroll-view>
-  <tl-view-ledger-switcher visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" viewing-id="{{ledgerId}}" title="切换账本明细" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
-  </tl-view-ledger-switcher>
+  <tl-ledger-switcher id="ledger-switcher" visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" selected-id="{{ledgerId}}" title="切换账本明细" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
+  </tl-ledger-switcher>
 </view>

@@ -6,7 +6,7 @@
       <view class="page-content">
         <view class="hero-card card">
           <view class="hero-icon">
-            <tl-icon name="file-upload-line" size="52" color="#f0442f">
+            <tl-icon name="file-upload-line" size="52" colorKey="primary">
             </tl-icon>
           </view>
           <view>
@@ -20,7 +20,7 @@
           <picker mode="selector" range="{{accounts}}" value="{{accountIndex}}" bindchange="onAccountChange">
             <view class="picker-field">
               {{accounts[accountIndex]}}
-              <tl-icon name="arrow-down-s-line" size="28" color="#9a8278">
+              <tl-icon name="arrow-down-s-line" size="28" colorKey="muted">
               </tl-icon>
             </view>
           </picker>
@@ -32,7 +32,7 @@
             <view class="template-button" bindtap="downloadTemplate">下载模板</view>
           </view>
           <tl-button class="page-submit" block="{{true}}" loading="{{uploading}}" loading-text="正在导入..." bind:tap="chooseAndImport">
-            <tl-icon name="upload-2-line" size="34" color="#ffffff">
+            <tl-icon name="upload-2-line" size="34" colorKey="white">
             </tl-icon>
             <text>选择账单文件</text>
           </tl-button>

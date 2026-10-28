@@ -1,5 +1,5 @@
 const app = getApp();
-const ledgerStore = require("../../services/ledger.store");
+const { syncData } = require("../../services/data-sync.service");
 const feedback = require("../../services/feedback-ui");
 const { getId } = require("../../utils/mapper");
 
@@ -47,7 +47,7 @@ Component({
   lifetimes: {
     attached() {
       this.syncAuthState();
-      this.setData({ lastSyncedText: this.formatSyncedAt(ledgerStore.getLastSyncedAt()) });
+      this.setData({ lastSyncedText: this.formatSyncedAt(app.globalData.dataSyncedAt) });
       this.refreshHeroData();
     },
   },
@@ -106,6 +106,7 @@ Component({
     },
 
     refreshAfterSync() {
+      if (this.data.syncing) return;
       this.syncAuthState();
       this.refreshHeroData();
     },
@@ -114,12 +115,12 @@ Component({
       if (this.data.syncing) return;
       this.setData({ syncing: true });
       try {
-        const result = await ledgerStore.syncLedgers({ force: true });
-        await this.refreshHeroData();
+        const result = await syncData();
+        this.syncAuthState();
         this.setData({ lastSyncedText: this.formatSyncedAt(result.syncedAt || Date.now()) });
         feedback.showToast({
           type: "success",
-          message: result.changed ? "已同步最新数据" : "数据已是最新",
+          message: "同步完成",
         });
       } catch (error) {
         feedback.showToast({ type: "error", message: error.message || "同步失败" });
@@ -189,7 +190,7 @@ Component({
 
     importBill() {
       if (this.data.readonly) {
-        feedback.showToast({ type: "warning", message: "访客不能导入账单" });
+        feedback.showReadonlyToast();
         return;
       }
       wx.navigateTo({ url: "/pages/record-import/index" });

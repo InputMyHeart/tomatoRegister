@@ -11,6 +11,6 @@
 .tl-budget-progress__bar {
   height: 100%;
   border-radius: inherit;
-  background: #f0442f;
+  background: var(--tl-color-primary);
   transition: width 180ms ease;
 }

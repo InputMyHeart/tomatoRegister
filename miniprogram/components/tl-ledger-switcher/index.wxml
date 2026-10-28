@@ -1,0 +1,43 @@
+<tl-bottom-sheet visible="{{visible}}" close-on-mask="{{!busy}}" bind:close="close">
+  <view class="tl-ledger-switcher__head">
+    <view class="tl-ledger-switcher__heading">
+      <view class="tl-ledger-switcher__title">{{title}}</view>
+      <view wx:if="{{subtitle}}" class="tl-ledger-switcher__subtitle">{{subtitle}}</view>
+    </view>
+    <view wx:if="{{showActions}}" class="tl-ledger-switcher__manage">
+      <tl-button variant="text" size="small" disabled="{{busy}}" bind:tap="manage">账本设置</tl-button>
+    </view>
+    <view class="tl-ledger-switcher__close" bindtap="close">
+      <tl-icon name="close-line" size="32" colorKey="muted">
+      </tl-icon>
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="tl-ledger-switcher__loading">
+    <tl-skeleton variant="list">
+    </tl-skeleton>
+  </view>
+  <tl-empty-state wx:elif="{{error}}" variant="error" title="账本加载失败">
+    <tl-button variant="secondary" size="small" bind:tap="retry">重新加载</tl-button>
+  </tl-empty-state>
+  <block wx:else>
+    <tl-empty-state wx:if="{{!options.length}}" title="还没有账本">
+    </tl-empty-state>
+    <scroll-view wx:else class="tl-ledger-switcher__list" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view wx:for="{{options}}" wx:key="id" class="tl-ledger-switcher__item {{item.selected ? 'is-selected' : ''}}" data-id="{{item.id}}" bindtap="select">
+        <view class="tl-ledger-switcher__icon">
+          <tl-icon name="{{item.icon}}" size="34" colorKey="primary">
+          </tl-icon>
+        </view>
+        <view class="tl-ledger-switcher__content">
+          <text class="tl-ledger-switcher__name">{{item.name}}</text>
+          <text class="tl-ledger-switcher__meta">{{item.meta || item.typeText}}</text>
+        </view>
+        <view class="tl-ledger-switcher__labels">
+          <text wx:if="{{item.meta}}" class="tl-ledger-switcher__meta">{{item.typeText}}</text>
+          <text wx:if="{{item.selected}}" class="tl-ledger-switcher__current">{{selectedText}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+  <tl-button wx:if="{{showActions && !loading && !error}}" block="{{true}}" disabled="{{busy}}" bind:tap="create">新建账本</tl-button>
+</tl-bottom-sheet>

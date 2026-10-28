@@ -32,8 +32,8 @@ Page({
     if (this.data.ledgerId) this.load();
   },
   async load() {
-    const data = await categoryService.listCategories(this.data.ledgerId);
-    const cs = data.categories || [];
+    const allItems = await categoryService.listCategories(this.data.ledgerId);
+    const cs = allItems || [];
     const parentMap = cs.reduce((map, item) => {
       if (item.level === "parent") map[item._id] = item;
       return map;
@@ -54,7 +54,8 @@ Page({
           ),
       }));
     const p = cs.find((item) => item._id === this.data.parentId);
-    this.setData({ items, role: data.role || "", parentName: p ? p.name : "" });
+    const ledger = app.globalData.currentLedger || {};
+    this.setData({ items, role: ledger.role || "", parentName: p ? p.name : "" });
   },
   openCreate() {
     if (!["owner", "member"].includes(this.data.role)) return;

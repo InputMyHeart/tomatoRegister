@@ -190,7 +190,7 @@
 
 .record-item {
   padding: 28rpx 0;
-  border-bottom: 1rpx solid #f7e4dc;
+  border-bottom: 1rpx solid var(--tl-color-border-divider);
 }
 
 .category-dot {
@@ -314,57 +314,6 @@
   font-weight: var(--tl-font-weight-bold);
 }
 
-.ledger-switcher-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24rpx;
-  margin-bottom: 22rpx;
-}
-
-.ledger-switcher-title {
-  color: var(--tl-color-text);
-  font-size: var(--tl-font-heading);
-  font-weight: var(--tl-font-weight-bold);
-  line-height: 1.3;
-}
-
-.ledger-switcher-subtitle {
-  margin-top: 6rpx;
-  color: var(--tl-color-text-tertiary);
-  font-size: var(--tl-font-body-sm);
-  line-height: 1.4;
-}
-
-.ledger-switcher-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56rpx;
-  height: 56rpx;
-  flex: 0 0 56rpx;
-  border-radius: 50%;
-  color: var(--tl-color-text-tertiary);
-  background: #f3e8e3;
-  font-size: var(--tl-font-data);
-  line-height: 1;
-}
-
-.ledger-create-entry {
-  display: flex;
-  height: 88rpx;
-  margin-top: 6rpx;
-  border-radius: var(--tl-radius-control);
-  color: var(--tl-color-text-inverse);
-  background: #f0442f;
-  font-size: var(--tl-font-body);
-  align-items: center;
-  justify-content: center;
-  font-weight: var(--tl-font-weight-bold);
-  line-height: 1;
-  text-align: center;
-}
-
 .budget-right {
   display: flex;
   align-items: center;
@@ -388,10 +337,10 @@
   color: var(--tl-color-income);
 }
 .budget-status.attention {
-  color: #d58a18;
+  color: var(--tl-color-warning-alt);
 }
 .budget-status.warning {
-  color: #e86f30;
+  color: var(--tl-color-warning-accent);
 }
 .budget-status.danger {
   color: var(--tl-color-danger);
@@ -415,40 +364,6 @@
   font-size: var(--tl-font-body-sm);
 }
 
-.ledger-switcher-loading,
-.ledger-switcher-error {
-  min-height: 260rpx;
-  color: var(--tl-color-text-tertiary);
-  font-size: var(--tl-font-body-sm);
-  font-weight: var(--tl-font-weight-bold);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18rpx;
-}
-
-.ledger-switcher-spinner {
-  width: 42rpx;
-  height: 42rpx;
-  border: 5rpx solid #ffe1d9;
-  border-top-color: #f0442f;
-  border-radius: 50%;
-  animation: ledgerSpinner 720ms linear infinite;
-}
-
-.ledger-switcher-retry {
-  padding: 14rpx 24rpx;
-  border-radius: var(--tl-radius-pill);
-  color: var(--tl-color-primary);
-  background: var(--tl-color-primary-soft);
-}
-
-@keyframes ledgerSpinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
 /* Match the records-page row layout and surface optional record notes. */
 .records-card .record-item {
   align-items: flex-start;
@@ -493,14 +408,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ledger-switcher-settings {
-  margin-left: auto;
-  padding: 10rpx 16rpx;
-  color: var(--tl-color-primary);
-  font-size: var(--tl-font-body-sm);
-  font-weight: var(--tl-font-weight-bold);
-}
-
 :host {
   display: flex;
   width: 100%;

@@ -1,4 +1,10 @@
 const feedback = require("../../services/feedback-ui");
+const TOAST_ICONS = {
+  success: "checkbox-circle-line",
+  warning: "error-warning-line",
+  error: "close-circle-line",
+  info: "information-line",
+};
 
 Component({
   data: {
@@ -6,6 +12,7 @@ Component({
     loadingMessage: "",
     toastVisible: false,
     toastType: "info",
+    toastIconName: TOAST_ICONS.info,
     toastMessage: "",
   },
 
@@ -37,12 +44,14 @@ Component({
   },
 
   methods: {
+    stopTap() {},
     renderFeedback(snapshot) {
       this.setData({
         loadingVisible: Boolean(snapshot.loading),
         loadingMessage: snapshot.loading ? snapshot.loading.message : "",
         toastVisible: Boolean(snapshot.toast),
         toastType: snapshot.toast ? snapshot.toast.type : "info",
+        toastIconName: TOAST_ICONS[snapshot.toast && snapshot.toast.type] || TOAST_ICONS.info,
         toastMessage: snapshot.toast ? snapshot.toast.message : "",
       });
     },

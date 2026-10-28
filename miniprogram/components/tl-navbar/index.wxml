@@ -4,7 +4,7 @@
   <view class="nav-row" style="height: {{navHeight}}px;">
     <view class="nav-brand {{showBack ? 'back-only' : ''}}">
       <view wx:if="{{showBack}}" class="back-button" bindtap="handleBack">
-        <tl-icon name="arrow-left-s-line" size="42" color="#f0442f">
+        <tl-icon name="arrow-left-s-line" size="42" colorKey="primary">
         </tl-icon>
       </view>
       <block wx:elif="{{!hideBrand}}">

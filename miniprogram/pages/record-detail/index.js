@@ -1,4 +1,5 @@
 const recordService = require("../../services/record.service");
+const app = getApp();
 const { formatDisplayMoney } = require("../../utils/money");
 const { formatDateTime } = require("../../utils/date");
 const { getId } = require("../../utils/mapper");
@@ -63,13 +64,15 @@ Page({
     this.setData({ loading: true, isError: false });
     try {
       const data = await recordService.getRecord(recordId);
-      if (!data.record) throw new Error("记录加载失败");
+      const record = data.record;
+      const ledgerInfo = data.ledger || app.globalData.currentLedger || {};
+      if (!record) throw new Error("记录加载失败");
 
-      const [record] = await resolveAvatarUrls([data.record], "memberAvatar");
+      const [resolved] = await resolveAvatarUrls([record], "memberAvatar");
       this.setData({
         loading: false,
         readonly: Boolean(data.readonly),
-        record: normalizeRecord(record, data.ledger),
+        record: normalizeRecord(resolved, ledgerInfo),
       });
     } catch (error) {
       console.warn("load record detail failed", error);

@@ -20,7 +20,7 @@
 .tab-item {
   min-width: 0;
   height: 96rpx;
-  color: #b39a90;
+  color: var(--tl-color-tab-inactive);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -54,15 +54,15 @@
   height: 108rpx;
   margin-top: -36rpx;
   border-radius: var(--tl-radius-pill);
-  background: linear-gradient(135deg, #ff8268 0%, #f0442f 100%);
-  border: 8rpx solid #fffaf7;
+  background: linear-gradient(135deg, #ff8268 0%, var(--tl-color-primary) 100%);
+  border: 8rpx solid var(--tl-color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .record-hub.readonly {
-  background: #d8cbc4;
+  background: var(--tl-color-tab-divider);
 }
 .tab-icon,
 .hub-icon {

@@ -67,8 +67,7 @@ Page({
     });
   },
   async save() {
-    if (this.data.readonly)
-      return feedback.showToast({ type: "warning", message: "访客不能设置快捷金额" });
+    if (this.data.readonly) return feedback.showReadonlyToast();
     if (this.data.saving) return;
     const amounts = this.data.amounts.map(Number);
     if (

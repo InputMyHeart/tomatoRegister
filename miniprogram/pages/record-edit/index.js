@@ -2,6 +2,7 @@ const feedback = require("../../services/feedback-ui");
 const app = getApp();
 const recordService = require("../../services/record.service");
 const { getPaymentAccounts } = require("../../services/payment-account.service");
+const { markNavigation } = require("../../utils/navigation-timing");
 const {
   evaluateAmountExpression,
   getAmountValidationMessage,
@@ -47,6 +48,9 @@ function normalizeTags(input) {
 
 Page({
   data: {
+    recordLoading: false,
+    recordLoadError: false,
+    readonly: false,
     recordId: "",
     isEditing: false,
     type: "expense",
@@ -77,9 +81,11 @@ Page({
     quickNotes: quickNotesFor("expense", "其他支出"),
     createdDate: "",
     updatedDate: "",
+    syncVersion: 0,
   },
 
   onLoad(options = {}) {
+    markNavigation("编辑页", "onLoad");
     const type = options.type === "income" ? "income" : "expense";
     const fallbackCategory = type === "income" ? "其他收入" : "其他支出";
     const fallbackLabel = type === "income" ? "其他" : "其他";
@@ -101,6 +107,19 @@ Page({
         ? "price-tag-3-line"
         : "book-2-line";
     const currentLedger = app.globalData.currentLedger || {};
+    const ledgerId = options.ledgerId || currentLedger._id || "";
+    const targetLedger =
+      ledgerId === currentLedger._id
+        ? currentLedger
+        : (app.globalData.ledgers || []).find((ledger) => (ledger._id || ledger.id) === ledgerId) ||
+          {};
+    if (!options.id && (targetLedger.readonly || targetLedger.role === "readonly")) {
+      this.setData({ readonly: true });
+      feedback.showReadonlyToast();
+      if (getCurrentPages().length > 1) wx.navigateBack();
+      else wx.reLaunch({ url: "/pages/index/index" });
+      return;
+    }
     const date = options.id ? this.data.date : today();
     this.setData({
       type,
@@ -118,17 +137,34 @@ Page({
       quickNotes: quickNotesFor(type, categoryName),
       date,
     });
-    if (options.id) this.loadRecord(decodeURIComponent(options.id));
+    if (options.id) {
+      this.setData({ recordId: decodeURIComponent(options.id), isEditing: true });
+      this.loadRecord(this.data.recordId);
+    }
+  },
+
+  onReady() {
+    markNavigation("编辑页", "onReady");
   },
 
   async loadRecord(recordId) {
+    this.setData({ recordLoading: true, recordLoadError: false });
     try {
       const data = await recordService.getRecord(recordId);
       const record = data.record;
+      const ledgerInfo = data.ledger || app.globalData.currentLedger || {};
       if (!record) throw new Error("记录加载失败");
+      const readonly = Boolean(data.readonly || data.role === "readonly");
+      this.setData({ readonly });
+      if (readonly) {
+        await wx.redirectTo({
+          url: `/pages/record-detail/index?id=${encodeURIComponent(recordId)}`,
+        });
+        return;
+      }
       const recordType = record.type === "income" ? "income" : "expense";
       const recordAccounts = Array.from(
-        new Set([...getPaymentAccounts(data.ledger), record.account].filter(Boolean))
+        new Set([...getPaymentAccounts(ledgerInfo), record.account].filter(Boolean))
       );
       const accountIndex = Math.max(0, recordAccounts.indexOf(record.account));
       this.setData({
@@ -147,18 +183,24 @@ Page({
         tags: Array.isArray(record.tags) ? record.tags : [],
         date: record.date || today(),
         ledgerId: record.ledgerId || "",
-        ledgerName: (data.ledger && data.ledger.name) || "我的账本",
+        ledgerName: (ledgerInfo && ledgerInfo.name) || "我的账本",
         accountIndex,
-        quickAmounts: quickAmountsFor(data.ledger),
+        quickAmounts: quickAmountsFor(ledgerInfo),
         quickNotes: quickNotesFor(recordType, record.categoryName),
         createdDate: formatRecordTimestamp(record.createdAt),
         updatedDate: formatRecordTimestamp(record.updatedAt),
+        syncVersion: Number(record.syncVersion || 0),
       });
       this.setAmountExpression(String(record.amount || ""));
     } catch (error) {
       feedback.showToast({ type: "error", message: error.message || "记录加载失败" });
-      setTimeout(() => wx.navigateBack(), 500);
+      this.setData({ recordLoadError: true });
+    } finally {
+      this.setData({ recordLoading: false });
     }
+  },
+  reloadRecord() {
+    return this.loadRecord(this.data.recordId);
   },
   applyCategorySelection(selection = {}) {
     const type = selection.type === "income" ? "income" : "expense";
@@ -195,6 +237,7 @@ Page({
   },
 
   reselectCategory() {
+    if (this.data.readonly) return;
     const params = [`type=${this.data.type}`, "mode=reselect"];
     if (this.data.ledgerId) params.push(`ledgerId=${encodeURIComponent(this.data.ledgerId)}`);
     wx.navigateTo({ url: `/pages/record-category/index?${params.join("&")}` });
@@ -235,6 +278,7 @@ Page({
   },
 
   async deleteRecord() {
+    if (this.data.readonly || this.data.recordLoading || this.data.recordLoadError) return;
     if (!this.data.isEditing || !this.data.recordId || this.data.saving || this.data.deleting)
       return;
     const confirmed = await new Promise((resolve) => {
@@ -250,20 +294,33 @@ Page({
     if (!confirmed) return;
 
     this.setData({ deleting: true });
+    const recordId = this.data.recordId;
+    const ledgerId = this.data.ledgerId;
     try {
-      await recordService.deleteRecord(this.data.recordId);
-      app.globalData.recordsNeedRefresh = true;
+      await recordService.deleteRecord({ recordId, ledgerId, syncVersion: this.data.syncVersion });
       feedback.showToast({ type: "success", message: "已删除" });
-      setTimeout(() => wx.navigateBack(), 650);
+      wx.navigateBack();
     } catch (error) {
-      console.warn("deleteRecord failed", error);
-      feedback.showToast({ type: "error", message: error.message || "删除失败" });
-    } finally {
       this.setData({ deleting: false });
+      feedback.showToast({
+        type: "error",
+        message:
+          error.code === "RECORD_CONFLICT"
+            ? "记录已被其他成员修改，请重新打开后操作"
+            : "删除失败，请重试",
+      });
     }
   },
+
   async saveRecord() {
-    if (this.data.saving) return;
+    if (this.data.readonly) return;
+    if (
+      this.data.saving ||
+      this.data.deleting ||
+      this.data.recordLoading ||
+      this.data.recordLoadError
+    )
+      return;
     const finalTags = Array.from(
       new Set([...this.data.tags, ...normalizeTags(this.data.tagInput)])
     ).slice(0, 8);
@@ -278,32 +335,38 @@ Page({
     }
 
     this.setData({ saving: true });
+    const ledgerId = this.data.ledgerId;
+    const payload = {
+      recordId: this.data.recordId,
+      ledgerId,
+      type: this.data.type,
+      amount: result.value,
+      note: this.data.note,
+      tags: finalTags,
+      date: this.data.date,
+      categoryName: this.data.categoryName,
+      categoryLabel: this.data.categoryLabel,
+      categoryIcon: this.data.categoryIcon,
+      parentCategory: this.data.parentCategory,
+      parentIcon: this.data.parentIcon,
+      account: this.data.accounts[this.data.accountIndex],
+      syncVersion: this.data.syncVersion || 0,
+    };
+
     try {
-      const payload = {
-        recordId: this.data.recordId,
-        ledgerId: this.data.ledgerId,
-        type: this.data.type,
-        amount: result.value,
-        note: this.data.note,
-        tags: finalTags,
-        date: this.data.date,
-        categoryName: this.data.categoryName,
-        categoryLabel: this.data.categoryLabel,
-        categoryIcon: this.data.categoryIcon,
-        parentCategory: this.data.parentCategory,
-        parentIcon: this.data.parentIcon,
-        account: this.data.accounts[this.data.accountIndex],
-      };
       if (this.data.isEditing) await recordService.updateRecord(payload);
       else await recordService.createRecord(payload);
-      app.globalData.recordsNeedRefresh = true;
       feedback.showToast({ type: "success", message: this.data.isEditing ? "已保存" : "已记账" });
-      setTimeout(() => wx.navigateBack(), 650);
+      wx.navigateBack();
     } catch (error) {
-      console.warn("saveRecord failed", error);
-      feedback.showToast({ type: "error", message: error.message || "保存失败" });
-    } finally {
       this.setData({ saving: false });
+      feedback.showToast({
+        type: "error",
+        message:
+          error.code === "RECORD_CONFLICT"
+            ? "记录已被其他成员修改，输入已保留，请重新确认"
+            : "保存失败，输入已保留，请重试",
+      });
     }
   },
 });

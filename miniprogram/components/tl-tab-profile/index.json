@@ -1,7 +1,5 @@
 {
   "component": true,
   "styleIsolation": "apply-shared",
-  "usingComponents": {
-    "tl-icon": "/components/tl-icon/index"
-  }
+  "usingComponents": {}
 }

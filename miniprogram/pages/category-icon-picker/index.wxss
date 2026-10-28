@@ -63,8 +63,8 @@
 }
 
 .icon-cell.selected {
-  border: 3rpx solid #f0442f;
-  background: #fff8f4;
+  border: 3rpx solid var(--tl-color-primary);
+  background: var(--tl-palette-warm-100);
 }
 
 .icon-cell.selected text {

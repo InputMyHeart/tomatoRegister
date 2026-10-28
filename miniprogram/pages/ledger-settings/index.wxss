@@ -52,28 +52,28 @@
 }
 
 .type-tag.personal {
-  color: #8a5a30;
-  background: #fff1df;
+  color: var(--tl-color-tag-personal);
+  background: var(--tl-color-tag-personal-bg);
 }
 
 .type-tag.shared {
-  color: #2f7163;
+  color: var(--tl-color-tag-shared);
   background: var(--tl-color-income-soft);
 }
 
 .role-tag.owner {
   color: var(--tl-color-danger);
-  background: #ffe9e4;
+  background: var(--tl-color-tag-owner-bg);
 }
 
 .role-tag.member {
-  color: #5f6f7d;
-  background: #eef3f6;
+  color: var(--tl-color-tag-member);
+  background: var(--tl-color-tag-member-bg);
 }
 
 .role-tag.visitor {
-  color: #7a6a90;
-  background: #f1edf7;
+  color: var(--tl-color-tag-visitor);
+  background: var(--tl-color-tag-visitor-bg);
 }
 
 .ledger-remark {
@@ -106,7 +106,7 @@
   height: 52rpx;
   margin-left: -16rpx;
   box-sizing: border-box;
-  border: 3rpx solid #fffdfb;
+  border: 3rpx solid var(--tl-color-surface);
   border-radius: 50%;
   background: var(--tl-color-primary-soft);
 }
@@ -136,26 +136,26 @@
   justify-content: center;
   gap: 8rpx;
   min-height: 68rpx;
-  border: 2rpx solid #f3dfd8;
+  border: 2rpx solid var(--tl-color-border-warm);
   border-radius: var(--tl-radius-control);
   background: var(--tl-color-surface);
-  color: #825f54;
+  color: var(--tl-color-text-secondary);
   font-size: var(--tl-font-body-sm);
   font-weight: var(--tl-font-weight-bold);
 }
 
 .ledger-action.edit {
-  color: #9a5949;
+  color: var(--tl-color-text);
 }
 
 .ledger-action.danger {
-  border-color: #e33d2d;
-  background: #f0442f;
+  border-color: var(--tl-color-danger);
+  background: var(--tl-color-primary);
   color: var(--tl-color-text-inverse);
 }
 
 .member-avatar-status {
-  color: #a58c82;
+  color: var(--tl-color-text-tertiary);
   font-size: var(--tl-font-caption);
   font-weight: var(--tl-font-weight-bold);
 }

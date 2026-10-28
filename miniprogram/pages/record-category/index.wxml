@@ -6,12 +6,12 @@
       <view class="page-content">
         <view class="type-switch fade-up">
           <view class="type-item {{type === 'expense' ? 'active expense' : ''}}" data-type="expense" bindtap="switchType">
-            <tl-icon name="price-tag-3-line" size="30" color="{{type === 'expense' ? '#ffffff' : '#f0442f'}}">
+            <tl-icon name="price-tag-3-line" size="30" colorKey="{{type === 'expense' ? 'white' : 'primary'}}">
             </tl-icon>
             <text>支出</text>
           </view>
           <view class="type-item {{type === 'income' ? 'active income' : ''}}" data-type="income" bindtap="switchType">
-            <tl-icon name="funds-line" size="30" color="{{type === 'income' ? '#ffffff' : '#25a66a'}}">
+            <tl-icon name="funds-line" size="30" colorKey="{{type === 'income' ? 'white' : 'income'}}">
             </tl-icon>
             <text>收入</text>
           </view>
@@ -23,7 +23,7 @@
   </tl-container>
   <tl-page-actions>
     <tl-button block="{{true}}" bind:tap="openCategoryManager">
-      <tl-icon name="add-line" size="32" color="#ffffff">
+      <tl-icon name="add-line" size="32" colorKey="white">
       </tl-icon>
       <text>添加分类</text>
     </tl-button>

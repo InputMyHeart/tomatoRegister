@@ -1,10 +1,12 @@
 const ledgerService = require("./ledger.service");
+const categoryStore = require("./category.store");
 const { getLedgerRole } = require("../utils/mapper");
 
 const CACHE_KEY = "tomatoLedgerLedgerCache";
 const DEFAULT_SYNC_INTERVAL_MS = 2 * 60 * 1000;
 let refreshRequest = null;
 let syncRequest = null;
+let generation = 0;
 const syncListeners = new Set();
 
 function getAppInstance(appInstance) {
@@ -107,6 +109,8 @@ function getCachedLedgers(appInstance) {
 }
 
 async function refreshLedgers(options = {}) {
+  const requestScope = getScope();
+  const requestGeneration = generation;
   const force = Boolean(options.force);
   if (refreshRequest) {
     if (!force) return refreshRequest;
@@ -118,15 +122,19 @@ async function refreshLedgers(options = {}) {
     }
     if (refreshRequest && refreshRequest !== activeRequest) return refreshRequest;
   }
+  if (requestScope !== getScope() || requestGeneration !== generation)
+    throw new Error("登录状态已变化，请重试");
   refreshRequest = ledgerService
     .listLedgers()
     .then((data) => {
+      if (requestScope !== getScope() || requestGeneration !== generation)
+        throw new Error("登录状态已变化，请重试");
       const ledgers = data.ledgers || [];
       writeCache(ledgers, { lastSyncedAt: Date.now() });
       return ledgers;
     })
     .finally(() => {
-      refreshRequest = null;
+      if (requestGeneration === generation) refreshRequest = null;
     });
   return refreshRequest;
 }
@@ -140,6 +148,8 @@ async function getLedgers() {
 }
 
 async function syncLedgers(options = {}) {
+  const requestScope = getScope();
+  const requestGeneration = generation;
   const force = Boolean(options.force);
   const app = getAppInstance();
   const cached = readCacheRecord(app);
@@ -158,10 +168,16 @@ async function syncLedgers(options = {}) {
     }
     if (syncRequest && syncRequest !== activeRequest) return syncRequest;
   }
+  if (requestScope !== getScope() || requestGeneration !== generation)
+    throw new Error("登录状态已变化，请重试");
   syncRequest = ledgerService
     .syncLedgers((cached && cached.revisions) || getRevisions((cached && cached.ledgers) || []))
     .then((data) => {
+      if (requestScope !== getScope() || requestGeneration !== generation)
+        throw new Error("登录状态已变化，请重试");
       const changed = Boolean(data.changed);
+      (data.changedLedgerIds || []).forEach(categoryStore.invalidate);
+      (data.removedLedgerIds || []).forEach(categoryStore.removeLedger);
       const ledgers = changed ? data.ledgers || [] : (cached && cached.ledgers) || [];
       writeCache(ledgers, {
         revisions: data.revisions || getRevisions(ledgers),
@@ -176,11 +192,11 @@ async function syncLedgers(options = {}) {
         ledgers,
         syncedAt: Date.now(),
       };
-      emitSync(result);
+      if (options.notify !== false) emitSync(result);
       return result;
     })
     .finally(() => {
-      syncRequest = null;
+      if (requestGeneration === generation) syncRequest = null;
     });
   return syncRequest;
 }
@@ -248,6 +264,9 @@ const joinReadonlyLedger = (readonlyShareCode) =>
   mutateLedger("joinReadonlyLedger", readonlyShareCode);
 
 function clearLedgers() {
+  generation += 1;
+  refreshRequest = null;
+  syncRequest = null;
   wx.removeStorageSync(CACHE_KEY);
   const app = getAppInstance();
   if (app && app.globalData) app.globalData.ledgers = [];

@@ -5,6 +5,8 @@ const ledgerStore = require("../../services/ledger.store");
 const { formatDisplayMoney } = require("../../utils/money");
 const { getId, getLedgerRole } = require("../../utils/mapper");
 const { resolveAvatarUrls } = require("../../utils/avatar");
+const { on: onEvent, off: offEvent } = require("../../utils/event-bus");
+const { startNavigation } = require("../../utils/navigation-timing");
 
 function getMonthLabel() {
   const now = new Date();
@@ -62,6 +64,7 @@ function normalizeDashboard(data = {}) {
     : [];
   const recordCount = Number(data.recordCount || 0);
   const totalRecordCount = Number(data.totalRecordCount || 0);
+  const hasMonthExpense = Number(data.monthExpense || 0) > 0;
   return {
     ledgerId: data.ledgerId || "",
     ledgerName: data.ledgerName || "我的账本",
@@ -86,9 +89,10 @@ function normalizeDashboard(data = {}) {
     recordCount,
     totalRecordCount,
     hasMonthRecords: recordCount > 0,
-    topExpenseCategory: data.topExpenseCategory || "暂无",
-    largestExpenseAmount: formatDisplayMoney(data.largestExpenseAmount),
-    largestExpenseCompact: compactMoney(data.largestExpenseAmount),
+    hasMonthExpense,
+    topExpenseCategory: hasMonthExpense ? data.topExpenseCategory || "其他" : "-",
+    largestExpenseAmount: hasMonthExpense ? formatDisplayMoney(data.largestExpenseAmount) : "-",
+    largestExpenseCompact: hasMonthExpense ? compactMoney(data.largestExpenseAmount) : "-",
     familyMood: data.familyMood || "本月还没有记录",
     recentRecords,
     hasDashboardData: totalRecordCount > 0,
@@ -124,9 +128,10 @@ Component({
     budgetLeft: "0",
     budgetRate: 0,
     recordCount: 0,
-    topExpenseCategory: "暂无",
-    largestExpenseAmount: "0",
-    largestExpenseCompact: "0",
+    hasMonthExpense: false,
+    topExpenseCategory: "-",
+    largestExpenseAmount: "-",
+    largestExpenseCompact: "-",
     familyMood: "本月还没有记录",
     recentRecords: [],
     hasDashboardData: false,
@@ -135,6 +140,14 @@ Component({
   lifetimes: {
     attached() {
       this.bootstrap();
+      this._onRecordsChanged = () => this.refreshDashboard();
+      onEvent("records:changed", this._onRecordsChanged);
+    },
+    detached() {
+      if (this._onRecordsChanged) {
+        offEvent("records:changed", this._onRecordsChanged);
+        this._onRecordsChanged = null;
+      }
     },
   },
 
@@ -168,83 +181,98 @@ Component({
     },
 
     async loadDashboard(ledgerId) {
-      const dashboard = await ledgerService.getDashboard(ledgerId);
-      if (dashboard) {
-        if (dashboard.noLedger) {
-          this.setData({
-            ledgers: [],
-            showLedgerInfo: false,
-            ledgerId: "",
-            ledgerName: "还没有账本",
-            ledgerType: "personal",
-            ledgerTypeText: "个人账本",
-            monthLabel: getMonthLabel(),
-            recentRecords: [],
-            recordCount: 0,
-            ...getStatusFlags("noLedger"),
-          });
-          return true;
-        }
-
-        const normalized = normalizeDashboard({
-          ...dashboard,
-          recentRecords: await resolveAvatarUrls(dashboard.recentRecords || [], "memberAvatar"),
-        });
-        app.globalData.currentLedger = {
-          ...(app.globalData.currentLedger || {}),
-          _id: normalized.ledgerId,
-          name: normalized.ledgerName,
-          type: normalized.ledgerType,
-          readonly: normalized.readonly,
-          budgetEnabled: normalized.budgetEnabled,
-          monthlyBudget: Number(normalized.budget || 0),
-          quickAmountsEnabled: Boolean(dashboard.quickAmountsEnabled),
-          quickAmounts: Array.isArray(dashboard.quickAmounts) ? dashboard.quickAmounts : [],
-        };
-        app.globalData.readonly = normalized.readonly;
-        app.persistAuthState();
+      const requestId = (this._dashboardRequestId || 0) + 1;
+      this._dashboardRequestId = requestId;
+      const ledger = app.globalData.currentLedger || {};
+      const targetLedgerId = ledgerId || ledger._id || "";
+      this.setPageStatus("loading");
+      if (!targetLedgerId) {
         this.setData({
-          ...normalized,
-          showLedgerInfo: true,
-          ...getStatusFlags(normalized.hasDashboardData ? "ready" : "empty"),
+          ledgers: [],
+          showLedgerInfo: false,
+          ledgerId: "",
+          ledgerName: "还没有账本",
+          ledgerType: "personal",
+          ledgerTypeText: "个人账本",
+          monthLabel: getMonthLabel(),
+          recentRecords: [],
+          recordCount: 0,
+          ...getStatusFlags("noLedger"),
         });
         return true;
       }
-      this.setPageStatus("error");
-      return false;
+
+      const dashboard = await ledgerService.getDashboard(targetLedgerId);
+      if (requestId !== this._dashboardRequestId) return false;
+      if ((app.globalData.currentLedger || {})._id !== targetLedgerId) return false;
+      if (dashboard.noLedger) {
+        this.setData({
+          ledgerId: "",
+          recentRecords: [],
+          recordCount: 0,
+          showLedgerInfo: false,
+          ...getStatusFlags("noLedger"),
+        });
+        return true;
+      }
+      return this.renderDashboard(dashboard, requestId);
     },
 
-    refreshDashboard() {
-      if (this.data.isSwitchingLedger) return Promise.resolve(false);
-      return this.bootstrap();
+    async renderDashboard(dashboard, requestId) {
+      const normalized = normalizeDashboard({
+        ...dashboard,
+        recentRecords: await resolveAvatarUrls(dashboard.recentRecords || [], "memberAvatar"),
+      });
+      if (requestId !== this._dashboardRequestId) return false;
+      if ((app.globalData.currentLedger || {})._id !== normalized.ledgerId) return false;
+      app.globalData.currentLedger = {
+        ...(app.globalData.currentLedger || {}),
+        _id: normalized.ledgerId,
+        name: normalized.ledgerName,
+        type: normalized.ledgerType,
+        readonly: normalized.readonly,
+        budgetEnabled: normalized.budgetEnabled,
+        monthlyBudget: Number(normalized.budget || 0),
+        quickAmountsEnabled: Boolean(dashboard.quickAmountsEnabled),
+        quickAmounts: Array.isArray(dashboard.quickAmounts) ? dashboard.quickAmounts : [],
+      };
+      app.globalData.readonly = normalized.readonly;
+      app.persistAuthState();
+      this.setData({
+        ...normalized,
+        showLedgerInfo: true,
+        ...getStatusFlags(normalized.hasDashboardData ? "ready" : "empty"),
+      });
+      return true;
     },
 
-    getLedgerRoleTag(item = {}) {
-      const role = getLedgerRole(app.globalData.openid, item);
-      if (role === "owner") return "拥有者";
-      if (role === "readonly") return "访客";
-      return "成员";
+    async refreshDashboard() {
+      if (this.data.isSwitchingLedger) return false;
+      const ledger = app.globalData.currentLedger || {};
+      const targetLedgerId = ledger._id || "";
+
+      const request = this.loadDashboard(targetLedgerId);
+      const requestId = this._dashboardRequestId;
+      try {
+        return await request;
+      } catch (error) {
+        console.warn("home dashboard refresh failed", error);
+        if (
+          requestId === this._dashboardRequestId &&
+          (app.globalData.currentLedger || {})._id === targetLedgerId
+        ) {
+          this.setPageStatus("error");
+        }
+        return false;
+      }
     },
 
     normalizeLedgers(ledgers = []) {
-      return ledgers.map((item) => {
-        const id = item._id || item.id || "";
-        const typeTag = getLedgerTypeText(item.type);
-        const role = getLedgerRole(app.globalData.openid, item);
-        const roleTag = this.getLedgerRoleTag(item);
-        return {
-          ...item,
-          id,
-          displayName: item.name || "未命名账本",
-          typeTag,
-          typeClass: item.type === "shared" ? "shared" : "personal",
-          roleTag,
-          memberCount: Array.isArray(item.memberOpenids) ? item.memberOpenids.length : 0,
-          roleClass: role === "owner" ? "owner" : role === "readonly" ? "visitor" : "member",
-          canManage: role === "owner",
-          isCurrent: id === this.data.ledgerId,
-        };
-      });
+      return ledgers.map((item) => ({
+        ...item,
+        roleTag: getRoleText(getLedgerRole(app.globalData.openid, item)),
+        memberCount: Array.isArray(item.memberOpenids) ? item.memberOpenids.length : 0,
+      }));
     },
 
     async switchLedger() {
@@ -351,13 +379,14 @@ Component({
 
     goRecordEdit() {
       if (this.data.readonly) {
-        feedback.showToast({ type: "warning", message: "访客不能记账" });
+        feedback.showReadonlyToast();
         return;
       }
       if (!this.data.ledgerId) {
         this.goCreateLedger();
         return;
       }
+      startNavigation("首页", "分类页");
       wx.navigateTo({ url: "/pages/record-category/index" });
     },
 
@@ -368,7 +397,8 @@ Component({
     goRecordDetail(event) {
       const recordId = event.currentTarget.dataset.id || "";
       if (!recordId) return;
-      wx.navigateTo({ url: `/pages/record-edit/index?id=${encodeURIComponent(recordId)}` });
+      const page = this.data.readonly ? "record-detail" : "record-edit";
+      wx.navigateTo({ url: `/pages/${page}/index?id=${encodeURIComponent(recordId)}` });
     },
   },
 });

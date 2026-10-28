@@ -10,13 +10,13 @@
               <view class="account-title">{{ledgerName}}</view>
               <view class="account-subtitle">记一笔时可选择以下支付账户</view>
             </view>
-            <tl-icon name="bank-card-line" size="42" color="#f0442f">
+            <tl-icon name="bank-card-line" size="42" colorKey="primary">
             </tl-icon>
           </view>
           <view class="account-list">
             <view wx:for="{{accounts}}" wx:key="*this" class="account-row">
               <view class="account-icon">
-                <tl-icon name="wallet-3-line" size="32" color="#f0442f">
+                <tl-icon name="wallet-3-line" size="32" colorKey="primary">
                 </tl-icon>
               </view>
               <text class="account-name">{{item}}</text>
@@ -30,7 +30,7 @@
   </tl-container>
   <tl-page-actions wx:if="{{!readonly}}">
     <tl-button block="{{true}}" loading="{{saving}}" loading-text="保存中..." bind:tap="addAccount">
-      <tl-icon name="add-line" size="32" color="#ffffff">
+      <tl-icon name="add-line" size="32" colorKey="white">
       </tl-icon>
       <text>新增账户</text>
     </tl-button>

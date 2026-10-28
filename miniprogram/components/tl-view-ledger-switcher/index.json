@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "tl-icon": "/components/tl-icon/index",
-    "tl-bottom-sheet": "/components/tl-bottom-sheet/index"
-  }
-}

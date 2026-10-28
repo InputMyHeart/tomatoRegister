@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #f0442f;
+  background: var(--tl-color-primary);
 }
 
 .result-icon.login,

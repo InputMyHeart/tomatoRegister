@@ -67,8 +67,8 @@ Page({
     const ledger = app.globalData.currentLedger || {};
     const ledgerId = this.data.ledgerId || ledger._id;
     if (!ledgerId) return;
-    const data = await categoryService.listCategories(ledgerId);
-    const categories = data.categories || [];
+    const items = await categoryService.listCategories(ledgerId);
+    const categories = items || [];
     const expenseGroups = groupCategories(categories, "expense");
     const incomeGroups = groupCategories(categories, "income");
     const type = this.data.type;
@@ -76,7 +76,7 @@ Page({
     const activeParentId = groups.some((item) => item._id === this.data.activeParentId)
       ? this.data.activeParentId
       : (groups[0] && groups[0]._id) || "";
-    const role = data.role || "";
+    const role = ledger.role || "";
     const canCreate = ["owner", "member"].includes(role);
     const expenseRows = buildRows(expenseGroups, activeParentId, canCreate);
     const incomeRows = buildRows(incomeGroups, activeParentId, canCreate);

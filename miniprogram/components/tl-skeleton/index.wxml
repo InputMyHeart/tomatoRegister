@@ -1,5 +1,5 @@
-<view class="skeleton skeleton-{{variant}}">
-  <block wx:if="{{variant === 'home'}}">
+<view class="skeleton skeleton-{{resolvedVariant}}">
+  <block wx:if="{{resolvedVariant === 'home'}}">
     <view class="skeleton-hero">
       <view class="skeleton-hero-main">
         <view class="skeleton-row">
@@ -31,7 +31,7 @@
       </view>
     </view>
   </block>
-  <block wx:elif="{{variant === 'records'}}">
+  <block wx:elif="{{resolvedVariant === 'records'}}">
     <view class="skeleton-record-card" wx:for="{{recordCards}}" wx:key="*this">
       <view class="skeleton-record-head">
         <view class="skeleton-item record-date">
@@ -51,7 +51,7 @@
       </view>
     </view>
   </block>
-  <block wx:elif="{{variant === 'list'}}">
+  <block wx:elif="{{resolvedVariant === 'list'}}">
     <view class="skeleton-card skeleton-generic-card" wx:for="{{recordCards}}" wx:key="*this">
       <view class="skeleton-item card-title">
       </view>
@@ -61,7 +61,7 @@
       </view>
     </view>
   </block>
-  <block wx:elif="{{variant === 'detail'}}">
+  <block wx:elif="{{resolvedVariant === 'detail'}}">
     <view class="skeleton-card skeleton-detail-hero">
       <view class="skeleton-item detail-icon">
       </view>
@@ -77,7 +77,7 @@
       </view>
     </view>
   </block>
-  <block wx:else>
+  <block wx:elif="{{resolvedVariant === 'analysis'}}">
     <view class="skeleton-card analysis-overview">
       <view class="skeleton-row spaced">
         <view class="skeleton-item card-title">

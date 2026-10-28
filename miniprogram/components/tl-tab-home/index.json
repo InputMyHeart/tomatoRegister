@@ -2,11 +2,7 @@
   "component": true,
   "styleIsolation": "apply-shared",
   "usingComponents": {
-    "tl-icon": "/components/tl-icon/index",
-    "tl-empty-state": "/components/tl-empty-state/index",
-    "tl-skeleton": "/components/tl-skeleton/index",
     "tl-budget-progress": "/components/tl-budget-progress/index",
-    "tl-ledger-selector": "/components/tl-ledger-selector/index",
-    "tl-bottom-sheet": "/components/tl-bottom-sheet/index"
+    "tl-ledger-switcher": "/components/tl-ledger-switcher/index"
   }
 }

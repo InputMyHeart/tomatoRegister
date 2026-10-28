@@ -46,7 +46,7 @@ Page({
 
   async saveBudget() {
     if (this.data.readonly) {
-      feedback.showToast({ type: "warning", message: "访客不能设置预算" });
+      feedback.showReadonlyToast();
       return;
     }
     if (this.data.saving) return;

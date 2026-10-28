@@ -17,7 +17,7 @@ Page({
     const ledger = app.globalData.currentLedger || {};
     if (!app.globalData.loggedIn) return wx.reLaunch({ url: "/pages/login/index" });
     if (ledger.readonly) {
-      feedback.showToast({ type: "warning", message: "访客不能导入账单" });
+      feedback.showReadonlyToast();
       setTimeout(() => wx.navigateBack(), 300);
       return;
     }
@@ -82,7 +82,6 @@ Page({
         ledgerId: this.data.ledgerId,
         defaultAccount: this.data.accounts[this.data.accountIndex],
       });
-      app.globalData.recordsNeedRefresh = true;
       const range =
         result.startDate && result.endDate
           ? `已导入 ${result.startDate} 至 ${result.endDate} 的记录`

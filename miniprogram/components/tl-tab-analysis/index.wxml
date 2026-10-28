@@ -5,19 +5,19 @@
         <view class="analysis-context-bar">
           <view class="context-ledger" bindtap="switchLedger">
             <text class="ledger-name">{{ledgerName}}</text>
-            <tl-icon name="arrow-down-s-line" size="24" color="#f0442f">
+            <tl-icon name="arrow-down-s-line" size="24" colorKey="primary">
             </tl-icon>
           </view>
           <view class="context-divider">
           </view>
           <view wx:if="{{mode !== 'all' && mode !== 'custom'}}" class="context-period">
             <view class="context-nav" data-delta="-1" bindtap="shift">
-              <tl-icon name="arrow-left-s-line" size="28" color="#f0442f">
+              <tl-icon name="arrow-left-s-line" size="28" colorKey="primary">
               </tl-icon>
             </view>
             <text class="context-period-text">{{rangeLabel}}</text>
             <view class="context-nav" data-delta="1" bindtap="shift">
-              <tl-icon name="arrow-right-s-line" size="28" color="#f0442f">
+              <tl-icon name="arrow-right-s-line" size="28" colorKey="primary">
               </tl-icon>
             </view>
           </view>
@@ -29,7 +29,7 @@
           <view class="context-mode-picker" bindtap="openModeSheet">
             <view class="context-mode">
               <text>{{modeLabel}}</text>
-              <tl-icon name="arrow-down-s-line" size="24" color="#f0442f">
+              <tl-icon name="arrow-down-s-line" size="24" colorKey="primary">
               </tl-icon>
             </view>
           </view>
@@ -73,7 +73,7 @@
             <view class="section-title-with-help">
               <text class="section-kicker">图表分析</text>
               <view class="section-help-trigger" data-question="month-chart" bindtap="openQuestionDialog">
-                <tl-icon name="question-line" size="28" color="#e76a53">
+                <tl-icon name="question-line" size="28" colorKey="warning">
                 </tl-icon>
               </view>
             </view>
@@ -103,7 +103,7 @@
             <view class="section-title-with-help">
               <text class="section-kicker">本月消费 Top 5</text>
               <view class="section-help-trigger" data-question="month-top" bindtap="openQuestionDialog">
-                <tl-icon name="question-line" size="28" color="#e76a53">
+                <tl-icon name="question-line" size="28" colorKey="warning">
                 </tl-icon>
               </view>
             </view>
@@ -111,7 +111,7 @@
           <view class="analysis-record-list card fade-up">
             <view wx:for="{{monthlyTopRecords}}" wx:key="index" class="record-row analysis-record-row">
               <view class="category-mark expense">
-                <tl-icon name="{{item.categoryIcon}}" size="32" color="#f0442f">
+                <tl-icon name="{{item.categoryIcon}}" size="32" colorKey="primary">
                 </tl-icon>
               </view>
               <view class="record-main">
@@ -137,7 +137,7 @@
             <view class="section-title-with-help">
               <text class="section-kicker">图表分析</text>
               <view class="section-help-trigger" data-question="year-chart" bindtap="openQuestionDialog">
-                <tl-icon name="question-line" size="28" color="#e76a53">
+                <tl-icon name="question-line" size="28" colorKey="warning">
                 </tl-icon>
               </view>
             </view>
@@ -168,7 +168,7 @@
             <view class="section-title-with-help">
               <text class="section-kicker">分类排名</text>
               <view class="section-help-trigger" data-question="year-ranking" bindtap="openQuestionDialog">
-                <tl-icon name="question-line" size="28" color="#e76a53">
+                <tl-icon name="question-line" size="28" colorKey="warning">
                 </tl-icon>
               </view>
             </view>
@@ -234,7 +234,7 @@
           <view wx:if="{{selectedCalendarRecords.length}}" class="calendar-detail-list card fade-up">
             <view wx:for="{{selectedCalendarRecords}}" wx:key="_id" class="record-row calendar-detail-row">
               <view class="category-mark {{item.type}}">
-                <tl-icon name="{{item.iconName}}" size="32" color="{{item.type === 'income' ? '#25a66a' : '#f0442f'}}">
+                <tl-icon name="{{item.iconName}}" size="32" colorKey="{{item.type === 'income' ? 'income' : 'primary'}}">
                 </tl-icon>
               </view>
               <view class="record-main">
@@ -251,393 +251,53 @@
           </view>
           <view wx:else class="calendar-record-empty card fade-up">当天还没有收支记录</view>
         </block>
-        <block wx:elif="{{mode === 'month-legacy'}}">
-          <view class="showcase-status card fade-up">
-            <view class="showcase-status__head">
-              <text class="section-kicker">本月状态</text>
-              <text class="showcase-status__tag">进行中 · 已过 18 天</text>
+        <block wx:elif="{{mode === 'all'}}">
+          <view class="analysis-summary-card card fade-up">
+            <view class="summary-eyebrow">
+              <text class="section-kicker">累计结余</text>
             </view>
-            <text class="showcase-status__title">本月状态不错</text>
-            <text class="showcase-status__text">结余 ¥2,480，较上月多存 ¥620。</text>
-          </view>
-          <view class="showcase-overview card fade-up">
-            <text class="section-kicker">本月结余</text>
-            <text class="showcase-overview__value">¥{{overview.balanceText}}</text>
-            <text class="showcase-overview__compare">{{overview.saveRateText}} · 较上月 +¥620</text>
-            <view class="showcase-overview__grid">
-              <view>
+            <text class="summary-title">¥{{overview.balanceText}}</text>
+            <text class="summary-copy">{{overview.saveRateText}} · 共 {{overview.recordCount}} 笔</text>
+            <view class="summary-metrics">
+              <view class="summary-metric">
                 <text>收入</text>
                 <text class="is-income">¥{{overview.incomeText}}</text>
               </view>
-              <view>
+              <view class="summary-metric">
                 <text>支出</text>
                 <text class="is-expense">¥{{overview.expenseText}}</text>
               </view>
             </view>
           </view>
           <view class="showcase-section fade-up">
-            <text class="section-kicker">本月关注</text>
-          </view>
-          <view class="showcase-insights card fade-up">
-            <view wx:for="{{insights}}" wx:key="*this" class="showcase-insight">
-              <text class="insight-label neutral">提示</text>
-              <text>{{item}}</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">消费节奏</text>
-            <text class="showcase-section__note">每日收入、支出与结余</text>
+            <text class="section-kicker">累计收支走势</text>
           </view>
           <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas">
-              <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}" bind:init="onChartInit" bind:initerror="onChartInitError" force-use-old-canvas="true">
-              </ec-canvas>
+            <view class="chart-heading">
+              <text class="card-title">{{chartTitle}}</text>
             </view>
-            <view class="showcase-chart-metrics">
-              <text>最高支出日：8 月 15 日 · ¥1,086</text>
-              <text>近 7 天日均：¥318 / 天</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">支出构成</text>
-            <text class="showcase-section__note">餐饮 28% · 购物 22% · 前四类 78%</text>
-          </view>
-          <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas analysis-chart-canvas--compact">
-              <ec-canvas id="month-category-chart" canvas-id="month-category-chart" data-chart-key="month-category" ec="{{ec}}" bind:init="onShowcaseChartInit" force-use-old-canvas="true">
-              </ec-canvas>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">预算消耗</text>
-            <text class="showcase-section__note">购物仅剩 ¥20，餐饮仅剩 ¥96</text>
-          </view>
-          <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas analysis-chart-canvas--compact">
-              <ec-canvas id="month-budget-chart" canvas-id="month-budget-chart" data-chart-key="month-budget" ec="{{ec}}" bind:init="onShowcaseChartInit" force-use-old-canvas="true">
-              </ec-canvas>
-            </view>
-            <text class="showcase-forecast">按当前节奏，预计月末支出 ¥5,720</text>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">本月大额支出</text>
-          </view>
-          <view class="showcase-list card fade-up">
-            <view class="showcase-record">
-              <view>
-                <text>8 月 15 日 · 购物</text>
-                <text>显示器支架</text>
-              </view>
-              <text class="is-expense">¥860</text>
-            </view>
-            <view class="showcase-record">
-              <view>
-                <text>8 月 5 日 · 家居</text>
-                <text>厨房用品</text>
-              </view>
-              <text class="is-expense">¥560</text>
-            </view>
-          </view>
-        </block>
-        <block wx:elif="{{mode === 'year-legacy'}}">
-          <view class="showcase-overview card fade-up">
-            <text class="section-kicker">2026 年累计结余</text>
-            <text class="showcase-overview__value">¥{{overview.balanceText}}</text>
-            <text class="showcase-overview__compare">{{overview.saveRateText}} · 较去年同期 +¥3,280</text>
-            <view class="showcase-overview__grid">
-              <view>
-                <text>累计收入</text>
-                <text class="is-income">¥{{overview.incomeText}}</text>
-              </view>
-              <view>
-                <text>累计支出</text>
-                <text class="is-expense">¥{{overview.expenseText}}</text>
-              </view>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">年度收支趋势</text>
-            <text class="showcase-section__note">按月观察收入、支出与结余</text>
-          </view>
-          <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas">
-              <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}" bind:init="onChartInit" bind:initerror="onChartInitError" force-use-old-canvas="true">
-              </ec-canvas>
-            </view>
-            <view class="showcase-chart-metrics">
-              <text>支出最高月：6 月 · ¥8,620</text>
-              <text>结余最佳月：4 月 · ¥3,260</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">重点分类趋势</text>
-            <text class="showcase-section__note">购物在 5—6 月出现阶段高峰</text>
-          </view>
-          <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas analysis-chart-canvas--compact">
-              <ec-canvas id="year-category-chart" canvas-id="year-category-chart" data-chart-key="year-category" ec="{{ec}}" bind:init="onShowcaseChartInit" force-use-old-canvas="true">
-              </ec-canvas>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">年度发现</text>
-          </view>
-          <view class="showcase-insights card fade-up">
-            <view class="showcase-insight">
-              <text class="insight-label positive">趋势</text>
-              <text>餐饮支出已连续 4 个月下降</text>
-            </view>
-            <view class="showcase-insight">
-              <text class="insight-label neutral">周期</text>
-              <text>出行支出集中在 1 月和 5 月，占全年出行的 61%</text>
-            </view>
-            <view class="showcase-insight">
-              <text class="insight-label positive">对比</text>
-              <text>结余率较去年同期提升 4.2%</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">年度规律</text>
-            <text class="showcase-section__note">识别持续变化，而不是重复看单月构成</text>
-          </view>
-          <view class="showcase-cycle card fade-up">
-            <view class="showcase-cycle__item">
-              <text class="showcase-cycle__period">1—2 月</text>
-              <view>
-                <text>出行支出集中</text>
-                <text>占全年出行支出的 38%</text>
-              </view>
-            </view>
-            <view class="showcase-cycle__item">
-              <text class="showcase-cycle__period">5—6 月</text>
-              <view>
-                <text>购物出现阶段高峰</text>
-                <text>6 月 ¥2,860，为全年最高</text>
-              </view>
-            </view>
-            <view class="showcase-cycle__item">
-              <text class="showcase-cycle__period">近 4 月</text>
-              <view>
-                <text>餐饮支出持续回落</text>
-                <text>月均较年初下降 18%</text>
-              </view>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">年度阶段对比</text>
-            <text class="showcase-section__note">上半年与当前阶段的变化</text>
-          </view>
-          <view class="showcase-performance card fade-up">
-            <view>
-              <text>收入</text>
-              <text class="is-income">+12%</text>
-            </view>
-            <view>
-              <text>支出</text>
-              <text class="is-income">-6%</text>
-            </view>
-            <view>
-              <text>结余率</text>
-              <text>22% → 31%</text>
-            </view>
-            <view>
-              <text>最佳阶段</text>
-              <text>4—6 月</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">年度月度表现</text>
-          </view>
-          <view class="showcase-performance card fade-up">
-            <view>
-              <text>支出最高</text>
-              <text>6 月 ¥8,620</text>
-            </view>
-            <view>
-              <text>支出最低</text>
-              <text>4 月 ¥3,860</text>
-            </view>
-            <view>
-              <text>结余最高</text>
-              <text>4 月 ¥3,260</text>
-            </view>
-            <view>
-              <text>结余最低</text>
-              <text>1 月 -¥1,120</text>
-            </view>
-          </view>
-        </block>
-        <block wx:elif="{{mode === 'calendar-legacy'}}">
-          <view class="showcase-calendar-summary card fade-up">
-            <view>
-              <text>支出记录日</text>
-              <text>17 天</text>
-            </view>
-            <view>
-              <text>日均支出</text>
-              <text>¥258</text>
-            </view>
-            <view>
-              <text>最高支出日</text>
-              <text>8 月 15 日 · ¥1,086</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">消费日历</text>
-            <text class="showcase-section__note">颜色越深，代表当天支出越高</text>
-          </view>
-          <view class="calendar-card card fade-up">
-            <view class="calendar-weekdays">
-              <text>日</text>
-              <text>一</text>
-              <text>二</text>
-              <text>三</text>
-              <text>四</text>
-              <text>五</text>
-              <text>六</text>
-            </view>
-            <view class="calendar-grid">
-              <view wx:for="{{calendarCells}}" wx:key="key" class="calendar-cell {{item.blank ? 'is-blank' : ''}} {{item.isActive ? 'is-active' : ''}}">
-                <text wx:if="{{!item.blank}}" class="calendar-day">{{item.day}}</text>
-                <text class="calendar-expense">-{{item.expenseText}}</text>
-                <text class="calendar-income">+{{item.incomeText}}</text>
-              </view>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">周消费节奏</text>
-            <text class="showcase-section__note">第 3 周消费最高，主要来自大额购物</text>
-          </view>
-          <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas analysis-chart-canvas--compact">
-              <ec-canvas id="calendar-week-chart" canvas-id="calendar-week-chart" data-chart-key="calendar-week" ec="{{ec}}" bind:init="onShowcaseChartInit" force-use-old-canvas="true">
-              </ec-canvas>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">8 月 18 日 · 周二</text>
-            <text class="showcase-section__note">支出 ¥326 · 收入 ¥6,800 · 共 3 笔</text>
-          </view>
-          <view class="showcase-list card fade-up">
-            <view class="showcase-record">
-              <view>
-                <text>工资</text>
-                <text>8 月工资</text>
-              </view>
-              <text class="is-income">+¥6,800</text>
-            </view>
-            <view class="showcase-record">
-              <view>
-                <text>餐饮</text>
-                <text>午餐</text>
-              </view>
-              <text class="is-expense">-¥48</text>
-            </view>
-            <view class="showcase-record">
-              <view>
-                <text>交通</text>
-                <text>地铁</text>
-              </view>
-              <text class="is-expense">-¥6</text>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">本月消费行为</text>
-          </view>
-          <view class="showcase-performance card fade-up">
-            <view>
-              <text>有支出记录</text>
-              <text>17 天</text>
-            </view>
-            <view>
-              <text>无支出记录</text>
-              <text>14 天</text>
-            </view>
-            <view>
-              <text>周末日均支出</text>
-              <text>¥328</text>
-            </view>
-            <view>
-              <text>工作日日均支出</text>
-              <text>¥210</text>
-            </view>
-          </view>
-        </block>
-        <block wx:elif="{{mode === 'all'}}">
-          <view class="showcase-overview card fade-up">
-            <text class="section-kicker">累计收支结余</text>
-            <text class="showcase-overview__value">¥{{overview.balanceText}}</text>
-            <text class="showcase-overview__compare">共 1,286 笔 · 2024.03.18—2026.08.18</text>
-            <view class="showcase-overview__grid">
-              <view>
-                <text>累计收入</text>
-                <text class="is-income">¥{{overview.incomeText}}</text>
-              </view>
-              <view>
-                <text>累计支出</text>
-                <text class="is-expense">¥{{overview.expenseText}}</text>
-              </view>
-            </view>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">筛选账目</text>
-            <text class="showcase-section__note">全部时间 · 全部收支 · 全部分类</text>
-          </view>
-          <view class="showcase-filters card fade-up">
-            <text>全部时间</text>
-            <text>全部收支</text>
-            <text>全部分类</text>
-            <text class="filter-action">筛选</text>
-          </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">累计结余走势</text>
-            <text class="showcase-section__note">已记录收入减去已记录支出</text>
-          </view>
-          <view class="chart-card card fade-up">
             <view class="analysis-chart-canvas">
               <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ec}}" bind:init="onChartInit" bind:initerror="onChartInitError" force-use-old-canvas="true">
               </ec-canvas>
             </view>
           </view>
           <view class="showcase-section fade-up">
-            <text class="section-kicker">长期支出结构</text>
-            <text class="showcase-section__note">餐饮、居住、购物占总支出的 64%</text>
+            <text class="section-kicker">累计支出构成</text>
           </view>
           <view class="chart-card card fade-up">
-            <view class="analysis-chart-canvas analysis-chart-canvas--compact">
-              <ec-canvas id="all-category-chart" canvas-id="all-category-chart" data-chart-key="all-category" ec="{{ec}}" bind:init="onShowcaseChartInit" force-use-old-canvas="true">
+            <view class="analysis-chart-canvas">
+              <ec-canvas id="all-category-chart" canvas-id="all-category-chart" data-chart-key="category" ec="{{ec}}" bind:init="onSecondaryChartInit" force-use-old-canvas="true">
               </ec-canvas>
             </view>
           </view>
-          <view class="showcase-section fade-up">
-            <text class="section-kicker">账单明细</text>
-            <text class="showcase-section__note">按日期倒序</text>
-          </view>
-          <view class="showcase-list card fade-up">
-            <view class="showcase-record">
-              <view>
-                <text>工资</text>
-                <text>2026 年 8 月 18 日 · 8 月工资</text>
-              </view>
-              <text class="is-income">+¥6,800</text>
-            </view>
-            <view class="showcase-record">
-              <view>
-                <text>餐饮</text>
-                <text>2026 年 8 月 18 日 · 午餐</text>
-              </view>
-              <text class="is-expense">-¥48</text>
-            </view>
-            <view class="showcase-record">
-              <view>
-                <text>购物</text>
-                <text>2026 年 8 月 17 日 · 日用品</text>
-              </view>
-              <text class="is-expense">-¥126</text>
+          <view class="analysis-ratio-list">
+            <view wx:for="{{categories}}" wx:key="name" class="analysis-ratio-row">
+              <text>{{item.name}}</text>
+              <text>¥{{item.amountText}} · {{item.rate}}%</text>
             </view>
           </view>
         </block>
-        <tl-empty-state wx:else title="自定义分析暂未纳入本次原型" description="本次先验证月度、年度、日历与全部四种分析结构">
+        <tl-empty-state wx:else title="暂无可展示的分析" description="请选择月度、年度或日历查看账本数据">
         </tl-empty-state>
       </block>
     </view>
@@ -648,20 +308,20 @@
       <view class="analysis-mode-list">
         <view wx:for="{{modeOptions}}" wx:key="value" class="analysis-mode-option {{item.value === mode ? 'is-active' : ''}}" data-mode="{{item.value}}" bindtap="chooseMode">
           <text>{{item.label}}</text>
-          <tl-icon wx:if="{{item.value === mode}}" name="check-line" size="32" color="#f0442f">
+          <tl-icon wx:if="{{item.value === mode}}" name="check-line" size="32" colorKey="primary">
           </tl-icon>
         </view>
       </view>
     </view>
   </tl-bottom-sheet>
-  <tl-view-ledger-switcher visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" viewing-id="{{ledgerId}}" title="切换账本分析" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
-  </tl-view-ledger-switcher>
+  <tl-ledger-switcher id="ledger-switcher" visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgerOptions}}" selected-id="{{ledgerId}}" title="切换账本分析" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" bind:select="chooseViewLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger">
+  </tl-ledger-switcher>
   <tl-dialog visible="{{isQuestionDialogVisible}}" bind:close="closeQuestionDialog">
     <view class="analysis-question-dialog">
       <view class="analysis-question-dialog__header">
         <text class="analysis-question-dialog__title">{{questionDialogTitle}}</text>
         <view class="analysis-question-dialog__close" bindtap="closeQuestionDialog">
-          <tl-icon name="close-line" size="32" color="#7f6c65">
+          <tl-icon name="close-line" size="32" colorKey="mutedText">
           </tl-icon>
         </view>
       </view>

@@ -1,6 +1,4 @@
 {
   "navigationBarTitleText": "创建账本",
-  "usingComponents": {
-    "tl-navbar": "/components/tl-navbar/index"
-  }
+  "usingComponents": {}
 }

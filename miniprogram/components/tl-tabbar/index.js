@@ -1,5 +1,6 @@
 const feedback = require("../../services/feedback-ui");
 const app = getApp();
+const { startNavigation } = require("../../utils/navigation-timing");
 
 const leftTabs = [
   {
@@ -77,7 +78,7 @@ Component({
       if (this.data.readonly) return "readonly";
       const currentLedger = app.globalData && app.globalData.currentLedger;
       if (!currentLedger || !currentLedger._id) return "noLedger";
-      if (currentLedger.readonly) return "readonly";
+      if (currentLedger.readonly || currentLedger.role === "readonly") return "readonly";
       return "";
     },
 
@@ -99,7 +100,7 @@ Component({
         return;
       }
       if (reason === "readonly") {
-        feedback.showToast({ type: "warning", message: "访客不能记账" });
+        feedback.showReadonlyToast();
         this.updateRecordDisabledReason();
         return;
       }
@@ -108,6 +109,7 @@ Component({
         this.updateRecordDisabledReason();
         return;
       }
+      startNavigation("首页", "分类页");
       wx.navigateTo({ url: "/pages/record-category/index" });
     },
   },

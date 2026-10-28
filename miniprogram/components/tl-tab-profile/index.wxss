@@ -150,7 +150,7 @@
 
 .tool-tile:active,
 .function-row:active {
-  background: #fff4ef;
+  background: var(--tl-color-surface-warm);
 }
 
 .tool-icon,

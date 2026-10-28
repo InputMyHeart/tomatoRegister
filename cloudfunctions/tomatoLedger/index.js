@@ -2,46 +2,68 @@ const cloud = require("wx-server-sdk");
 const { success, failure } = require("./shared/response");
 const { toFailure } = require("./shared/errors");
 const { assertObject } = require("./validators/schemas");
-const auth = require("./actions/auth");
-const ledger = require("./actions/ledger");
-const record = require("./actions/record");
-const category = require("./actions/category");
-const invite = require("./actions/invite");
+const { ensureCollections } = require("./shared/helpers");
+const authHandler = require("./handlers/auth.handler");
+const ledgerHandler = require("./handlers/ledger.handler");
+const recordHandler = require("./handlers/record.handler");
+const categoryHandler = require("./handlers/category.handler");
+const dashboardHandler = require("./handlers/dashboard.handler");
+const analysisHandler = require("./handlers/analysis.handler");
+const budgetHandler = require("./handlers/budget.handler");
+const settingsHandler = require("./handlers/settings.handler");
 const feedback = require("./actions/feedback");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 
+// 包装：handler 统一接收 (openid, payload)，返回 { ok, data } 或抛错
+function wrap(handler) {
+  return async (context, payload) => {
+    await ensureCollections();
+    try {
+      const result = await handler(context.openid, payload);
+      if (result && result.success) return { success: true, data: result.data || {} };
+      const code = (result && result.code) || "REQUEST_FAILED";
+      const message = (result && result.message) || "Request failed";
+      return { success: false, code, message };
+    } catch (error) {
+      const code = error.code || "INTERNAL_ERROR";
+      const message = error.message || "Internal error";
+      return { success: false, code, message };
+    }
+  };
+}
+
 const routes = {
-  "auth/login": auth.login,
-  "auth/profile/update": auth.updateProfile,
-  "ledger/create": ledger.create,
-  "ledger/update": ledger.update,
-  "ledger/list": ledger.list,
-  "ledger/sync": ledger.sync,
-  "ledger/current/set": ledger.setCurrent,
-  "ledger/members/get": ledger.members,
-  "ledger/members/remove": ledger.removeMember,
-  "ledger/delete": ledger.remove,
-  "ledger/dashboard/get": ledger.dashboard,
-  "ledger/analysis/get": ledger.analysis,
-  "ledger/budget/update": ledger.updateBudget,
-  "ledger/quick-amounts/update": ledger.updateQuickAmounts,
-  "ledger/accounts/update": ledger.updateAccounts,
-  "record/create": record.create,
-  "record/get": record.get,
-  "record/list": record.list,
-  "record/update": record.update,
-  "record/delete": record.remove,
-  "record/import": record.importRecords,
-  "record/import/template": record.importTemplate,
-  "category/list": category.list,
-  "category/save": category.save,
-  "category/delete": category.remove,
-  "invite/create": invite.create,
-  "invite/join-token": invite.joinByToken,
-  "invite/join": invite.join,
-  "invite/join-readonly": invite.joinReadonly,
+  "auth/login": wrap(authHandler.login),
+  "auth/profile/update": wrap(authHandler.updateProfile),
+  "ledger/create": wrap(ledgerHandler.createLedger),
+  "ledger/update": wrap(ledgerHandler.updateLedger),
+  "ledger/list": wrap(ledgerHandler.listLedgers),
+  "ledger/sync": wrap(ledgerHandler.syncLedgers),
+  "ledger/current/set": wrap(ledgerHandler.setCurrentLedger),
+  "ledger/members/get": wrap(ledgerHandler.getLedgerMembers),
+  "ledger/members/remove": wrap(ledgerHandler.removeLedgerMember),
+  "ledger/delete": wrap(ledgerHandler.deleteLedger),
+  "ledger/dashboard/get": wrap(dashboardHandler.getDashboard),
+  "ledger/analysis/get": wrap(analysisHandler.getAnalysis),
+  "ledger/budget/update": wrap(budgetHandler.updateBudget),
+  "ledger/quick-amounts/update": wrap(settingsHandler.updateQuickAmounts),
+  "ledger/accounts/update": wrap(settingsHandler.updateAccounts),
+  "record/create": wrap(recordHandler.createRecord),
+  "record/get": wrap(recordHandler.getRecord),
+  "record/list": wrap(recordHandler.listRecords),
+  "record/update": wrap(recordHandler.updateRecord),
+  "record/delete": wrap(recordHandler.deleteRecord),
+  "record/import": wrap(recordHandler.importRecords),
+  "record/import/template": wrap(recordHandler.getImportTemplate),
+  "category/list": wrap(categoryHandler.listCategories),
+  "category/save": wrap(categoryHandler.saveCategory),
+  "category/delete": wrap(categoryHandler.removeCategory),
+  "invite/create": wrap(ledgerHandler.createLedgerInviteToken),
+  "invite/join-token": wrap(ledgerHandler.joinLedgerByInviteToken),
+  "invite/join": wrap(ledgerHandler.joinLedger),
+  "invite/join-readonly": wrap(ledgerHandler.joinReadonlyLedger),
   "feedback/create": feedback.create,
   "feedback/list": feedback.list,
 };

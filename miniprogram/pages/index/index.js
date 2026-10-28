@@ -1,5 +1,5 @@
-const app = getApp();
 const ledgerStore = require("../../services/ledger.store");
+const { on, off } = require("../../utils/event-bus");
 
 const TAB_TITLES = {
   index: "",
@@ -13,9 +13,13 @@ Page({
     activeTab: "index",
     navbarTitle: TAB_TITLES.index,
     recordsMonth: "",
+    recordDisabledReason: "noLedger",
   },
 
   onLoad(options = {}) {
+    this.syncRecordAccess();
+    this.onCurrentLedgerChanged = () => this.syncRecordAccess();
+    on("ledger:current-changed", this.onCurrentLedgerChanged);
     const activeTab = TAB_TITLES.hasOwnProperty(options.tab) ? options.tab : "index";
     this.setData({
       activeTab,
@@ -23,22 +27,32 @@ Page({
       recordsMonth: /^\d{4}-\d{2}$/.test(options.month || "") ? options.month : "",
     });
     this.unsubscribeLedgerSync = ledgerStore.subscribeSync((result) => {
+      this.syncRecordAccess();
       if (result.changed) this.refreshActiveTab(result);
     });
   },
 
   onUnload() {
+    if (this.onCurrentLedgerChanged) off("ledger:current-changed", this.onCurrentLedgerChanged);
     if (this.unsubscribeLedgerSync) this.unsubscribeLedgerSync();
     this.unsubscribeLedgerSync = null;
   },
 
   onShow() {
+    this.syncRecordAccess();
     ledgerStore.syncLedgers().catch((error) => console.warn("page ledger sync failed", error));
-    if (!app.globalData.recordsNeedRefresh || this.data.activeTab !== "index") return;
-    const home = this.selectComponent("#tab-home");
-    if (!home || typeof home.refreshDashboard !== "function") return;
-    app.globalData.recordsNeedRefresh = false;
-    home.refreshDashboard();
+  },
+
+  syncRecordAccess() {
+    const ledger = getApp().globalData.currentLedger;
+    const recordDisabledReason =
+      !ledger || !ledger._id
+        ? "noLedger"
+        : ledger.readonly || ledger.role === "readonly"
+          ? "readonly"
+          : "";
+    if (recordDisabledReason !== this.data.recordDisabledReason)
+      this.setData({ recordDisabledReason });
   },
 
   refreshActiveTab(syncResult) {

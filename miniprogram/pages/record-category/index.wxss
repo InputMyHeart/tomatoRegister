@@ -21,12 +21,12 @@
 
 .type-item.active.expense {
   color: var(--tl-color-text-inverse);
-  background: #f0442f;
+  background: var(--tl-color-primary);
 }
 
 .type-item.active.income {
   color: var(--tl-color-text-inverse);
-  background: #25a66a;
+  background: var(--tl-color-income);
 }
 .category-page .page-content {
   padding-bottom: var(--tl-page-content-bottom);

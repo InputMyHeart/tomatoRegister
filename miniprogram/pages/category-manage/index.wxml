@@ -20,7 +20,7 @@
                 </view>
                 <view wx:else class="category-item {{activeParentId === item._id ? 'selected' : ''}} {{type==='income'?'income':''}}" data-id="{{item._id}}" bindtap="selectParent">
                   <view class="category-icon {{type==='income'?'income':'expense'}}">
-                    <tl-icon name="{{item.icon}}" size="42" color="{{type==='income'?'#25a66a':'#f0442f'}}">
+                    <tl-icon name="{{item.icon}}" size="42" colorKey="{{type==='income'?'income':'primary'}}">
                     </tl-icon>
                   </view>
                   <text>{{item.name}}</text>
@@ -32,7 +32,7 @@
               <view class="children-grid">
                 <view wx:for="{{activeChildren}}" wx:key="_id" wx:for-item="item" class="category-item">
                   <view class="category-icon {{type==='income'?'income':'expense'}}">
-                    <tl-icon name="{{item.icon}}" size="38" color="{{type==='income'?'#25a66a':'#f0442f'}}">
+                    <tl-icon name="{{item.icon}}" size="38" colorKey="{{type==='income'?'income':'primary'}}">
                     </tl-icon>
                   </view>
                   <text>{{item.name}}</text>

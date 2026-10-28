@@ -26,7 +26,7 @@
             </view>
           </view>
           <tl-button wx:if="{{canManage}}" class="page-submit" block="{{true}}" bind:tap="inviteLedger">
-            <tl-icon name="user-add-line" size="34" color="#ffffff">
+            <tl-icon name="user-add-line" size="34" colorKey="white">
             </tl-icon>
             <text>邀请成员</text>
           </tl-button>
@@ -38,7 +38,7 @@
       <view class="share-sheet">
         <view class="sheet-title">选择邀请方式</view>
         <button wx:for="{{shareOptions}}" wx:key="mode" class="share-option" open-type="share" data-mode="{{item.mode}}" bindtap="selectShareMode">
-          <tl-icon name="{{item.icon}}" size="34" color="#c85d4a">
+          <tl-icon name="{{item.icon}}" size="34" colorKey="primaryDark">
           </tl-icon>
           <view>
             <view>{{item.title}}</view>

@@ -2,9 +2,9 @@
   --tl-category-radius-card: 34rpx;
   --tl-category-radius-control: 20rpx;
   --tl-category-radius-item: 28rpx;
-  --tl-category-primary: #f0442f;
-  --tl-category-primary-soft: #fff0ea;
-  --tl-category-surface: #fffdfc;
+  --tl-category-primary: var(--tl-color-primary);
+  --tl-category-primary-soft: var(--tl-color-primary-soft);
+  --tl-category-surface: var(--tl-color-surface);
   --tl-category-text: #312522;
   --tl-category-text-tertiary: #9a8278;
   --tl-category-font: 28rpx;
@@ -54,7 +54,7 @@
   row-gap: 16rpx;
   margin: 0 24rpx;
   padding: 22rpx 0 24rpx;
-  border-top: 1rpx solid #f2e9e3;
+  border-top: 1rpx solid var(--tl-color-divider-warm);
 }
 .tl-category-tree__child {
   display: flex;
@@ -74,7 +74,7 @@
   font-weight: var(--tl-category-font-weight);
   line-height: 1.15;
   text-align: center;
-  background: #fff8f4;
+  background: var(--tl-palette-warm-100);
 }
 .tl-category-tree__child-icon {
   width: 48rpx;

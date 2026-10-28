@@ -7,7 +7,7 @@
         <view wx:for="{{items}}" wx:key="_id" class="operation-row card">
           <view class="operation-left">
             <view class="operation-icon">
-              <tl-icon name="{{item.icon}}" size="38" color="{{type==='income'?'#25a66a':'#f0442f'}}">
+              <tl-icon name="{{item.icon}}" size="38" colorKey="{{type==='income'?'income':'primary'}}">
               </tl-icon>
             </view>
             <view>
@@ -26,7 +26,7 @@
       <view class="editor-sheet">
         <view class="sheet-title">{{editingItem?'编辑分类':'新增分类'}}</view>
         <view class="editor-icon {{draftIcon?'chosen':''}}" bindtap="chooseIcon">
-          <tl-icon wx:if="{{draftIcon}}" name="{{draftIcon}}" size="46" color="{{type==='income'?'#25a66a':'#f0442f'}}">
+          <tl-icon wx:if="{{draftIcon}}" name="{{draftIcon}}" size="46" colorKey="{{type==='income'?'income':'primary'}}">
           </tl-icon>
           <text wx:else>+</text>
         </view>

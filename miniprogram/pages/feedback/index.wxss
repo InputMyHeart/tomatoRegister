@@ -58,7 +58,7 @@
 }
 .type-option.selected {
   color: var(--tl-color-text-inverse);
-  background: #f0442f;
+  background: var(--tl-color-primary);
 }
 .image-grid {
   display: flex;

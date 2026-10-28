@@ -1,6 +1,7 @@
 const listeners = new Set();
 const loadingRequests = new Map();
 const TOAST_TYPES = new Set(["success", "warning", "error", "info"]);
+const READONLY_MESSAGE = "当前账本为只读账本，访客仅可查看";
 
 let nextLoadingId = 0;
 let toast = null;
@@ -57,7 +58,8 @@ function hideToast() {
 }
 
 function showToast(options = {}) {
-  const message = String(options.message || "").trim();
+  const rawMessage = String(options.message || "").trim();
+  const message = rawMessage === "READONLY_LEDGER" ? READONLY_MESSAGE : rawMessage;
   if (!message) return false;
   const type = TOAST_TYPES.has(options.type) ? options.type : "info";
   const defaultDuration = type === "warning" || type === "error" ? 3200 : 2200;
@@ -70,6 +72,10 @@ function showToast(options = {}) {
   notify();
   toastTimer = setTimeout(hideToast, duration);
   return true;
+}
+
+function showReadonlyToast() {
+  return showToast({ type: "warning", message: READONLY_MESSAGE });
 }
 
 function clearFeedback() {
@@ -87,6 +93,7 @@ module.exports = {
   updateLoading,
   hideLoading,
   showToast,
+  showReadonlyToast,
   hideToast,
   clearFeedback,
 };

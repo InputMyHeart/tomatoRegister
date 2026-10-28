@@ -1,1 +1,1 @@
-<text class="ri" style="font-size: {{size}}rpx; color: {{color}};">{{glyph}}</text>
+<text class="ri" style="font-size: {{size}}rpx; color: {{resolvedColor}};">{{glyph}}</text>

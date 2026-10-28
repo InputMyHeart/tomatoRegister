@@ -1,7 +1,4 @@
 {
   "navigationBarTitleText": "导入账单",
-  "usingComponents": {
-    "tl-navbar": "/components/tl-navbar/index",
-    "tl-icon": "/components/tl-icon/index"
-  }
+  "usingComponents": {}
 }

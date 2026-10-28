@@ -175,20 +175,18 @@ loading → error / empty / ready
 
 ### 公共组件边界
 
-| 组件               | 负责内容                                                  |
-| ------------------ | --------------------------------------------------------- |
-| `tl-container`     | 页面内容壳层及普通页面安全区                              |
-| `tl-skeleton`      | 页面或模块首次加载骨架，不包含稳定的 Navbar / Tabbar 壳层 |
-| `tl-empty-state`   | Empty 与可重试 Error 的通用呈现                           |
-| `tl-button`        | 主、次、危险、文字按钮及 Loading / Disabled 状态          |
-| `tl-page-actions`  | 非 Tab 页固定操作及底部安全区                             |
-| `tl-bottom-sheet`  | 底部弹层、遮罩和底部安全区                                |
-| `tl-dialog`        | 居中结果、确认或提示浮层                                  |
-| `tl-loading`       | 必须暂时阻断操作的全局处理状态，文案可更新                |
-| `tl-toast`         | 全局短提示，支持 success / warning / error / info         |
-| `tl-feedback-host` | 在页面壳层挂载 Loading 与 Toast，由统一服务驱动           |
-| `tl-tabbar`        | Tab 导航、中央记账入口及 Tab 页底部安全区                 |
-| `tl-record-form`   | 记账领域表单、金额输入、数字键盘及提交联动                |
+| 组件               | 负责内容                                                                          |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `tl-container`     | 页面内容壳层及普通页面安全区                                                      |
+| `tl-skeleton`      | 页面或模块首次加载骨架，不包含稳定的 Navbar / Tabbar 壳层                         |
+| `tl-empty-state`   | Empty 与可重试 Error 的通用呈现                                                   |
+| `tl-button`        | 主、次、危险、文字按钮及 Loading / Disabled 状态                                  |
+| `tl-page-actions`  | 非 Tab 页固定操作及底部安全区                                                     |
+| `tl-bottom-sheet`  | 底部弹层、遮罩和底部安全区                                                        |
+| `tl-dialog`        | 居中结果、确认或提示浮层                                                          |
+| `tl-feedback-host` | 统一订阅反馈服务，内部呈现阻断 Loading 与 success / warning / error / info 短提示 |
+| `tl-tabbar`        | Tab 导航、中央记账入口及 Tab 页底部安全区                                         |
+| `tl-record-form`   | 记账领域表单、金额输入、数字键盘及提交联动                                        |
 
 页面负责业务数据和事件，不重复实现上述通用视觉、定位或安全区能力。公共组件之间不直接访问页面数据，通过属性和事件保持单向交互。
 
@@ -259,3 +257,10 @@ feedback.showToast({ type: "warning", message: "部分数据未导入" });
 - 视觉脚本依赖微信开发者工具开启“设置 → 安全设置 → 服务端口”；工具路径不同时通过 `TL_WECHAT_CLI` 指定。
 
 新增 UI 时优先复用 `app.wxss` 的语义 Token。确需新增 Token 或公共组件能力时，先确认它可被多个页面用同一语义解释，再同步更新本文件和自动检查。
+
+### 组件注册与账本选择
+
+- 全局注册仅保留通用基础组件；Tab 内容、Tabbar、预算条、分类树、记录表单、账本选择器和图表在使用处注册。
+- tl-ledger-switcher 统一账本选择弹层、加载、失败重试和选中状态，只发出选择事件。首页负责激活账本；明细与分析页只更换查看范围。
+- tl-budget-progress 只接收 enabled 和 rate，将显示宽度限制在 0–100%；预算金额和剩余金额由业务数据提供。
+- tl-skeleton 支持 home / records / list / detail / analysis，缺省或未知类型回退为 list。

@@ -1,5 +1,7 @@
 const profileService = require("./services/profile.service");
 const ledgerStore = require("./services/ledger.store");
+const categoryStore = require("./services/category.store");
+const { emit } = require("./utils/event-bus");
 const { resolveEnvironment } = require("./config/cloud-env");
 
 App({
@@ -10,12 +12,13 @@ App({
     currentLedger: null,
     ledgers: [],
     stats: null,
+    dataSyncedAt: 0,
     readonly: false,
     loggedIn: false,
-    recordsNeedRefresh: false,
   },
 
   authRequest: null,
+  authGeneration: 0,
   authVerifiedInSession: false,
   ledgerSyncTimer: null,
   ledgerSyncActive: false,
@@ -80,14 +83,21 @@ App({
     if (!auth || !auth.user) return;
     if (!this.globalData.environment || auth.environmentKey !== this.globalData.environment.key) {
       wx.removeStorageSync("tomatoLedgerAuth");
+      ledgerStore.clearLedgers();
+      categoryStore.clearAll();
       return;
     }
     this.globalData.openid = auth.openid || "";
     this.globalData.user = auth.user;
-    this.globalData.currentLedger = auth.currentLedger || null;
     this.globalData.ledgers = ledgerStore.getCachedLedgers(this);
-    this.globalData.stats = auth.stats || null;
-    this.globalData.readonly = Boolean(auth.currentLedger && auth.currentLedger.readonly);
+    this.globalData.currentLedger =
+      this.globalData.ledgers.find(
+        (ledger) => (ledger._id || ledger.id) === auth.user.currentLedgerId
+      ) || null;
+    this.globalData.stats = null;
+    this.globalData.readonly = Boolean(
+      this.globalData.currentLedger && this.globalData.currentLedger.readonly
+    );
     this.globalData.loggedIn = true;
   },
 
@@ -95,10 +105,9 @@ App({
     wx.setStorageSync("tomatoLedgerAuth", {
       openid: this.globalData.openid,
       user: this.globalData.user,
-      currentLedger: this.globalData.currentLedger,
-      stats: this.globalData.stats,
       environmentKey: this.globalData.environment && this.globalData.environment.key,
     });
+    emit("ledger:current-changed");
   },
 
   loginWithWechat(options = {}) {
@@ -113,9 +122,16 @@ App({
     }
     if (this.authRequest) return this.authRequest;
 
+    const requestGeneration = this.authGeneration;
     this.authRequest = profileService
       .login()
       .then((auth) => {
+        if (requestGeneration !== this.authGeneration) throw new Error("登录状态已变化，请重试");
+        if (this.globalData.openid && this.globalData.openid !== auth.openid) {
+          ledgerStore.clearLedgers();
+          categoryStore.clearAll();
+          this.globalData.dataSyncedAt = 0;
+        }
         this.globalData.openid = auth.openid || "";
         this.globalData.user = auth.user || null;
         this.globalData.currentLedger = auth.currentLedger || null;
@@ -133,13 +149,15 @@ App({
         throw error;
       })
       .finally(() => {
-        this.authRequest = null;
+        if (requestGeneration === this.authGeneration) this.authRequest = null;
       });
     return this.authRequest;
   },
 
   async updateProfile(profile = {}) {
+    const requestGeneration = this.authGeneration;
     const data = await profileService.updateProfile(profile);
+    if (requestGeneration !== this.authGeneration) throw new Error("登录状态已变化，请重试");
     const user = data.user;
     this.globalData.user = user || this.globalData.user;
     this.persistAuthState();
@@ -147,6 +165,9 @@ App({
   },
 
   logout() {
+    this.authGeneration += 1;
+    categoryStore.clearAll();
+    this.globalData.dataSyncedAt = 0;
     this.globalData.openid = "";
     this.globalData.user = null;
     this.globalData.currentLedger = null;
@@ -159,5 +180,6 @@ App({
     this.authRequest = null;
     this.stopLedgerAutoSync();
     wx.removeStorageSync("tomatoLedgerAuth");
+    emit("ledger:current-changed");
   },
 });

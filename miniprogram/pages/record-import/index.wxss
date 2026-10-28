@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--tl-radius-control);
-  background: #ffe6df;
+  background: var(--tl-color-primary-soft);
 }
 .hero-title,
 .card-title,
@@ -30,7 +30,7 @@
 .import-note,
 .result-copy {
   margin-top: 8rpx;
-  color: #967f76;
+  color: var(--tl-color-text-tertiary);
   font-size: var(--tl-font-caption);
   line-height: 1.6;
 }
@@ -50,7 +50,7 @@
   justify-content: space-between;
   margin-top: 12rpx;
   padding: 21rpx;
-  border: 2rpx solid #f3dfd8;
+  border: 2rpx solid var(--tl-color-border-warm);
   border-radius: var(--tl-radius-control);
   color: var(--tl-color-text);
   font-size: var(--tl-font-body);
@@ -63,10 +63,10 @@
   margin-top: 26rpx;
   padding: 20rpx;
   border-radius: var(--tl-radius-control);
-  background: #fff7f3;
+  background: var(--tl-color-page);
 }
 .template-title {
-  color: #6f4a41;
+  color: var(--tl-color-text-secondary);
   font-size: var(--tl-font-body-sm);
   font-weight: var(--tl-font-weight-bold);
 }
@@ -79,7 +79,7 @@
   justify-content: center;
   line-height: 1;
   border-radius: var(--tl-radius-xs);
-  background: #ffe5de;
+  background: var(--tl-color-primary-soft);
   color: var(--tl-color-primary);
   font-size: var(--tl-font-caption);
   font-weight: var(--tl-font-weight-bold);
@@ -113,7 +113,7 @@
   gap: 8rpx;
   padding: 22rpx 12rpx;
   border-radius: var(--tl-radius-control);
-  background: #fff4ef;
+  background: var(--tl-color-surface-warm);
   color: var(--tl-color-text-tertiary);
   font-size: var(--tl-font-caption);
   text-align: center;

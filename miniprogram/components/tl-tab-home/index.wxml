@@ -9,7 +9,7 @@
             <view class="ledger-switch" bindtap="switchLedger">
               <text class="ledger-title">{{ledgerName}}</text>
               <view class="ledger-type-tag">{{ledgerTypeText}}</view>
-              <tl-icon name="arrow-down-s-line" size="38" color="#f0442f">
+              <tl-icon name="arrow-down-s-line" size="38" colorKey="primary">
               </tl-icon>
             </view>
             <view class="month-line">{{monthLabel}}</view>
@@ -42,7 +42,7 @@
                 <view wx:if="{{canManageBudget}}" class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
               </view>
             </view>
-            <tl-budget-progress enabled="{{budgetEnabled}}" budget="{{budget}}" expense="{{monthExpense}}">
+            <tl-budget-progress enabled="{{budgetEnabled}}" rate="{{budgetRate}}">
             </tl-budget-progress>
           </view>
         </block>
@@ -80,7 +80,7 @@
           <view class="mini-stats fade-up">
             <view class="mini-stat">
               <view class="mini-icon">
-                <tl-icon name="file-list-3-line" size="24" color="#f0442f">
+                <tl-icon name="file-list-3-line" size="24" colorKey="primary">
                 </tl-icon>
               </view>
               <view class="mini-value">{{recordCount}}</view>
@@ -88,7 +88,7 @@
             </view>
             <view class="mini-stat">
               <view class="mini-icon">
-                <tl-icon name="restaurant-2-line" size="24" color="#f0442f">
+                <tl-icon name="restaurant-2-line" size="24" colorKey="primary">
                 </tl-icon>
               </view>
               <view class="mini-value">{{topExpenseCategory}}</view>
@@ -96,10 +96,10 @@
             </view>
             <view class="mini-stat">
               <view class="mini-icon">
-                <tl-icon name="funds-line" size="24" color="#f0442f">
+                <tl-icon name="funds-line" size="24" colorKey="primary">
                 </tl-icon>
               </view>
-              <view class="mini-value">¥{{largestExpenseCompact}}</view>
+              <view class="mini-value">{{hasMonthExpense ? '¥' : ''}}{{largestExpenseCompact}}</view>
               <view class="mini-label">支出最大</view>
             </view>
           </view>
@@ -116,7 +116,7 @@
                 <view wx:if="{{canManageBudget}}" class="budget-setting-link" bindtap="goBudgetSettings">设置</view>
               </view>
             </view>
-            <tl-budget-progress enabled="{{budgetEnabled}}" budget="{{budget}}" expense="{{monthExpense}}">
+            <tl-budget-progress enabled="{{budgetEnabled}}" rate="{{budgetRate}}">
             </tl-budget-progress>
           </view>
           <view class="records-card card fade-up">
@@ -151,33 +151,6 @@
       </block>
     </view>
   </scroll-view>
-  <tl-bottom-sheet visible="{{isLedgerSwitcherVisible}}" bind:close="closeLedgerSwitcher">
-    <view class="ledger-switcher-head">
-      <view>
-        <view class="ledger-switcher-title">切换账本</view>
-        <view class="ledger-switcher-subtitle">点击账本即可切换</view>
-      </view>
-      <view class="ledger-switcher-settings" bindtap="goLedgerSettings">账本设置</view>
-      <view class="ledger-switcher-close" bindtap="closeLedgerSwitcher">×</view>
-    </view>
-    <view wx:if="{{isSwitchingLedger}}" class="ledger-switcher-loading">
-      <view class="ledger-switcher-spinner">
-      </view>
-      <view>正在切换账本...</view>
-    </view>
-    <view wx:elif="{{isLoadingLedgers}}" class="ledger-switcher-loading">
-      <view class="ledger-switcher-spinner">
-      </view>
-      <view>正在加载账本...</view>
-    </view>
-    <view wx:elif="{{ledgerLoadError}}" class="ledger-switcher-error">
-      <view>账本加载失败</view>
-      <view class="ledger-switcher-retry" bindtap="switchLedger">点击重试</view>
-    </view>
-    <block wx:else>
-      <tl-ledger-selector ledgers="{{ledgers}}" current-id="{{ledgerId}}" bind:select="chooseLedger">
-      </tl-ledger-selector>
-      <view class="ledger-create-entry" bindtap="goCreateLedger">新建账本</view>
-    </block>
-  </tl-bottom-sheet>
+  <tl-ledger-switcher id="ledger-switcher" visible="{{isLedgerSwitcherVisible}}" ledgers="{{ledgers}}" selected-id="{{ledgerId}}" selected-text="当前使用" subtitle="点击账本即可切换" loading="{{isLoadingLedgers}}" error="{{ledgerLoadError}}" busy="{{isSwitchingLedger}}" show-actions="{{true}}" bind:select="chooseLedger" bind:close="closeLedgerSwitcher" bind:retry="switchLedger" bind:manage="goLedgerSettings" bind:create="goCreateLedger">
+  </tl-ledger-switcher>
 </view>

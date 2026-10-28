@@ -11,6 +11,6 @@
     <tl-tab-profile id="tab-profile" wx:else>
     </tl-tab-profile>
   </tl-container>
-  <tl-tabbar active="{{activeTab}}" bind:change="switchTab">
+  <tl-tabbar active="{{activeTab}}" record-disabled-reason="{{recordDisabledReason}}" bind:change="switchTab">
   </tl-tabbar>
 </view>

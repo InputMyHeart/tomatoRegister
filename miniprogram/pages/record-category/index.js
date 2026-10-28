@@ -1,6 +1,9 @@
 const app = getApp();
+const feedback = require("../../services/feedback-ui");
 const { getId } = require("../../utils/mapper");
 const categoryService = require("../../services/category.service");
+const categoryStore = require("../../services/category.store");
+const { startNavigation, markNavigation } = require("../../utils/navigation-timing");
 function toGroups(categories, type) {
   const parents = categories.filter((item) => item.type === type && item.level === "parent");
   const children = categories.filter((item) => item.type === type && item.level === "child");
@@ -22,6 +25,7 @@ Page({
     ledgerName: "选择分类",
   },
   onLoad(options = {}) {
+    markNavigation("分类页", "onLoad");
     const ledger = app.globalData.currentLedger || {};
     this.setData({
       type: options.type === "income" ? "income" : "expense",
@@ -32,17 +36,52 @@ Page({
         : ledger.name || "选择分类",
     });
   },
+  onReady() {
+    markNavigation("分类页", "onReady");
+  },
   onShow() {
+    this.renderFromCache();
+    this._unsubscribe = categoryStore.subscribeSync((result) => {
+      if (result.ledgerId !== this.data.ledgerId) return;
+      if (result.invalidated) this.loadCategories();
+      else this.renderCategories(result.items);
+    });
     this.loadCategories();
   },
+  onHide() {
+    if (this._unsubscribe) {
+      this._unsubscribe();
+      this._unsubscribe = null;
+    }
+  },
+  onUnload() {
+    if (this._unsubscribe) {
+      this._unsubscribe();
+      this._unsubscribe = null;
+    }
+  },
+  renderFromCache() {
+    const cached = categoryStore.getCategoriesSync(this.data.ledgerId);
+    this.renderCategories(cached);
+  },
+  renderCategories(categories) {
+    const groups = toGroups(categories || [], this.data.type);
+    this.setData({
+      groups,
+      expandedGroupId: groups[0] ? groups[0].id : this.data.expandedGroupId,
+    });
+  },
   async loadCategories() {
-    const data = await categoryService.listCategories(this.data.ledgerId);
-    const groups = toGroups(data.categories || [], this.data.type);
-    this.setData({ groups, expandedGroupId: groups[0] ? groups[0].id : "" });
+    try {
+      const items = await categoryService.listCategories(this.data.ledgerId);
+      this.renderCategories(items);
+    } catch (error) {
+      feedback.showToast({ type: "error", message: error.message || "分类加载失败，请重试" });
+    }
   },
   switchType(event) {
     this.setData({ type: event.currentTarget.dataset.type });
-    this.loadCategories();
+    this.renderFromCache();
   },
   toggleGroup(event) {
     const id = event.detail.id || event.currentTarget.dataset.id;
@@ -83,6 +122,7 @@ Page({
       `parentIcon=${encodeURIComponent(parentIcon)}`,
       this.data.ledgerId ? `ledgerId=${encodeURIComponent(this.data.ledgerId)}` : "",
     ];
+    startNavigation("分类页", "编辑页");
     wx.redirectTo({ url: `/pages/record-edit/index?${params.filter(Boolean).join("&")}` });
   },
 });

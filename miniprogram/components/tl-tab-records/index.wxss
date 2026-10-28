@@ -123,7 +123,7 @@
   color: var(--tl-color-primary);
 }
 .brief-count {
-  color: #4c3a34;
+  color: var(--tl-color-text-muted);
 }
 
 .timeline {
@@ -212,7 +212,7 @@
 
 .category-mark.income {
   color: var(--tl-color-income);
-  background: #effaf2;
+  background: var(--tl-color-surface-income);
 }
 
 .record-main {
@@ -263,7 +263,7 @@
   height: 76rpx;
   margin: 24rpx auto 0;
   border-radius: var(--tl-radius-pill);
-  background: #f0442f;
+  background: var(--tl-color-primary);
   color: var(--tl-color-text-inverse);
   font-size: var(--tl-font-body-sm);
   align-items: center;

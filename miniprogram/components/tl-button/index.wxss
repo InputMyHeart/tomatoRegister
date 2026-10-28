@@ -6,10 +6,10 @@
   --tl-button-font-medium: 30rpx;
   --tl-button-font-small: 28rpx;
   --tl-button-font-weight: 700;
-  --tl-button-primary: #f0442f;
-  --tl-button-primary-soft: #fff0ea;
-  --tl-button-danger: #d9483b;
-  --tl-button-inverse: #ffffff;
+  --tl-button-primary: var(--tl-color-primary);
+  --tl-button-primary-soft: var(--tl-color-primary-soft);
+  --tl-button-danger: var(--tl-color-primary-pressed);
+  --tl-button-inverse: var(--tl-palette-white);
   --tl-button-gap: 16rpx;
   --tl-button-duration: 180ms;
 

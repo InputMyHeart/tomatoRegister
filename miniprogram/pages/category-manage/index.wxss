@@ -28,7 +28,7 @@
   bottom: 8rpx;
   width: calc(50% - 8rpx);
   border-radius: var(--tl-radius-pill);
-  background: #f0442f;
+  background: var(--tl-color-primary);
 
   transition:
     transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -36,7 +36,7 @@
 }
 .tab-indicator.to-income {
   transform: translateX(100%);
-  background: #25a66a;
+  background: var(--tl-color-income);
 }
 .tab.active {
   color: var(--tl-color-text-inverse);
@@ -94,7 +94,7 @@
 }
 .add-icon {
   color: var(--tl-color-primary);
-  background: #fff8f4;
+  background: var(--tl-palette-warm-100);
   border: 2rpx dashed #f6b7aa;
   font-size: var(--tl-font-data-lg);
   font-weight: var(--tl-font-weight-regular);

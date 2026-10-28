@@ -6,6 +6,7 @@ const { getId } = require("../../utils/mapper");
 const ledgerStore = require("../../services/ledger.store");
 const recordService = require("../../services/record.service");
 const { resolveAvatarUrls } = require("../../utils/avatar");
+const { on: onEvent, off: offEvent } = require("../../utils/event-bus");
 
 const weekdayMap = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
@@ -129,15 +130,31 @@ Component({
 
   lifetimes: {
     attached() {
+      this.isAttached = true;
+      this.recordsRequestId = 0;
       this.initialMonth = this.properties.initialMonth || "";
       this.bootstrap();
+      this._onRecordsChanged = (result = {}) => {
+        if (!result.ledgerId || result.ledgerId === this.data.ledgerId) this.refreshRecords();
+      };
+      onEvent("records:changed", this._onRecordsChanged);
+    },
+    detached() {
+      this.isAttached = false;
+      this.recordsRequestId += 1;
+      if (this._onRecordsChanged) {
+        offEvent("records:changed", this._onRecordsChanged);
+        this._onRecordsChanged = null;
+      }
     },
   },
 
   methods: {
-    refreshRecords() {
-      const currentLedger = app.globalData.currentLedger || {};
-      if ((currentLedger._id || "") !== this.data.ledgerId) return this.bootstrap();
+    refreshRecords(syncResult = {}) {
+      const removed = syncResult.removedLedgerIds || [];
+      if (removed.includes(this.data.ledgerId)) return this.bootstrap();
+      const changed = syncResult.changedLedgerIds || [];
+      if (changed.length && !changed.includes(this.data.ledgerId)) return;
       return this.loadRecords(this.data.currentRange);
     },
 
@@ -147,7 +164,13 @@ Component({
         return;
       }
 
-      await app.loginWithWechat();
+      try {
+        await app.loginWithWechat();
+      } catch (_error) {
+        if (this.isAttached) this.setData({ loading: false, isError: true });
+        return;
+      }
+      if (!this.isAttached) return;
       const ledger = app.globalData.currentLedger || {};
       const currentRange = this.initialMonth
         ? getRange(Number(this.initialMonth.slice(0, 4)), Number(this.initialMonth.slice(5, 7)))
@@ -164,24 +187,46 @@ Component({
     },
 
     async loadRecords(range = this.data.currentRange, append = false) {
-      if (!range || (append && (!this.data.hasMore || this.data.loadingMore))) return;
-      this.setData(
-        append
-          ? { loadingMore: true }
-          : {
-              loading: true,
-              isError: false,
-              records: [],
-              nextCursor: null,
-              hasMore: false,
-              monthIncome: "0",
-              monthExpense: "0",
-              monthRecordCount: 0,
-            }
-      );
+      if (!range || (append && (this.data.loading || !this.data.hasMore || this.data.loadingMore)))
+        return;
+      const requestId = ++this.recordsRequestId;
+      const ledgerId = this.data.ledgerId;
+      if (!ledgerId) {
+        this.setData({
+          loading: false,
+          loadingMore: false,
+          isError: false,
+          records: [],
+          hasMore: false,
+          nextCursor: null,
+          monthIncome: "0",
+          monthExpense: "0",
+          monthRecordCount: 0,
+          historyRecordCount: 0,
+          rangeRecordCount: 0,
+          latestRecordDate: "",
+          latestRecordMonthLabel: "",
+          ...buildView([], this.data.activeType),
+        });
+        return;
+      }
+      if (!append) {
+        this.setData({
+          loading: true,
+          loadingMore: false,
+          isError: false,
+          records: [],
+          hasMore: false,
+          nextCursor: null,
+          ...buildView([], this.data.activeType),
+        });
+      } else {
+        this.setData({ loadingMore: true });
+      }
+
       try {
         const data = await recordService.listRecords({
-          ledgerId: this.data.ledgerId,
+          ledgerId,
           start: range.start,
           end: range.end,
           pageSize: 30,
@@ -190,6 +235,7 @@ Component({
         const page = (await resolveAvatarUrls(data.records || [], "memberAvatar")).map(
           normalizeRecord
         );
+        if (!this.isAttached || requestId !== this.recordsRequestId) return;
         const records = append ? [...this.data.records, ...page] : page;
         const latestRecordDate = data.latestRecordDate || "";
         const latestRecordMonthLabel = /^\d{4}-\d{2}-\d{2}$/.test(latestRecordDate)
@@ -210,9 +256,11 @@ Component({
           latestRecordDate,
           latestRecordMonthLabel,
           readonly: Boolean(data.readonly),
+          ledgerName: (data.ledger && data.ledger.name) || this.data.ledgerName,
           ...buildView(records, this.data.activeType),
         });
       } catch (error) {
+        if (!this.isAttached || requestId !== this.recordsRequestId) return;
         console.warn("load records failed", error);
         this.setData(
           append
@@ -292,7 +340,7 @@ Component({
 
     goRecordEdit() {
       if (this.data.readonly) {
-        feedback.showToast({ type: "warning", message: "访客不能记账" });
+        feedback.showReadonlyToast();
         return;
       }
       wx.navigateTo({
@@ -309,11 +357,13 @@ Component({
     openRecord(event) {
       const id = event.currentTarget.dataset.id;
       if (!id) return;
-      wx.navigateTo({ url: `/pages/record-edit/index?id=${encodeURIComponent(id)}` });
+      const page = this.data.readonly ? "record-detail" : "record-edit";
+      wx.navigateTo({ url: `/pages/${page}/index?id=${encodeURIComponent(id)}` });
     },
 
     reload() {
-      this.loadRecords();
+      if (!this.data.currentRange) return this.bootstrap();
+      return this.loadRecords();
     },
   },
 });

@@ -10,7 +10,7 @@
             <button class="avatar-field" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
               <image class="edit-avatar {{isDefaultAvatar ? 'default' : ''}}" src="{{avatarUrl}}" mode="aspectFill">
               </image>
-              <tl-icon name="arrow-right-s-line" size="32" color="#f0442f">
+              <tl-icon name="arrow-right-s-line" size="32" colorKey="primary">
               </tl-icon>
             </button>
           </view>
