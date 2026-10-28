@@ -3,6 +3,7 @@ const app = getApp();
 const ledgerService = require("../../services/ledger.service");
 const ledgerStore = require("../../services/ledger.store");
 const { on: onEvent, off: offEvent } = require("../../utils/event-bus");
+const { logPerformance } = require("../../utils/performance");
 const { formatDisplayMoney } = require("../../utils/money");
 const {
   monthAnchor,
@@ -181,6 +182,7 @@ Component({
 
     async loadAnalysis() {
       if (!this.data.ledgerId) return this.setData({ loading: false, noLedger: true });
+      const startedAt = Date.now();
       const requestId = ++this.analysisRequestId;
       const request = {
         ledgerId: this.data.ledgerId,
@@ -196,7 +198,9 @@ Component({
         const result = decorate(await ledgerService.getAnalysis(request));
         if (!this.isAttached || requestId !== this.analysisRequestId) return;
         if (result.noLedger || !result.ledger) {
-          this.setData({ loading: false, noLedger: true });
+          this.setData({ loading: false, noLedger: true }, () =>
+            logPerformance("analysis", "content-ready", startedAt, "no-ledger")
+          );
           return;
         }
         const chartType =
@@ -244,11 +248,16 @@ Component({
           yearRankingRows:
             this.data.yearRankingType === "income" ? result.incomeCategories : result.categories,
         };
-        this.setData(nextData, () => this.renderChart());
+        this.setData(nextData, () => {
+          logPerformance("analysis", "content-ready", startedAt);
+          this.renderChart();
+        });
       } catch (error) {
         if (!this.isAttached || requestId !== this.analysisRequestId) return;
         console.warn("analysis load failed", error);
-        this.setData({ loading: false, error: true });
+        this.setData({ loading: false, error: true }, () =>
+          logPerformance("analysis", "content-ready", startedAt, "error")
+        );
       }
     },
 

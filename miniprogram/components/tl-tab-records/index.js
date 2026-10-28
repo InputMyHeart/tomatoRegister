@@ -7,6 +7,7 @@ const ledgerStore = require("../../services/ledger.store");
 const recordService = require("../../services/record.service");
 const { resolveAvatarUrls } = require("../../utils/avatar");
 const { on: onEvent, off: offEvent } = require("../../utils/event-bus");
+const { logPerformance } = require("../../utils/performance");
 
 const weekdayMap = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
@@ -189,6 +190,7 @@ Component({
     async loadRecords(range = this.data.currentRange, append = false) {
       if (!range || (append && (this.data.loading || !this.data.hasMore || this.data.loadingMore)))
         return;
+      const startedAt = Date.now();
       const requestId = ++this.recordsRequestId;
       const ledgerId = this.data.ledgerId;
       if (!ledgerId) {
@@ -242,30 +244,34 @@ Component({
           ? getRange(Number(latestRecordDate.slice(0, 4)), Number(latestRecordDate.slice(5, 7)))
               .label
           : "";
-        this.setData({
-          loading: false,
-          loadingMore: false,
-          records,
-          nextCursor: data.nextCursor || null,
-          hasMore: Boolean(data.hasMore),
-          historyRecordCount: Number(data.historyRecordCount || 0),
-          rangeRecordCount: Number(data.rangeRecordCount || 0),
-          monthIncome: formatDisplayMoney((data.rangeSummary || {}).income),
-          monthExpense: formatDisplayMoney((data.rangeSummary || {}).expense),
-          monthRecordCount: Number(data.rangeRecordCount || 0),
-          latestRecordDate,
-          latestRecordMonthLabel,
-          readonly: Boolean(data.readonly),
-          ledgerName: (data.ledger && data.ledger.name) || this.data.ledgerName,
-          ...buildView(records, this.data.activeType),
-        });
+        this.setData(
+          {
+            loading: false,
+            loadingMore: false,
+            records,
+            nextCursor: data.nextCursor || null,
+            hasMore: Boolean(data.hasMore),
+            historyRecordCount: Number(data.historyRecordCount || 0),
+            rangeRecordCount: Number(data.rangeRecordCount || 0),
+            monthIncome: formatDisplayMoney((data.rangeSummary || {}).income),
+            monthExpense: formatDisplayMoney((data.rangeSummary || {}).expense),
+            monthRecordCount: Number(data.rangeRecordCount || 0),
+            latestRecordDate,
+            latestRecordMonthLabel,
+            readonly: Boolean(data.readonly),
+            ledgerName: (data.ledger && data.ledger.name) || this.data.ledgerName,
+            ...buildView(records, this.data.activeType),
+          },
+          () => logPerformance("records", "content-ready", startedAt, append ? "append" : "success")
+        );
       } catch (error) {
         if (!this.isAttached || requestId !== this.recordsRequestId) return;
         console.warn("load records failed", error);
         this.setData(
           append
             ? { loadingMore: false }
-            : { loading: false, isError: true, ...buildView([], this.data.activeType) }
+            : { loading: false, isError: true, ...buildView([], this.data.activeType) },
+          () => logPerformance("records", "content-ready", startedAt, "error")
         );
       }
     },

@@ -7,6 +7,7 @@ const { getId, getLedgerRole } = require("../../utils/mapper");
 const { resolveAvatarUrls } = require("../../utils/avatar");
 const { on: onEvent, off: offEvent } = require("../../utils/event-bus");
 const { startNavigation } = require("../../utils/navigation-timing");
+const { logPerformance } = require("../../utils/performance");
 
 function getMonthLabel() {
   const now = new Date();
@@ -181,24 +182,28 @@ Component({
     },
 
     async loadDashboard(ledgerId) {
+      const startedAt = Date.now();
       const requestId = (this._dashboardRequestId || 0) + 1;
       this._dashboardRequestId = requestId;
       const ledger = app.globalData.currentLedger || {};
       const targetLedgerId = ledgerId || ledger._id || "";
       this.setPageStatus("loading");
       if (!targetLedgerId) {
-        this.setData({
-          ledgers: [],
-          showLedgerInfo: false,
-          ledgerId: "",
-          ledgerName: "还没有账本",
-          ledgerType: "personal",
-          ledgerTypeText: "个人账本",
-          monthLabel: getMonthLabel(),
-          recentRecords: [],
-          recordCount: 0,
-          ...getStatusFlags("noLedger"),
-        });
+        this.setData(
+          {
+            ledgers: [],
+            showLedgerInfo: false,
+            ledgerId: "",
+            ledgerName: "还没有账本",
+            ledgerType: "personal",
+            ledgerTypeText: "个人账本",
+            monthLabel: getMonthLabel(),
+            recentRecords: [],
+            recordCount: 0,
+            ...getStatusFlags("noLedger"),
+          },
+          () => logPerformance("home", "content-ready", startedAt, "no-ledger")
+        );
         return true;
       }
 
@@ -206,19 +211,22 @@ Component({
       if (requestId !== this._dashboardRequestId) return false;
       if ((app.globalData.currentLedger || {})._id !== targetLedgerId) return false;
       if (dashboard.noLedger) {
-        this.setData({
-          ledgerId: "",
-          recentRecords: [],
-          recordCount: 0,
-          showLedgerInfo: false,
-          ...getStatusFlags("noLedger"),
-        });
+        this.setData(
+          {
+            ledgerId: "",
+            recentRecords: [],
+            recordCount: 0,
+            showLedgerInfo: false,
+            ...getStatusFlags("noLedger"),
+          },
+          () => logPerformance("home", "content-ready", startedAt, "no-ledger")
+        );
         return true;
       }
-      return this.renderDashboard(dashboard, requestId);
+      return this.renderDashboard(dashboard, requestId, startedAt);
     },
 
-    async renderDashboard(dashboard, requestId) {
+    async renderDashboard(dashboard, requestId, startedAt) {
       const normalized = normalizeDashboard({
         ...dashboard,
         recentRecords: await resolveAvatarUrls(dashboard.recentRecords || [], "memberAvatar"),
@@ -238,11 +246,14 @@ Component({
       };
       app.globalData.readonly = normalized.readonly;
       app.persistAuthState();
-      this.setData({
-        ...normalized,
-        showLedgerInfo: true,
-        ...getStatusFlags(normalized.hasDashboardData ? "ready" : "empty"),
-      });
+      this.setData(
+        {
+          ...normalized,
+          showLedgerInfo: true,
+          ...getStatusFlags(normalized.hasDashboardData ? "ready" : "empty"),
+        },
+        () => logPerformance("home", "content-ready", startedAt, "success")
+      );
       return true;
     },
 
