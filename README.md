@@ -28,7 +28,8 @@ cloudfunctions/tomatoLedger/          业务云函数
   index.js                            路由、统一响应、结构化日志
   actions/                            认证、账本、记录、分类、邀请入口
   shared/ validators/ policies/       响应、校验、权限边界
-  legacy.handlers.js                 当前业务实现与数据访问逻辑
+  handlers/                          各业务域处理函数
+  dashboard.helpers.js               首页汇总辅助函数
 scripts/                              本地质量检查脚本
 tests/                                Node 内置测试
 docs/                                 长期有效的数据、环境、回归与协作规则

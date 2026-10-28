@@ -36,6 +36,8 @@
 - 小程序有缓存时立即展示；前台按 2 分钟间隔后台校验。只有检测到变化时，当前可见的首页、明细或分析模块才重新请求业务数据。
 - “我的 → 同步数据”提供强制校验入口。所有业务数据仍通过 `tomatoLedger` 获取，缓存和版本号都不能替代云函数权限判断。
 - `ledger/analysis/get` 按月、年或全部时间一次返回概览、上期对比、补齐零值时间桶的趋势、收支分类、支付账户、共享成员录入支出及账本级预算执行。当前月/年使用上期同期对比，历史周期使用完整上期；账本预算仅代表当前配置，因此只在当前月展示。成员维度依据记录创建者统计，不代表实际付款人。
+- 分析接口内部批量读取使用 `date`、`createdAt`、`_id` 复合游标，避免大偏移量 `skip`；此内部游标不改变对外 `record/list` 的 `{ date, id }` 契约。
+- 首页当月收支、笔数、最大支出和支出最多分类由云端聚合计算；最近 10 条仍从账本全部历史查询，不限当月。
 - 年度模式的 `recentYearTrend` 固定补齐包括当前年在内的最近 5 个自然年。
 - `feedbacks.content` 必填且最多 200 字；`type` 可为 `feature`、`bug`、`improvement`、`other` 或空；`images` 最多 9 个云文件；`status` 为 `submitted`、`processing` 或 `resolved`。
 
@@ -44,6 +46,7 @@
 以下索引需要在目标 CloudBase 环境中配置并在发布前核对：
 
 - `records`：`ledgerId ASC, date DESC, createdAt DESC, _id DESC`，用于记录游标分页。
+- 上述组合索引的反向遍历用于分析接口的升序内部游标；在 test 环境检查实际索引命中和查询耗时。
 - `records`：`ledgerId ASC, createdAt DESC`，用于最近记录查询。
 - `ledgerInvites`：`token ASC`，唯一。
 - `ledgers`：`inviteCode ASC`，唯一。
