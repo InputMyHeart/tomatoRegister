@@ -142,6 +142,39 @@ test("analysis and record list requery cloud without persisting results", async 
   assert.equal((await records.listRecords({ ledgerId: "a" })).value, 3);
 });
 
+test("request transport failure is marked as an unknown write outcome", async () => {
+  const api = load(
+    "miniprogram/services/api.js",
+    { "../utils/performance": { logPerformance() {} } },
+    { globalData: {} },
+    { cloud: { callFunction: async () => Promise.reject(new Error("network interrupted")) } }
+  );
+  await assert.rejects(api.callApi("record/create", {}), (error) => {
+    assert.equal(error.deliveryUnknown, true);
+    return true;
+  });
+});
+
+test("server response failure remains a known result", async () => {
+  const api = load(
+    "miniprogram/services/api.js",
+    { "../utils/performance": { logPerformance() {} } },
+    { globalData: {} },
+    {
+      cloud: {
+        callFunction: async () => ({
+          result: { ok: false, error: { code: "INVALID_RECORD_AMOUNT", message: "金额无效" } },
+        }),
+      },
+    }
+  );
+  await assert.rejects(api.callApi("record/create", {}), (error) => {
+    assert.equal(error.code, "INVALID_RECORD_AMOUNT");
+    assert.equal(error.deliveryUnknown, undefined);
+    return true;
+  });
+});
+
 test("saving waits for cloud; a failed save preserves input and supports retry", async () => {
   let request = deferred();
   let navigations = 0;
@@ -177,6 +210,28 @@ test("saving waits for cloud; a failed save preserves input and supports retry",
   await retry;
   assert.equal(navigations, 1);
   assert.equal(toasts.at(-1).type, "success");
+});
+
+test("unknown save result keeps the draft and asks for cloud record verification", async () => {
+  const toasts = [];
+  const error = new Error("network interrupted");
+  error.deliveryUnknown = true;
+  const page = instance(
+    load(
+      "miniprogram/pages/record-edit/index.js",
+      {
+        "../../services/record.service": { createRecord: async () => Promise.reject(error) },
+        "../../services/feedback-ui": { showToast: (value) => toasts.push(value) },
+      },
+      { globalData: {} },
+      { navigateBack: () => assert.fail("unknown result must not navigate") }
+    )
+  );
+  Object.assign(page.data, { ledgerId: "a", amount: "39", note: "午饭" });
+  await page.saveRecord();
+  assert.equal(page.data.note, "午饭");
+  assert.equal(page.data.saving, false);
+  assert.match(toasts.at(-1).message, /结果未确认.*明细核对/);
 });
 
 test("deletion waits for cloud and remains on page when rejected", async () => {

@@ -307,7 +307,9 @@ Page({
         message:
           error.code === "RECORD_CONFLICT"
             ? "记录已被其他成员修改，请重新打开后操作"
-            : "删除失败，请重试",
+            : error.deliveryUnknown
+              ? "删除结果未确认，请先到明细核对"
+              : "删除失败，请重试",
       });
     }
   },
@@ -365,7 +367,9 @@ Page({
         message:
           error.code === "RECORD_CONFLICT"
             ? "记录已被其他成员修改，输入已保留，请重新确认"
-            : "保存失败，输入已保留，请重试",
+            : error.deliveryUnknown
+              ? "保存结果未确认，输入已保留，请先到明细核对"
+              : "保存失败，输入已保留，请重试",
       });
     }
   },

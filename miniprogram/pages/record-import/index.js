@@ -97,7 +97,12 @@ Page({
         resultDateText: range,
       });
     } catch (error) {
-      feedback.showToast({ type: "error", message: error.message || "导入失败" });
+      feedback.showToast({
+        type: error.deliveryUnknown ? "warning" : "error",
+        message: error.deliveryUnknown
+          ? "导入结果未确认，请先到明细核对，避免重复导入"
+          : error.message || "导入失败",
+      });
     } finally {
       this.setData({ uploading: false });
     }
