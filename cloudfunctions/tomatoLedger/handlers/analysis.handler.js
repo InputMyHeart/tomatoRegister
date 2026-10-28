@@ -94,21 +94,36 @@ function makeComparablePeriodEnd(year, month, day) {
 
 async function getAnalysisRecords(query) {
   const rows = [];
-  let offset = 0;
+  let cursor = null;
   while (true) {
+    const pageQuery = cursor
+      ? _.and([
+          query,
+          _.or([
+            { date: _.gt(cursor.date) },
+            { date: cursor.date, createdAt: _.gt(cursor.createdAt) },
+            {
+              date: cursor.date,
+              createdAt: cursor.createdAt,
+              _id: _.gt(cursor._id),
+            },
+          ]),
+        ])
+      : query;
     const page =
       (
         await db
           .collection("records")
-          .where(query)
+          .where(pageQuery)
           .orderBy("date", "asc")
-          .skip(offset)
+          .orderBy("createdAt", "asc")
+          .orderBy("_id", "asc")
           .limit(100)
           .get()
       ).data || [];
     rows.push(...page);
     if (page.length < 100) return rows;
-    offset += page.length;
+    cursor = page[page.length - 1];
   }
 }
 
