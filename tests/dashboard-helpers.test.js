@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   loadAllMonthRecords,
+  summarizeDashboardGroups,
   summarizeDashboardRecords,
 } = require("../cloudfunctions/tomatoLedger/dashboard.helpers");
 
@@ -36,6 +37,53 @@ test("dashboard reads every month page before calculating totals", async () => {
   assert.equal(summary.balance, -3370.74);
   assert.equal(summary.largestExpense, 13264.74);
   assert.equal(summary.topExpenseCategory, "餐饮");
+});
+
+test("dashboard grouped totals match the previous full-record summary", () => {
+  const cases = [
+    [],
+    [{ type: "income", amount: 25 }],
+    [{ type: "expense", amount: 12.34, categoryName: "餐饮" }],
+    Array.from({ length: 101 }, (_, index) => ({
+      type: index % 5 === 0 ? "income" : "expense",
+      amount: index % 3 === 0 ? 12.34 : 0.01,
+      parentCategory: index % 2 === 0 ? "餐饮" : "",
+      categoryName: index % 2 === 0 ? "午餐" : "交通",
+    })),
+  ];
+  cases.forEach((records) => {
+    const types = new Map();
+    const categories = new Map();
+    records.forEach((record) => {
+      const type = types.get(record.type) || {
+        _id: record.type,
+        total: 0,
+        count: 0,
+        largest: 0,
+      };
+      type.total += record.amount;
+      type.count += 1;
+      type.largest = Math.max(type.largest, record.amount);
+      types.set(record.type, type);
+      if (record.type === "expense") {
+        const category = record.parentCategory || record.categoryName || "其他";
+        categories.set(category, (categories.get(category) || 0) + record.amount);
+      }
+    });
+    const topCategory = [...categories].sort((left, right) => right[1] - left[1])[0];
+    const before = summarizeDashboardRecords(records);
+    const after = summarizeDashboardGroups([...types.values()], topCategory && topCategory[0]);
+    for (const field of [
+      "income",
+      "expense",
+      "balance",
+      "recordCount",
+      "largestExpense",
+      "topExpenseCategory",
+    ]) {
+      assert.equal(after[field], before[field], field);
+    }
+  });
 });
 
 test("dashboard continues after a full page and handles an empty month", async () => {

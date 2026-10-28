@@ -1,4 +1,4 @@
-const { summarizeRecords } = require("./analysis.helpers");
+const { roundMoney, summarizeRecords } = require("./analysis.helpers");
 
 async function loadAllMonthRecords(fetchPage, pageSize = 100) {
   const records = [];
@@ -24,4 +24,27 @@ function summarizeDashboardRecords(records) {
   return { ...summary, topExpenseCategory };
 }
 
-module.exports = { loadAllMonthRecords, summarizeDashboardRecords };
+function summarizeDashboardGroups(typeGroups = [], topCategory = "") {
+  let income = 0;
+  let expense = 0;
+  let recordCount = 0;
+  let largestExpense = 0;
+  typeGroups.forEach((group) => {
+    recordCount += Number(group.count || 0);
+    if (group._id === "income") income += Number(group.total || 0);
+    if (group._id === "expense") {
+      expense += Number(group.total || 0);
+      largestExpense = Math.max(largestExpense, Number(group.largest || 0));
+    }
+  });
+  return {
+    income: roundMoney(income),
+    expense: roundMoney(expense),
+    balance: roundMoney(income - expense),
+    recordCount,
+    largestExpense: roundMoney(largestExpense),
+    topExpenseCategory: topCategory || "其他",
+  };
+}
+
+module.exports = { loadAllMonthRecords, summarizeDashboardRecords, summarizeDashboardGroups };

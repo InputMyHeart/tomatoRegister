@@ -2,6 +2,7 @@
 const {
   db,
   _,
+  $,
   ok,
   getLedgerForUser,
   getLedgerRole,
@@ -12,34 +13,44 @@ const {
   getCurrentMonthRange,
 } = require("../shared/helpers");
 const { attachRecordOwner } = require("./record.handler");
-const { loadAllMonthRecords, summarizeDashboardRecords } = require("../dashboard.helpers");
+const { summarizeDashboardGroups } = require("../dashboard.helpers");
 
-async function getMonthRecords(query) {
-  return loadAllMonthRecords(async (cursor, pageSize) => {
-    const pageQuery = cursor
-      ? _.and([
-          query,
-          _.or([
-            { date: _.lt(cursor.date) },
-            { date: cursor.date, createdAt: _.lt(cursor.createdAt) },
-            {
-              date: cursor.date,
-              createdAt: cursor.createdAt,
-              _id: _.lt(cursor._id),
-            },
-          ]),
-        ])
-      : query;
-    const result = await db
-      .collection("records")
-      .where(pageQuery)
-      .orderBy("date", "desc")
-      .orderBy("createdAt", "desc")
-      .orderBy("_id", "desc")
-      .limit(pageSize)
-      .get();
-    return result.data || [];
+async function getMonthSummary(query) {
+  const parentCategory = $.ifNull(["$parentCategory", ""]);
+  const categoryName = $.ifNull(["$categoryName", ""]);
+  const category = $.cond({
+    if: $.eq([parentCategory, ""]),
+    then: $.cond({
+      if: $.eq([categoryName, ""]),
+      then: "其他",
+      else: categoryName,
+    }),
+    else: parentCategory,
   });
+  const [typeResult, topCategoryResult] = await Promise.all([
+    db
+      .collection("records")
+      .aggregate()
+      .match(query)
+      .group({
+        _id: "$type",
+        total: $.sum("$amount"),
+        count: $.sum(1),
+        largest: $.max("$amount"),
+      })
+      .end(),
+    db
+      .collection("records")
+      .aggregate()
+      .match({ ...query, type: "expense" })
+      .project({ amount: 1, category })
+      .group({ _id: "$category", total: $.sum("$amount") })
+      .sort({ total: -1, _id: 1 })
+      .limit(1)
+      .end(),
+  ]);
+  const topCategory = (topCategoryResult.list || [])[0];
+  return summarizeDashboardGroups(typeResult.list || [], topCategory && topCategory._id);
 }
 
 async function getDashboard(openid, data = {}) {
@@ -50,8 +61,8 @@ async function getDashboard(openid, data = {}) {
 
   const monthRange = getCurrentMonthRange();
   const query = { ledgerId: ledger._id, date: _.gte(monthRange.start).and(_.lt(monthRange.end)) };
-  const [monthRecords, recentResult, totalRecordCountResult] = await Promise.all([
-    getMonthRecords(query),
+  const [monthSummary, recentResult, totalRecordCountResult] = await Promise.all([
+    getMonthSummary(query),
     db
       .collection("records")
       .where({ ledgerId: ledger._id })
@@ -66,7 +77,6 @@ async function getDashboard(openid, data = {}) {
   const ownerMap = await resolveUsersAvatarUrls(
     await getUsersByOpenids(latestRecords.map((item) => item.ownerOpenid))
   );
-  const monthSummary = summarizeDashboardRecords(monthRecords);
   const { income: monthIncome, expense: monthExpense } = monthSummary;
   const budgetEnabled = Boolean(ledger.budgetEnabled);
   const budget = budgetEnabled ? Number(ledger.monthlyBudget || 0) : 0;
@@ -92,7 +102,7 @@ async function getDashboard(openid, data = {}) {
     totalRecordCount: totalRecordCountResult.total || 0,
     topExpenseCategory: monthSummary.topExpenseCategory,
     largestExpenseAmount: monthSummary.largestExpense,
-    familyMood: monthRecords.length ? "本月记录持续更新" : "本月还没有记录",
+    familyMood: monthSummary.recordCount ? "本月记录持续更新" : "本月还没有记录",
     monthRange,
     recentRecords: latestRecords.map((item) => attachRecordOwner(item, ownerMap, openid)),
   });
